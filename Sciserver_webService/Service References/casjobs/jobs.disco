@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://skyserver.sdss3.org/casjobs/services/jobs.asmx?wsdl" docRef="http://skyserver.sdss3.org/casjobs/services/jobs.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://skyserver.sdss3.org/casjobs/services/jobs.asmx" xmlns:q1="http://Services.Cas.jhu.edu" binding="q1:JobsSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://skyserver.sdss3.org/casjobs/services/jobs.asmx" xmlns:q2="http://Services.Cas.jhu.edu" binding="q2:JobsSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

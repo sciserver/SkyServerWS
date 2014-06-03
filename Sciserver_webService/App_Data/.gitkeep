@@ -1,0 +1,17 @@
+# Build Folders
+[Bb]in
+[Oo]bj
+
+# User-specific Files
+*.suo
+*.user
+*.sln.docstates
+
+# NuGet Packages Directory
+packages
+
+# Others
+[Ww]eb.config
+
+# Needed for tracking empty folders
+!.gitkeep
