@@ -10,15 +10,20 @@ namespace Sciserver_webService.Models
 {
     public class StreamingResponse
     {
+        private String data = "";
+        public StreamingResponse(String d){
+            this.data = d;
+        }
         public void WriteToStream(Stream outputStream, HttpContent content, TransportContext context)
         {
             StreamWriter writer = new StreamWriter(outputStream);
             try
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    writer.WriteLine("Line " + (i + 1));
-                }   
+                //for (int i = 0; i < 10; i++)
+                //{
+                //   writer.WriteLine("Line " + (i + 1));
+                //}   
+                writer.WriteLine(data);
             }
             finally
             {

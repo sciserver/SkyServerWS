@@ -29,6 +29,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -39,6 +40,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Jhu.Graywulf.Components">
+      <HintPath>lib\Jhu.Graywulf.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Jhu.Graywulf.Format, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Jhu.Graywulf.Format.dll</HintPath>
+    </Reference>
+    <Reference Include="Jhu.Graywulf.Schema, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Jhu.Graywulf.Schema.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -119,14 +131,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConeSearch\RunQuery.cs" />
     <Compile Include="ConeSearch\StreamingCone.cs" />
-    <Compile Include="Controllers\ConeSearchController.cs" />
-    <Compile Include="Controllers\CustomResponseController.cs" />
+    <Compile Include="Controllers\ConeSearch\ConeSearchController.cs" />
     <Compile Include="Controllers\DefaultController.cs" />
+    <Compile Include="Controllers\ImgCutout\getJpegCodec.cs" />
+    <Compile Include="Controllers\ImgCutout\getJpegController.cs" />
     <Compile Include="Controllers\KeystoneAuthController.cs" />
-    <Compile Include="Controllers\SDSSFieldsController.cs" />
-    <Compile Include="Controllers\StreamingRequestController.cs" />
-    <Compile Include="Controllers\StreamingResponseController.cs" />
+    <Compile Include="Controllers\SDSSFields\UrlsOfFieldsController.cs" />
+    <Compile Include="Controllers\SDSSFields\FieldArrayRectController.cs" />
+    <Compile Include="Controllers\SDSSFields\SDSSFieldsController.cs" />
+    <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
+    <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
+    <Compile Include="Controllers\SIAP\getSIAPController.cs" />
+    <Compile Include="Controllers\SIAP\getSIAPInfoController.cs" />
+    <Compile Include="Controllers\SIAP\getSIAPInfoAllController.cs" />
+    <Compile Include="ImgCutout\Coord.cs" />
+    <Compile Include="ImgCutout\HTMRegion.cs" />
+    <Compile Include="ImgCutout\ImgCutout.cs" />
+    <Compile Include="ImgCutout\OverlayOptions.cs" />
+    <Compile Include="ImgCutout\polyFunk.cs" />
+    <Compile Include="ImgCutout\projection.cs" />
+    <Compile Include="ImgCutout\SdssConstants.cs" />
+    <Compile Include="ImgCutout\SDSSGraphicsEnv.cs" />
+    <Compile Include="ImgCutout\Validation.cs" />
+    <Compile Include="SIAP\SIAP.cs" />
+    <Compile Include="SIAP\SiapTable.cs" />
     <Compile Include="ExceptionFilter\CustomFilter.cs" />
     <Compile Include="ExceptionFilter\DefaultException.cs" />
     <Compile Include="ExceptionFilter\LoggingInterface.cs" />
@@ -138,7 +168,12 @@
     <Compile Include="Models\CustomResponse.cs" />
     <Compile Include="Models\StreamingResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SDSSFields\Band.cs" />
+    <Compile Include="SDSSFields\Field.cs" />
+    <Compile Include="SDSSFields\SdssCoord.cs" />
     <Compile Include="SDSSFields\SDSSFields.cs" />
+    <Compile Include="SDSSFields\Validation.cs" />
+    <Compile Include="SDSSFields\WCS.cs" />
     <Compile Include="Service References\casjobs\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -150,6 +185,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Content Include="Global.asax" />
+    <Content Include="Jhu.Graywulf.Format.dll" />
+    <Content Include="Jhu.Graywulf.Schema.dll" />
     <Content Include="Properties\DataSources\System.Data.DataSet.datasource" />
     <Content Include="Service References\casjobs\jobs.disco" />
     <Content Include="Service References\casjobs\configuration91.svcinfo" />
@@ -169,6 +206,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Controllers\SearchTools\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

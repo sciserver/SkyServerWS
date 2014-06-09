@@ -15,6 +15,7 @@ namespace Sciserver_webService
     {
         protected void Application_Start()
         {
+            
             GlobalConfiguration.Configuration.Formatters.Add(new CustomResponseFormatter());
 
             AreaRegistration.RegisterAllAreas();

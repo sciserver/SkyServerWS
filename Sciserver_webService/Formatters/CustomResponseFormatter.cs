@@ -17,6 +17,10 @@ namespace Sciserver_webService.Formatters
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/xml"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/plain"));
+            SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpeg"));
+            SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpg"));
+            SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/png"));
+            
         }
 
         public override bool CanWriteType(System.Type type)
@@ -38,29 +42,36 @@ namespace Sciserver_webService.Formatters
 
         public override void WriteToStream(Type type, object o, Stream stream, HttpContent content)
         {
-            if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("application/xml")))
-            {
-                using (StreamWriter writer = new StreamWriter(stream))
-                {
-                    writer.Write("<Value>" + ((CustomResponse)o).Value + "</Value>");
-                }
-            }
-            else if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("application/json")))
-            {
-                using (StreamWriter writer = new StreamWriter(stream))
-                {
-                    writer.Write("{\"Value\":\"" + ((CustomResponse)o).Value + "\"}");
-                }
-            }
-            else if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("text/plain")))
-            {
-                using (StreamWriter writer = new StreamWriter(stream))
-                {
-                    writer.Write("Value: " + ((CustomResponse)o).Value);
-                }
-            }
+            //if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("application/xml")))
+            //{
+            //    using (StreamWriter writer = new StreamWriter(stream))
+            //    {
+            //        writer.Write("<Value>" + ((CustomResponse)o).Value + "</Value>");
+            //    }
+            //}
+            //else if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("application/json")))
+            //{
+            //    using (StreamWriter writer = new StreamWriter(stream))
+            //    {
+            //        writer.Write("{\"Value\":\"" + ((CustomResponse)o).Value + "\"}");
+            //    }
+            //}
+            //else if (content.Headers.ContentType.Equals(new MediaTypeHeaderValue("text/plain")))
+            //{
+            //    using (StreamWriter writer = new StreamWriter(stream))
+            //    {
+            //        writer.Write("Value: " + ((CustomResponse)o).Value);
+            //    }
+            //}
 
-            stream.Close();
+            //if(content.Headers.ContentType.Equals(new MediaTypeHeaderValue("image/jpeg"))){
+            //    using (StreamWriter writer = new StreamWriter(stream))
+            //    {
+            //        writer.Write(((CustomResponse)o).Value);
+            //    }
+            //}
+
+            //stream.Close();
         }
 
     }
