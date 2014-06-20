@@ -23,7 +23,6 @@ namespace Sciserver_webService.Controllers
                 return sdssFields.UrlOfFields(valid.getRa(), valid.getDec(), valid.getRadius(), band);
             }
             throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
-
         }
     }
 }

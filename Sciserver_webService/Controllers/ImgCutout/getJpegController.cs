@@ -31,8 +31,8 @@ namespace Sciserver_webService.Controllers
             //    return ControllerContext.Request.CreateResponse(HttpStatusCode.OK, "Anonymous");
             //}
             Validation valid = new Validation();
-            
-           if (ra == null || dec == null || scale == null) throw new ArgumentException("There are not enough parameters to process your request. Enter position (ra,dec) values properly. ");
+
+            if (ra == null || dec == null || scale == null) throw new ArgumentException("There are not enough parameters to process your request. Enter position (ra,dec) values properly.ra must be in [0,360], dec must be in [-90,90], scale must be in [0.015, 60.0]. ");
            if (valid.ValidateInput(ra, dec, scale))
            {
                ImgCutout.ImgCutout img = new ImgCutout.ImgCutout();

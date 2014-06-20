@@ -13,13 +13,14 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sciserver_webService</RootNamespace>
     <AssemblyName>Sciserver_webService</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,6 +40,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Jhu.Graywulf.Components">
@@ -52,8 +55,8 @@
       <HintPath>lib\Jhu.Graywulf.Schema.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="openstacknet">
       <HintPath>lib\openstacknet.dll</HintPath>
@@ -63,6 +66,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -70,11 +74,8 @@
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
@@ -126,6 +127,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="VOTable">
       <HintPath>lib\VOTable.dll</HintPath>
     </Reference>
@@ -143,6 +145,16 @@
     <Compile Include="Controllers\SDSSFields\SDSSFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
+    <Compile Include="Controllers\SearchTools\NewRectangularController.cs" />
+    <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
+    <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="ToolsSearch\trials\Class1.cs" />
+    <Compile Include="ToolsSearch\trials\HttpService.cs" />
+    <Compile Include="ToolsSearch\NewRectangular.cs" />
+    <Compile Include="ToolsSearch\RectangularSearch.cs" />
+    <Compile Include="ToolsSearch\RunCasjobs.cs" />
+    <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPInfoController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPInfoAllController.cs" />
@@ -179,6 +191,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
+    <Compile Include="ToolsSearch\RadialSearch.cs" />
+    <Compile Include="ToolsSearch\SqlSearch.cs" />
+    <Compile Include="ToolsSearch\Validation.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -195,7 +210,9 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </Content>
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -206,7 +223,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\SearchTools\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

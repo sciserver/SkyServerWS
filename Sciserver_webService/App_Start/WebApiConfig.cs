@@ -62,6 +62,35 @@ namespace Sciserver_webService
             );
 
 
+            /// Radial Search
+            config.Routes.MapHttpRoute(
+                name: "RadialSearch",
+                routeTemplate: "dr10/SearchTools/{controller}",
+                defaults: new { controller = "RadialSearch" }
+            );
+
+            /// Rectangular Search
+            config.Routes.MapHttpRoute(
+                name: "RectangularSearch",
+                routeTemplate: "dr10/SearchTools/{controller}",
+                defaults: new { controller = "RectangularSearch" }
+            );
+
+            /// SQL Search
+            config.Routes.MapHttpRoute(
+                name: "SqlSearch",
+                routeTemplate: "dr10/SearchTools/{controller}",
+                defaults: new { controller = "SqlSearch" }
+            );
+
+            /// TESTing new casjobs REST client 
+            config.Routes.MapHttpRoute(
+                name: "NewRectangular",
+                routeTemplate: "dr10/SearchTools/{controller}",
+                defaults: new { controller = "NewRectangular" }
+            );
+            
+
             config.Filters.Add(new ExceptionFilter.ExceptionHandleAttribute());
             //GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;            
             //config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(new MediaTypeHeaderValue("application/xml"));

@@ -14,9 +14,6 @@ namespace Sciserver_webService.ImgCutout
         {
             try
             {
-                //this.ra = Convert.ToDouble(ra);
-                //this.dec = Convert.ToDouble(dec);
-                //this.scale = Convert.ToDouble(sr);
                 if (ra.LastIndexOf(":") == -1)
                     this.ra =  Double.Parse(ra);
                 else
