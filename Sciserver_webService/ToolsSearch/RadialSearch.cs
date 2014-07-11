@@ -8,7 +8,7 @@ using System.Data;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Sciserver_webService.SearchTools
+namespace Sciserver_webService.UseCasjobs
 {
     public class RadialSearch
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using net.ivoa.VOTable;
 
-namespace Sciserver_webService.SearchTools
+namespace Sciserver_webService.UseCasjobs
 {
     public class RectangularSearch
     {

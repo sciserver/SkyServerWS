@@ -89,6 +89,22 @@ namespace Sciserver_webService
                 routeTemplate: "dr10/SearchTools/{controller}",
                 defaults: new { controller = "NewRectangular" }
             );
+
+
+            /// Imaging Query
+            config.Routes.MapHttpRoute(
+                name: "Cone",
+                routeTemplate: "dr10/ImagingQuery/{controller}",
+                defaults: new { controller = "Cone" }
+            );
+
+
+            /// Spectro Query
+            config.Routes.MapHttpRoute(
+                name: "ConeSpectro",
+                routeTemplate: "dr10/SpectroQuery/{controller}",
+                defaults: new { controller = "ConeSpectro" }
+            );
             
 
             config.Filters.Add(new ExceptionFilter.ExceptionHandleAttribute());

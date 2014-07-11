@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 
 using System.Net.Http;
 
-namespace Sciserver_webService.SearchTools
+namespace Sciserver_webService.UseCasjobs
 {
     public class NewRectangular
     {
@@ -19,7 +19,7 @@ namespace Sciserver_webService.SearchTools
         private String token = "";
 
         public NewRectangular(String ra, String dec, String ra2, String dec2,String uband ,String gband,
-                              String rband , String iband,String zband,String searchtype , String returntype, String token) {
+                              String rband ,String iband,String zband,String searchtype ,String returntype,String token) {
            
             if (ra == null || dec == null || ra2 == null || dec2 == null) throw new ArgumentException("There are not enough parameters to process your request.");
 

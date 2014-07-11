@@ -7,13 +7,13 @@ using System.Configuration;
 using System.Data;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-//using System.Xml;
 using net.ivoa.VOTable;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 
-namespace Sciserver_webService.SearchTools
+///This class is used to submit query to casjobs
+namespace Sciserver_webService.UseCasjobs
 {
 
     public class RunCasjobs
@@ -83,14 +83,14 @@ namespace Sciserver_webService.SearchTools
         
         public HttpResponseMessage postCasjobs(string query, string token)
         {
+            string casjobsTaskname = "test";
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(Globals.casjobsREST);
 
-            StringContent content = new StringContent("\"" + query + "\"");
+            StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskname+"\"}");
 
             content.Headers.Add(Globals.xauth, token);
             content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
-
 
             HttpResponseMessage response = client.PostAsync(Globals.casjobsContextPath, content).Result;
             response.EnsureSuccessStatusCode();
@@ -99,6 +99,25 @@ namespace Sciserver_webService.SearchTools
             else
                 throw new ApplicationException("Query did not return results successfully, check input and try again later.");
                 
+        }
+
+        public HttpResponseMessage uploadCasjobs(string datastring, string token)
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(Globals.casjobsREST);
+
+            StringContent content = new StringContent("\"" + datastring + "\"");
+
+            content.Headers.Add(Globals.xauth, token);
+            content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
+
+            HttpResponseMessage response = client.PostAsync(Globals.casjobsContextPath, content).Result;
+            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+                return response;
+            else
+                throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+
         }
     }
 }

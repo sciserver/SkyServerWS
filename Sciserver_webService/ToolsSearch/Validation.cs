@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sciserver_webService.SearchTools
+namespace Sciserver_webService.UseCasjobs
 {
     public class Validation
     {
