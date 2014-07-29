@@ -37,7 +37,7 @@ namespace Sciserver_webService.UseCasjobs
 
         public HttpResponseMessage getResponse() {
             RunCasjobs run = new RunCasjobs();
-            return run.postCasjobs(this.query,this.token) ;
+            return run.postCasjobs(this.query,this.token,"NewRectangularQuery") ;
         }
 
         // Using some other trial code

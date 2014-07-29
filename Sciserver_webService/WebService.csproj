@@ -153,7 +153,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ImpTypes\FloatImpTypes.cs" />
+    <Compile Include="Common\ImpTypes\ImpType.cs" />
+    <Compile Include="Common\ImpTypes\IntegerImpTypes.cs" />
+    <Compile Include="Common\ImpTypes\MiscImpTypes.cs" />
     <Compile Include="Common\KeyWords.cs" />
+    <Compile Include="Common\ProcessRequest.cs" />
+    <Compile Include="Common\UploadDataReader.cs" />
     <Compile Include="ConeSearch\RunQuery.cs" />
     <Compile Include="ConeSearch\StreamingCone.cs" />
     <Compile Include="Controllers\ConeSearch\ConeSearchController.cs" />
@@ -166,8 +172,7 @@
     <Compile Include="Controllers\ImgCutout\getJpegController.cs" />
     <Compile Include="Controllers\IRSpectraQuery\ConeIRController.cs" />
     <Compile Include="Controllers\IRSpectraQuery\NoPositionIRController.cs" />
-    <Compile Include="Controllers\IRSpectraQuery\ProximityIRController.cs" />
-    <Compile Include="Controllers\IRSpectraQuery\RectangularIRController.cs" />
+    <Compile Include="Controllers\IRSpectraQuery\GalacticIRController.cs" />
     <Compile Include="Controllers\KeystoneAuthController.cs" />
     <Compile Include="Controllers\SDSSFields\UrlsOfFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayRectController.cs" />

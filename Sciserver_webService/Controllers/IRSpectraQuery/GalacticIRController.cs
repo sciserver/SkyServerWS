@@ -11,13 +11,12 @@ using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
 {
-    public class ConeSpectroController : ApiController
-    {      
+    public class RectangularIRController : ApiController
+    {
         [ExceptionHandleAttribute]
-        public HttpResponseMessage get()
-        {
+        public HttpResponseMessage get(){
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.spectroQuery, KeyWords.cone, "SpectroQuery:ConeSearch");
+            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "IRSpectroQuery:RectangularSearch");
         }
     }
 }

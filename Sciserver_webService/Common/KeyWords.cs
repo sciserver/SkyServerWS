@@ -7,6 +7,9 @@ namespace Sciserver_webService.Common
 {
     public class KeyWords
     {
+        /// <summary>
+        /// All the parameter names of web services
+        /// </summary>
         public static string imagingQuery = "img";
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
@@ -32,6 +35,7 @@ namespace Sciserver_webService.Common
         public static string proximity = "proximity";
         public static string noposition = "noposition";
         public static string rectangular = "rectangular";
+        public static string conelb = "conelb";        
 
         public static string imagingConstraint = "imagingConstraint";
         public static string Lcenter = "Lcenter";
@@ -102,8 +106,12 @@ namespace Sciserver_webService.Common
         public static string doSky = "doSky";
         public static string doUnknown = "doUnknown";        
 
-        //// Casjobs REST api query submission
+        //// Casjobs REST api 
         public static string CasjobsQuery = "Query";
-        public static string CasjobsTaskName = "TaskName";        
+        public static string CasjobsTaskName = "TaskName";                
+
+        //// Authentication Token
+        public static string XAuthToken= "X-Auth-Token";
+        
     }
 }

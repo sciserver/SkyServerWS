@@ -81,13 +81,13 @@ namespace Sciserver_webService.UseCasjobs
 
         //// Using New CAsjobs WebService
         
-        public HttpResponseMessage postCasjobs(string query, string token)
+        public HttpResponseMessage postCasjobs(string query, string token, string casjobsTaskName)
         {
-            string casjobsTaskname = "test";
+            //string casjobsTaskname = "test";
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(Globals.casjobsREST);
 
-            StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskname+"\"}");
+            StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskName+"\"}");
 
             content.Headers.Add(Globals.xauth, token);
             content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
@@ -101,6 +101,12 @@ namespace Sciserver_webService.UseCasjobs
                 
         }
 
+        /// <summary>
+        ///  Upload data to run queries using table join
+        /// </summary>
+        /// <param name="datastring"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public HttpResponseMessage uploadCasjobs(string datastring, string token)
         {
             HttpClient client = new HttpClient();

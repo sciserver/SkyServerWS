@@ -105,7 +105,13 @@ namespace Sciserver_webService
                 routeTemplate: "dr10/SpectroQuery/{controller}",
                 defaults: new { controller = "ConeSpectro" }
             );
-            
+
+            /// IR-Spectro Query
+            config.Routes.MapHttpRoute(
+                name: "ConeIRSpectro",
+                routeTemplate: "dr10/IRSpectroQuery/{controller}",
+                defaults: new { controller = "ConeIRSpectro" }
+            );
 
             config.Filters.Add(new ExceptionFilter.ExceptionHandleAttribute());
             //GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;            
