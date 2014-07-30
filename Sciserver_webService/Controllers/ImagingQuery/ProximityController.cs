@@ -15,10 +15,10 @@ namespace Sciserver_webService.Controllers
     {
         
         [ExceptionHandleAttribute]
-        public HttpResponseMessage get() 
+        public HttpResponseMessage post() 
         {       
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
         }
     }
 }

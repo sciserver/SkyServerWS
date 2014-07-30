@@ -39,6 +39,55 @@ namespace Sciserver_webService.Common
         }
 
 
+        /// Upload table        
+        public HttpResponseMessage proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
+        {
+            try
+            {
+                IEnumerable<string> values;
+                if (api.ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
+                {
+                    // Keystone authentication
+                    string token = values.First();
+                    var userAccess = Keystone.Authenticate(token);
+
+                    Dictionary<String, String> dictionary = api.Request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+                    String query = "";
+
+                    //if (dictionary["radecTextarea"] != null)
+                    //{
+                    //    UploadDataReader up = new UploadDataReader();
+                    //    query += up.UploadTo(dictionary["radecTextarea"], queryType, dictionary["nearBy"]);
+                    //}
+                    //else
+                    //{
+                        var task = api.Request.Content.ReadAsStreamAsync();
+                        task.Wait();
+                        Stream stream = task.Result;
+
+                        using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
+                        {
+                            query += up.UploadTo(queryType, dictionary["searchNearBy"]);
+                        }
+                    //}
+
+                    HttpResponseMessage resp = new HttpResponseMessage();
+                    query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
+                    RunCasjobs run = new RunCasjobs();
+                    resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+                    return resp;
+                }
+                else
+                {
+                    // No authentication (anonymous) // Logg
+                    throw new UnauthorizedAccessException("Check the token you are using.");
+                }
+            }
+            catch (Exception exp)
+            {
+                throw new Exception("Exception while uploading data to create temp table." + exp.Message);
+            }
+        }
 
 
         /// Upload table        

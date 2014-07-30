@@ -49,7 +49,8 @@ namespace Sciserver_webService.Common
         public string UploadTo(string type, string nearBy) {
             this.type = type;
             this.nearBy = nearBy;
-            string CommandText = createUploadTable();
+            ///string CommandText = createUploadTable();
+            string CommandText = "";
             CommandText += loadUpload();
             CommandText += createXtable();
             return CommandText;
@@ -58,13 +59,15 @@ namespace Sciserver_webService.Common
 
         private string createUploadTable() {
 
-            string qry = "create table #upload ( up_id int,\n";
+            string qry = "create table #upload ( up_id int, ";
             for (int i = 0; i < columnNames.Length; i++)
             {
-                qry += "\n[ up_" + columnNames[i] + "]";
-                qry += " " + GetSqlType(i);
-                if (GetSqlType(i) == SqlDbType.VarChar)
-                    qry += "(MAX)";
+                qry += " up_" + columnNames[i] + " ";
+                //qry += " " + GetSqlType(i);
+                //if (GetSqlType(i) == SqlDbType.VarChar)
+                //    qry += "(MAX)";
+
+                qry += " " + SqlDbType.Float;
                 qry += ",";
             }
             qry = qry.Trim(',');
@@ -74,19 +77,27 @@ namespace Sciserver_webService.Common
 
         private string loadUpload()
         {
-            string cmdQuery = "";
-            cmdQuery += " Insert into #upload values ";
             string line = origReader.ReadLine();//advance to first real row
+            columnNames = line.Split(',');
+
+            string cmdQuery = "";
+            cmdQuery = createUploadTable();
+            
+            
+            cmdQuery += " Insert into #upload values ";
+            
             int cnt = 0;
+            line = origReader.ReadLine();
             while (line != null)
             {
                 cnt++;
                 //string[] data = line.Split(',');
-                cmdQuery += "( " + cnt + "," + line + " ), \n";
+                cmdQuery += "( " + cnt + "," + line + " ),";
                 line = origReader.ReadLine();
             }
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
+            
         }
 
         private string loadUpload(string radecText)
@@ -96,7 +107,7 @@ namespace Sciserver_webService.Common
             string[] lines = radecText.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
 
             for (int i = 1; i < lines.Length; i++) {
-                cmdQuery += "( " + i + "," + lines[i] + " ), \n";
+                cmdQuery += "( " + i + "," + lines[i] + " ),";
             }
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
@@ -112,8 +123,8 @@ namespace Sciserver_webService.Common
                     cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
-                    fun += "dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd = "INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select SpecObjid from " + fun + ") S ";
+                    fun += " dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
+                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select SpecObjid from " + fun + ") S ";
                 }
                 else
                 {
@@ -121,9 +132,9 @@ namespace Sciserver_webService.Common
                     cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
-                    fun += "dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd = "INSERT INTO #x SELECT up_id," + fun + "as SpecobjId ";
-                    cmd += "FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    fun += " dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
+                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as SpecobjId ";
+                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
                 }
             }
             else
@@ -134,17 +145,17 @@ namespace Sciserver_webService.Common
                     cmd += " CREATE TABLE #x (up_id int,objID bigint) ";
                     
                     var fun = " ";
-                    fun += "dbo.fGetNearbyObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd = "INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select Objid from " + fun + ") S ";
+                    fun += " dbo.fGetNearbyObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
+                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select Objid from " + fun + ") S ";
                 }
                 else
                 {
                     cmd = " ";
                     cmd += " CREATE TABLE #x (up_id int,objID bigint) ";                    
                     var fun = " ";
-                    fun += "dbo.fGetNearestObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd = "INSERT INTO #x SELECT up_id," + fun + "as objId ";
-                    cmd += "FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    fun += " dbo.fGetNearestObjIdEq( up_ra,up_dec,up_sep ) ";
+                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as objId ";
+                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
                 }
             }
             return cmd;
