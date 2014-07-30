@@ -17,7 +17,7 @@ namespace Sciserver_webService.Controllers
         public HttpResponseMessage get() 
         {            
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "ImagingQuery:RectangularSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.rectangular, "ImagingQuery:RectangularSearch");
         }
     }
 }

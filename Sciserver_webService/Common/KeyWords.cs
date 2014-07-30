@@ -10,6 +10,7 @@ namespace Sciserver_webService.Common
         /// <summary>
         /// All the parameter names of web services
         /// </summary>
+        
         public static string imagingQuery = "img";
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
@@ -35,7 +36,8 @@ namespace Sciserver_webService.Common
         public static string proximity = "proximity";
         public static string noposition = "noposition";
         public static string rectangular = "rectangular";
-        public static string conelb = "conelb";        
+        // for galactic co-ordinates in IRSpectraQuery 
+        public static string conelb = "conelb";       
 
         public static string imagingConstraint = "imagingConstraint";
         public static string Lcenter = "Lcenter";

@@ -11,7 +11,7 @@ using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
 {
-    public class RectangularIRController : ApiController
+    public class GalacticIRController : ApiController
     {
         [ExceptionHandleAttribute]
         public HttpResponseMessage get(){

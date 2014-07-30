@@ -18,7 +18,7 @@ namespace Sciserver_webService.Controllers
         public HttpResponseMessage get() 
         {       
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "ImagingQuery:ProximitySearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
         }
     }
 }

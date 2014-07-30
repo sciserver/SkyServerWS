@@ -542,22 +542,22 @@ namespace Sciserver_webService.QueryTools
             return objType;
         }
 
-        private static string apogeeAlias = "";
+
+        private static string orderClause = "";        
+        private static string specAlias = "s";
+        private static string bestAlias = "p";
+        private static string targAlias = "t";
+        private static string apogeeAlias = "a";
+        private static string aspcapAlias = "q";
+        private static string apogeeObjectAlias = "o";
         private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
         private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
 
         public static string buildQuery(string type, Dictionary<string, string> requestDictionary, string positionType)
         {
             Dictionary<string,string> dictionary = getDictionary(positionType,type,requestDictionary);
-
-            string orderClause = "";
-            string cmd = "";
-            string specAlias = "s";
-            string bestAlias = "p";
-            string targAlias = "t";
-            string apogeeAlias = "a";            
-            string aspcapAlias = "q";
-            string apogeeObjectAlias = "o";
+            
+            string cmd = "";            
 
             List<string> objType = new List<string>();
             List<string> proxList = new List<string>();
@@ -565,7 +565,7 @@ namespace Sciserver_webService.QueryTools
             List<string> specFields = new List<string>();
             List<string> IRspecFields = new List<string>();
             
-            string proxMode = " ";
+            //string proxMode = " ";
             bool addQA = false;
             string nearBy = "";
             string[] options;
@@ -600,22 +600,18 @@ namespace Sciserver_webService.QueryTools
             double calculatedRA = 0;
             double calculatedDec = 0;
 
-
+            selectClause += "TOP " +  dictionary["limit"] + " ";
+            
             //KeyValuePair<string, string> entry in dictionary
             foreach (string s in dictionary.Keys)
             {
-
                 string name = s;
                 string val = dictionary[s];
-
                 if (val == null || "".Equals(val)) continue;
 
                 switch (name)
                 {
-                    case "limit":
-                        if (int.Parse(val) > 0)
-                            selectClause += "TOP " + val + " ";
-                        break;
+                    
                     case "imgparams":
                         options = getOptions(val);
                         ignoreImg = readImgFields(imgFields, options);
@@ -681,6 +677,16 @@ namespace Sciserver_webService.QueryTools
                             getProximityQueryText(ref selectClause,ref joinClause,ref orderClause, type, proxList, objType, proxRad, targdb, nearBy);
 
                         }
+                        else if (posType == "conelb")
+                        {
+                            Lval = Utilities.parseRA(dictionary["Lcenter"]);
+                            Bval = Utilities.parseDec(dictionary["Bcenter"]);
+                            double convertedRA = Utilities.glon2ra(Lval, Bval);
+                            double convertedDec = Utilities.glat2dec(Lval, Bval);
+                            joinClause += " JOIN dbo.fgetNearbyApogeeStarEq(" + convertedRA;
+                            joinClause += "," + convertedDec + ",";
+                            joinClause += dictionary["lbRadius"] + ") AS b ON b.apstar_id = " + apogeeAlias + ".apstar_id";
+                        }
                         break;
                     case "imagingConstraint":
                         imgConst = true;
@@ -691,23 +697,7 @@ namespace Sciserver_webService.QueryTools
                         break;
                     case "magType":
                         magType = val;
-                        break;                    
-                    case "Lcenter":
-                        Lval = Utilities.parseRA(val);
-                        break;
-                    case "Bcenter":
-                        Bval = Utilities.parseDec(val);
-                        break;
-                    case "lbRadius":
-                        double convertedRA = Utilities.glon2ra(Lval, Bval);
-                        double convertedDec = Utilities.glat2dec(Lval, Bval);
-                        if (type == "irspec" && posType == "conelb")
-                        {
-                            joinClause += " JOIN dbo.fgetNearbyApogeeStarEq(" + convertedRA;
-                            joinClause += "," + convertedDec + ",";
-                            joinClause += val + ") AS b ON b.apstar_id = " + apogeeAlias + ".apstar_id";
-                        }
-                        break;                   
+                        break;                                     
 
                     case "uMin":
                     case "gMin":

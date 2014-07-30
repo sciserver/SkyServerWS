@@ -16,7 +16,7 @@ namespace Sciserver_webService.Controllers
         public HttpResponseMessage get() 
         {           
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "ImagingQuery:NoPositionSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.noposition, "ImagingQuery:NoPositionSearch");
         }
     }
 }

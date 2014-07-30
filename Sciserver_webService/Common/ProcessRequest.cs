@@ -39,6 +39,8 @@ namespace Sciserver_webService.Common
         }
 
 
+
+
         /// Upload table        
         public HttpResponseMessage uploadTest(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
@@ -89,14 +91,3 @@ namespace Sciserver_webService.Common
     }
 }
 
-public class UploadDataReader{
-
-
-    public UploadDataReader(StreamReader str) { 
-    }
-    public void UploadData(string tablename)
-    { 
-
-    }
-
-}

@@ -16,7 +16,7 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public HttpResponseMessage get(){
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SpectroQuery:ProximitySearch");
+            return request.runquery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
         }
     }
 }
