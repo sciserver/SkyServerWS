@@ -76,29 +76,27 @@ namespace Sciserver_webService.UseCasjobs
             catch (Exception e) {
                 throw new Exception("Error getting results in VOTable format.\n"+e.Message);
             }
-
         }
 
         //// Using New CAsjobs WebService
         
-        public HttpResponseMessage postCasjobs(string query, string token, string casjobsTaskName)
+        public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName)
         {
             //string casjobsTaskname = "test";
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(Globals.casjobsREST);
 
             StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskName+"\"}");
-
+            if(!(token == null || token == String.Empty))
             content.Headers.Add(Globals.xauth, token);
             content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
 
             HttpResponseMessage response = client.PostAsync(Globals.casjobsContextPath, content).Result;
-            response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
             if(response.IsSuccessStatusCode)
                 return response;
             else
-                throw new ApplicationException("Query did not return results successfully, check input and try again later.");
-                
+                throw new ApplicationException("Query did not return results successfully, check input and try again later.");                
         }
 
         /// <summary>

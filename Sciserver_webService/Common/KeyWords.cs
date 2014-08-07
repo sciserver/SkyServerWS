@@ -14,6 +14,9 @@ namespace Sciserver_webService.Common
         public static string imagingQuery = "img";
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
+        public static string sqlSearchQuery = "SqlSearch";
+        public static string RectangularQuery = "RectangularSearch";
+        public static string RadialQuery = "RadialSearch";
 
         public static string limit = "limit";
         public static string dataset = "dataset";
