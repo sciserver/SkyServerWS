@@ -2,21 +2,69 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Configuration;
 
 namespace Sciserver_webService.Common
 {
     public class KeyWords
     {
+        //// Casjobs REST api 
+        public static string CasjobsQuery = "Query";
+        public static string CasjobsTaskName = "TaskName";
+
+        //// Authentication Token
+        public static string XAuthToken = "X-Auth-Token";
+
+        // this is data release and target setting for all the different services, eg. DR10
+        public static string DR = ConfigurationManager.AppSettings["TARGET"];
         /// <summary>
-        /// All the parameter names of web services
+        /// Authentication settings used for the KeyStone authentication settings
         /// </summary>
+        public static string xauth = "X-Auth-Token";
+        public static string contentJson = "application/json";
+        public static string contentXML = "application/XML";
+        /// <summary>
+        /// Casjobs setting for REST api
+        /// </summary>
+        public static string casjobsREST = ConfigurationManager.AppSettings["CASJobsREST"];
+        public static string casjobsContextPath = "contexts/" + DR + "/query";
+        public static string loggingMessageType = "SKYSERVER_WS";
+        /// <summary>
+        /// CASJobs old settings
+        /// </summary>
+        public static long CJobsWSID = long.Parse(ConfigurationManager.AppSettings["CJobsWSID"]);
+        public static string CJobsPasswd = ConfigurationManager.AppSettings["CJobsPassWD"];
+        public static string CJobsTARGET = DR;
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string ConeSelect = ConfigurationSettings.AppSettings["ConeSelect"];
+        /// <summary>
+        ///  Search tools and casjobs message
+        /// </summary>
+        public static string Rectangular = "FOR RECTANGULAR SEARCH";
+        public static string Radial = "FOR RADIAL SEARCH";
+        public static string SQL = "FOR SQL SEARCH";
+        public static string ImagingQuery = "FOR IMAGING QUERY";
+        public static string SpectroQuery = "FOR SPECTRO QUERY";
+        public static string IRSpectroQuery = "FOR IR-SPECTRO QUERY";
+        /// <summary>
+        /// Imaging Query
+        /// </summary>
+        public static string Database = ConfigurationManager.AppSettings["database"];
+        public static string Release = DR;
+        public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
         
+        /// <summary>
+        /// For different types of web service type names 
+        /// </summary>
         public static string imagingQuery = "img";
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
         public static string sqlSearchQuery = "SqlSearch";
         public static string RectangularQuery = "RectangularSearch";
         public static string RadialQuery = "RadialSearch";
+        public static string ConeSearchQuery = "ConeSearch";
 
         public static string limit = "limit";
         public static string dataset = "dataset";
@@ -109,14 +157,12 @@ namespace Sciserver_webService.Common
         public static string doGalaxy = "doGalaxy";
         public static string doStar = "doStar";
         public static string doSky = "doSky";
-        public static string doUnknown = "doUnknown";        
+        public static string doUnknown = "doUnknown";
 
-        //// Casjobs REST api 
-        public static string CasjobsQuery = "Query";
-        public static string CasjobsTaskName = "TaskName";                
 
-        //// Authentication Token
-        public static string XAuthToken= "X-Auth-Token";
+        // this skyserver url
+        public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
+        
         
     }
 }

@@ -11,6 +11,9 @@ using net.ivoa.VOTable;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using Sciserver_webService.Common;
+using System.Threading.Tasks;
+//using System.Web.Mvc.ActionResult;
 
 ///This class is used to submit query to casjobs
 namespace Sciserver_webService.UseCasjobs
@@ -33,7 +36,7 @@ namespace Sciserver_webService.UseCasjobs
             try
             {
                 JobsSoapClient cjobs = new JobsSoapClient();
-                DataSet ds = cjobs.ExecuteQuickJobDS(Globals.CJobsWSID, Globals.CJobsPasswd, query, Globals.CJobsTARGET, casjobsMessage, false);
+                DataSet ds = cjobs.ExecuteQuickJobDS(KeyWords.CJobsWSID, KeyWords.CJobsPasswd, query, KeyWords.CJobsTARGET, casjobsMessage, false);
                 return ds;
             }
             catch (Exception e) {
@@ -46,7 +49,7 @@ namespace Sciserver_webService.UseCasjobs
             try
             {
                 JobsSoapClient cjobs = new JobsSoapClient();
-                String ds = cjobs.ExecuteQuickJob(Globals.CJobsWSID, Globals.CJobsPasswd, query, Globals.CJobsTARGET, casjobsMessage, false);
+                String ds = cjobs.ExecuteQuickJob(KeyWords.CJobsWSID, KeyWords.CJobsPasswd, query, KeyWords.CJobsTARGET, casjobsMessage, false);
                 return ds;
             }
             catch (Exception e)
@@ -84,20 +87,49 @@ namespace Sciserver_webService.UseCasjobs
         {
             //string casjobsTaskname = "test";
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(Globals.casjobsREST);
+            client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
             StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskName+"\"}");
             if(!(token == null || token == String.Empty))
-            content.Headers.Add(Globals.xauth, token);
-            content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
+            content.Headers.Add(KeyWords.xauth, token);
+            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
-            HttpResponseMessage response = client.PostAsync(Globals.casjobsContextPath, content).Result;
+            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
                 response.EnsureSuccessStatusCode();
             if(response.IsSuccessStatusCode)
                 return response;
             else
                 throw new ApplicationException("Query did not return results successfully, check input and try again later.");                
         }
+
+
+        private string createCasjobsQuery() {
+            return "";
+        }
+
+        private string getJsonResult() {
+            return "";
+        }
+
+        //public async Task<HttpResponseMessage> postCasjobs(string query, String token, string casjobsTaskName, HttpResponseMessage response)
+        //{
+        //    //string casjobsTaskname = "test";
+        //    HttpClient client = new HttpClient();
+        //    client.BaseAddress = new Uri(KeyWords.casjobsREST);
+
+        //    StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
+        //    if (!(token == null || token == String.Empty))
+        //        content.Headers.Add(KeyWords.xauth, token);
+        //    content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+
+        //    System.IO.Stream stream = await client.PostAsync(KeyWords.casjobsContextPath, content).Result.Content.ReadAsStreamAsync();
+        //    //response.EnsureSuccessStatusCode();
+        //    //if (response.IsSuccessStatusCode)
+        //    //    return response;
+        //    //else
+        //    //    throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+        //    return response;
+        //}
 
         /// <summary>
         ///  Upload data to run queries using table join
@@ -108,14 +140,14 @@ namespace Sciserver_webService.UseCasjobs
         public HttpResponseMessage uploadCasjobs(string datastring, string token)
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(Globals.casjobsREST);
+            client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
             StringContent content = new StringContent("\"" + datastring + "\"");
 
-            content.Headers.Add(Globals.xauth, token);
-            content.Headers.ContentType = new MediaTypeHeaderValue(Globals.contentJson);
+            content.Headers.Add(KeyWords.xauth, token);
+            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
-            HttpResponseMessage response = client.PostAsync(Globals.casjobsContextPath, content).Result;
+            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
             response.EnsureSuccessStatusCode();
             if (response.IsSuccessStatusCode)
                 return response;

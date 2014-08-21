@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sciserver_webService.UseCasjobs
+namespace Sciserver_webService.ToolsSearch
 {
     public class Validation
     {
@@ -15,6 +15,8 @@ namespace Sciserver_webService.UseCasjobs
         public double ra { get; set; }
         public double dec { get; set; }
         public double radius { get; set; }
+        public string fp { get; set; }
+        public string format { get; set; }
 
         public Boolean gband { get; set; }
         public Boolean uband { get; set; }
@@ -33,14 +35,72 @@ namespace Sciserver_webService.UseCasjobs
         public int zmin { get; set; }
         public int zmax { get; set; }
 
+        public int limit = 10;
         public string searchtype { get; set; }
 
         private string returnType = "json"; // default search type
 
-        public double ra2 { get; set; }
-        public double dec2 { get; set; }
-        
-        
+        public double ra_max { get; set; }
+        public double dec_max { get; set; }
+
+        public String uband_s =null,  gband_s=null,  rband_s=null,  iband_s=null,  zband_s=null,  limit_s=null, returntype_s=null;
+
+        public string returnFormat {
+            get { return returnType; }
+        }
+
+        public Validation() { }
+
+        public Validation(Dictionary<string, string> requestDir)
+        {
+           try {
+               this.ra = Convert.ToDouble(requestDir["min_ra"]);
+               this.dec = Convert.ToDouble(requestDir["min_dec"]);
+               this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
+               this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
+           }
+           catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
+           catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
+
+           try { this.uband_s = requestDir["uband"]; }catch (Exception e) { }                       
+           try { this.gband_s = requestDir["gband"];}catch (Exception e) { }
+           try { this.rband_s = requestDir["rband"];}catch (Exception e) { }
+           try { this.iband_s = requestDir["iband"];}catch (Exception e) { }
+           try { this.zband_s = requestDir["zband"];}catch (Exception e) { }
+           try { this.searchtype = requestDir["searchtype"]; } catch (Exception e) { }
+           try { this.returntype_s = requestDir["returntype"]; } catch (Exception e) { }
+           try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
+        }
+
+        public Validation(Dictionary<string, string> requestDir, String r)
+        {
+            try
+            {
+                this.ra = Convert.ToDouble(requestDir["ra"]);
+                this.dec = Convert.ToDouble(requestDir["dec"]);
+                this.radius = Convert.ToDouble(requestDir["radius"]);             
+                this.fp = requestDir["fp"];
+            }
+            catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
+            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
+
+            try { this.uband_s = requestDir["uband"]; }
+            catch (Exception e) { }
+            try { this.gband_s = requestDir["gband"]; }
+            catch (Exception e) { }
+            try { this.rband_s = requestDir["rband"]; }
+            catch (Exception e) { }
+            try { this.iband_s = requestDir["iband"]; }
+            catch (Exception e) { }
+            try { this.zband_s = requestDir["zband"]; }
+            catch (Exception e) { }
+            try { this.searchtype = requestDir["searchtype"]; }
+            catch (Exception e) { }
+            try { this.format = requestDir["format"]; }
+            catch (Exception e) { }
+            try { this.limit_s = requestDir["limit"]; }
+            catch (Exception e) { }
+        }
 
         public bool ValidateInput(string ra, string dec, string sr)
         {
@@ -58,7 +118,7 @@ namespace Sciserver_webService.UseCasjobs
         }
 
         public bool ValidateOtherParameters(String uband, String gband, String rband, String iband, String zband,
-                         String searchtype , String returntype )
+                         String searchtype , String returntype, String limit )
         {
             try {
                 
@@ -148,8 +208,11 @@ namespace Sciserver_webService.UseCasjobs
                 if (returntype != null)
                 {
                     this.returnType = returntype;
-                }                
-
+                }
+                if (limit != null)
+                {
+                    this.limit = Int32.Parse(limit);
+                }
                 return true;
             }
             catch (Exception ex) {
@@ -163,8 +226,8 @@ namespace Sciserver_webService.UseCasjobs
             {
                 this.ra = Convert.ToDouble(ra);
                 this.dec = Convert.ToDouble(dec);
-                this.ra2 = Convert.ToDouble(ra2);
-                this.dec2 = Convert.ToDouble(dec2);
+                this.ra_max = Convert.ToDouble(ra2);
+                this.dec_max = Convert.ToDouble(dec2);
                 return true;
             }
             catch (Exception e)

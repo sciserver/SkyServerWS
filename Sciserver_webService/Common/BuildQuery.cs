@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.IO;
 using System.Net;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.QueryTools
 {
@@ -332,7 +333,6 @@ namespace Sciserver_webService.QueryTools
             return constraint;
         }
 
-
         public static string IRspecParamLimits(string name, string val, string prefix)
         {
             string constraint = "";
@@ -408,7 +408,7 @@ namespace Sciserver_webService.QueryTools
                 {
                     joinClause += " JOIN ";
                     if (targdb)
-                        joinClause += " TARG" + Globals.Release + ".";
+                        joinClause += " TARG" + KeyWords.Release + ".";
                     joinClause += "dbo.fGetObjFromRect(" + raMin + "," + raMax + "," + decMin + "," + decMax + ") AS b ON ";
                     if (type == "spec")
                         joinClause += "s.bestobjid = b.objID";
@@ -425,7 +425,7 @@ namespace Sciserver_webService.QueryTools
         {
             string joinClause = " JOIN ";
             if (targdb)
-                joinClause += " TARG" + Globals.Release + ".";
+                joinClause += " TARG" + KeyWords.Release + ".";
             double ra = Utilities.parseRA(raCenter);
             if (type == "irspec")
             {
@@ -489,9 +489,7 @@ namespace Sciserver_webService.QueryTools
             }
             return requestdictionary;
         }
-
-              
-       
+                    
         public static void getProximityQueryText(ref string selectClause, ref string joinClause, ref string orderClause,  string type,  List<string> proxList,List<string> objType, double proxRad, Boolean targdb,string nearBy)
         {
             
@@ -542,7 +540,6 @@ namespace Sciserver_webService.QueryTools
             return objType;
         }
 
-
         private static string orderClause = "";        
         private static string specAlias = "s";
         private static string bestAlias = "p";
@@ -553,8 +550,11 @@ namespace Sciserver_webService.QueryTools
         private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
         private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
 
+
         public static string buildQuery(string type, Dictionary<string, string> requestDictionary, string positionType)
         {
+
+
             Dictionary<string,string> dictionary = getDictionary(positionType,type,requestDictionary);
             
             string cmd = "";            
@@ -571,7 +571,7 @@ namespace Sciserver_webService.QueryTools
             string[] options;
             string selectClause = "SELECT ";
             string fromClause = "FROM ";
-            if ("spec".Equals(type)) fromClause += Globals.Database + "..SpecObj as " + specAlias;
+            if ("spec".Equals(type)) fromClause += KeyWords.Database + "..SpecObj as " + specAlias;
             if ("irspec".Equals(type)) fromClause += "apogeeStar as " + apogeeAlias;
             string whereClause = "WHERE ";
             string filters = "";
@@ -597,8 +597,8 @@ namespace Sciserver_webService.QueryTools
             // these variables are used to convert from (L,B) to (RA,dec)
             double Lval = 0;
             double Bval = 0;
-            double calculatedRA = 0;
-            double calculatedDec = 0;
+            //double calculatedRA = 0;
+            //double calculatedDec = 0;
 
             selectClause += "TOP " +  dictionary["limit"] + " ";
             
@@ -1142,7 +1142,7 @@ namespace Sciserver_webService.QueryTools
                 fromClause = buildFrom(bestdb, targdb, photoTable, imgFields, "", fromClause);
                 if (!ignoreSpec)
                 {
-                    fromClause += " LEFT OUTER JOIN " + Globals.Database + "..SpecObj s ON p.objID = s.bestObjID";
+                    fromClause += " LEFT OUTER JOIN " + KeyWords.Database + "..SpecObj s ON p.objID = s.bestObjID";
                     for (int i = 0; i < specFields.Count; i++)
                     {
                         if (specFields[i] == "ra")
@@ -1170,129 +1170,7 @@ namespace Sciserver_webService.QueryTools
             
             return cmd;
         }
-
-        public static void sendQuery(SqlCommand oCmd, string cmd)
-        {
-            oCmd.CommandTimeout = Globals.DefTimeout;
-            oCmd.CommandText = cmd;
-            oCmd.ExecuteNonQuery();
-        }
-
-        private static void updateBatchFile(SqlConnection oConn, List<string> lines, double rad)
-        {
-            string[] names = Regex.Split(lines[0], reSplit, RegexOptions.ExplicitCapture).Where(str => !str.Equals(String.Empty)).ToArray();
-            using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM #upload", oConn))
-            {
-                SqlCommandBuilder builder = new SqlCommandBuilder(adapter);
-                builder.QuotePrefix = "[";
-                builder.QuoteSuffix = "]";
-
-                DataSet ds = new DataSet();
-                adapter.Fill(ds);
-                for (int i = 0; i < lines.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        string[] v = Regex.Split(lines[i], reSplitList, RegexOptions.ExplicitCapture).Where(str => !str.Equals(String.Empty)).ToArray();
-                        if (v.Length >= 2)
-                        {
-                            DataRow dr = ds.Tables[0].NewRow();
-                            dr["up_id"] = i;
-                
-                            double ra = Utilities.parseRA(v[0]);
-                            double dec = Utilities.parseDec(v[1]);
-
-                            dr["up_ra"] = ra;
-                            dr["up_dec"] = dec;
-
-                            if (v.Length == 2) dr["up_sep"] = rad;
-                            else dr["up_sep"] = Double.Parse(v[2]);
-
-                            ds.Tables[0].Rows.Add(dr);
-                        }
-                    }
-                }
-                adapter.Update(ds);
-            }
-        }
-
-        public static string readProxText(SqlConnection oConn, List<string> proxText, List<string> objType, double rad, bool targdb, string type, string nearBy)
-        {
-            string cmd;
-            string[] names = Regex.Split(proxText[0], reSplit, RegexOptions.ExplicitCapture).Where(str => !str.Equals(String.Empty)).ToArray();
-            cmd = "CREATE TABLE #upload ( up_id int";
-            foreach (string i in names)
-            {
-                cmd += ", up_" + i + " float";
-            }
-            if (names.Length == 2)
-                cmd += ", up_sep float";
-            cmd += " ) ";
-            
-            using (SqlCommand oCmd = oConn.CreateCommand())
-            {
-                sendQuery(oCmd, cmd);
-
-                updateBatchFile(oConn, proxText, rad);
-
-                if (type == "spec")
-                {
-                    if (nearBy == "nearby")
-                    {
-                        cmd = " ";
-                        cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
-                        sendQuery(oCmd, cmd);
-                        var fun = " ";
-                        if (targdb)
-                            fun += "TARG" + Globals.Release + ".";
-                        fun += "dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                        cmd = "INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select SpecObjid from " + fun + ") S ";
-                    }
-                    else
-                    {
-                        cmd = " ";
-                        cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
-                        sendQuery(oCmd, cmd);
-                        var fun = " ";
-                        if (targdb)
-                            fun += "TARG" + Globals.Release + ".";
-                        fun += "dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
-                        cmd = "INSERT INTO #x SELECT up_id," + fun + "as SpecobjId ";
-                        cmd += "FROM #upload WHERE" + fun + "IS NOT NULL ";
-                    }
-                }
-                else
-                {
-                    if (nearBy == "nearby")
-                    {
-                        cmd = " ";
-                        cmd += " CREATE TABLE #x (up_id int,objID bigint) ";
-                        sendQuery(oCmd, cmd);
-                        var fun = " ";
-                        if (targdb)
-                            fun += "TARG" + Globals.Release + ".";
-                        fun += "dbo.fGetNearbyObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                        cmd = "INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select Objid from " + fun + ") S ";
-                    }
-                    else
-                    {
-                        cmd = " ";
-                        cmd += " CREATE TABLE #x (up_id int,objID bigint) ";
-                        sendQuery(oCmd, cmd);
-                        var fun = " ";
-                        if (targdb)
-                            fun += "TARG" + Globals.Release + ".";
-                        fun += "dbo.fGetNearestObjIdEq( up_ra,up_dec,up_sep ) ";
-                        cmd = "INSERT INTO #x SELECT up_id," + fun + "as objId ";
-                        cmd += "FROM #upload WHERE" + fun + "IS NOT NULL ";
-                    }
-                }
-                sendQuery(oCmd, cmd);
-            }
-            return cmd;
-        }
-
-
+               
         public static string buildFrom(bool bestdb, bool targdb, string photoTable, List<string> imgFields, string joinCond, string fromClause)
         {
             string bestAlias = "p", targAlias = "t";
@@ -1300,13 +1178,13 @@ namespace Sciserver_webService.QueryTools
             {
                 if (fromClause.Length > 5)
                     fromClause += " JOIN ";
-                fromClause += Globals.Database + ".." + photoTable + " AS " + bestAlias + joinCond;
+                fromClause += KeyWords.Database + ".." + photoTable + " AS " + bestAlias + joinCond;
             }
             else
             {
                 if (fromClause.Length > 5)
                     fromClause += " JOIN ";
-                fromClause += " TARG" + Globals.Release + ".." + photoTable + " AS " + bestAlias + joinCond;
+                fromClause += " TARG" + KeyWords.Release + ".." + photoTable + " AS " + bestAlias + joinCond;
             }
 
             return fromClause;
@@ -1400,6 +1278,6 @@ namespace Sciserver_webService.QueryTools
             }
             return selectClause;
         }
-
+       
     }
 }

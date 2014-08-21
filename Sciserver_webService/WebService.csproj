@@ -71,6 +71,14 @@
     <Reference Include="openstacknet">
       <HintPath>lib\openstacknet.dll</HintPath>
     </Reference>
+    <Reference Include="RabbitMQ.Client, Version=3.3.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\RabbitMQ.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="SciServer.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\SciServer.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="SimpleRESTServices">
       <HintPath>..\packages\SimpleRESTServices.1.3.0.1\lib\net40\SimpleRESTServices.dll</HintPath>
     </Reference>
@@ -161,9 +169,10 @@
     <Compile Include="Common\OutputFormat.cs" />
     <Compile Include="Common\ProcessRequest.cs" />
     <Compile Include="Common\UploadDataReader.cs" />
-    <Compile Include="ConeSearch\RunQuery.cs" />
+    <Compile Include="ConeSearch\ConeSearch.cs" />
     <Compile Include="ConeSearch\StreamingCone.cs" />
     <Compile Include="Controllers\ConeSearch\ConeSearchController.cs" />
+    <Compile Include="Controllers\ConeSearch\ConeSearchServiceController.cs" />
     <Compile Include="Controllers\DefaultController.cs" />
     <Compile Include="Controllers\ImagingQuery\ConeController.cs" />
     <Compile Include="Controllers\ImagingQuery\NoPositionController.cs" />
@@ -183,22 +192,26 @@
     <Compile Include="Controllers\SDSSFields\SDSSFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
-    <Compile Include="Controllers\SearchTools\NewRectangularController.cs" />
     <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
     <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
     <Compile Include="Controllers\SpectroQuery\ConeSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\NoPositionSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\ProximitySpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\RectangularSpectroController.cs" />
-    <Compile Include="Globals.cs" />
+    <Compile Include="default.aspx.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="default.aspx.designer.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ImagingQuery\BuildQuery.cs" />
     <Compile Include="Common\BuildQuery.cs" />
     <Compile Include="ImagingQuery\ImagingQuery.cs" />
     <Compile Include="Common\Utilities.cs" />
     <Compile Include="ImagingQuery\Validation.cs" />
-    <Compile Include="ToolsSearch\trials\Class1.cs" />
-    <Compile Include="ToolsSearch\trials\HttpService.cs" />
-    <Compile Include="ToolsSearch\NewRectangular.cs" />
+    <Compile Include="Models\JSONStreamResponse.cs" />
+    <Compile Include="Models\XMLStreamResponse.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
     <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />
@@ -246,6 +259,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Jhu.Graywulf.Format.dll" />
     <Content Include="Jhu.Graywulf.Schema.dll" />

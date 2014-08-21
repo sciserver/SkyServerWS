@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -6,6 +8,14 @@ using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.ImgCutout;
+using SciServer.Logging;
+using Sciserver_webService.Common;
+using System.Web;
+using Newtonsoft.Json;
+using System.IO;
+using System.Text;
+
+
 
 /// deoyani@pha.jhu.edu
 namespace Sciserver_webService.Controllers
@@ -17,19 +27,29 @@ namespace Sciserver_webService.Controllers
 
         public HttpResponseMessage Get([FromUri] string ra = null, [FromUri] string dec = null, [FromUri] string scale = "0.396127", [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = null, [FromUri]String query = "")
         {
-            
-           //if (ControllerContext.Request.Headers.TryGetValues("X-Auth-Token", out values))
-            //{
-            //    // Keystone authentication
-            //    string token = values.First();
-            //    var userAccess = Keystone.Authenticate(token);
-            //    return ControllerContext.Request.CreateResponse(HttpStatusCode.OK, "Keystone authentication");
-            //}
-            //else
-            //{
-            //    // No authentication (anonymous)
-            //    return ControllerContext.Request.CreateResponse(HttpStatusCode.OK, "Anonymous");
-            //}
+            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
+            string token = "";  
+            IEnumerable<string> values;
+            if (ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
+            {
+
+
+                try
+                {
+                    // Keystone authentication
+                    token = values.First();
+                    var userAccess = Keystone.Authenticate(token);
+
+                    Message message = log.CreateCustomMessage("Auth-SQlSearchRequest", JsonConvert.SerializeObject(Request));
+                    message.UserId = userAccess.User.Id;
+                    log.SendMessage(message);
+                }
+                catch (Exception ex)
+                {
+
+                    throw new UnauthorizedAccessException("Check the token you are using.");
+                }
+            }
             Validation valid = new Validation();
 
             if (ra == null || dec == null || scale == null) throw new ArgumentException("There are not enough parameters to process your request. Enter position (ra,dec) values properly.ra must be in [0,360], dec must be in [-90,90], scale must be in [0.015, 60.0]. ");

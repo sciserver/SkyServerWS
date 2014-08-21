@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Data.SqlTypes;
 using System.Globalization;
 
-namespace Sciserver_webService.QueryTools
+namespace Sciserver_webService.Common
 {
     public class Utilities
     {   /// <summary>

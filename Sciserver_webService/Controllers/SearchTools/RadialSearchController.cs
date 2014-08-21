@@ -5,7 +5,8 @@ using System.Web.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Sciserver_webService.ExceptionFilter;
-using Sciserver_webService.UseCasjobs;
+using Sciserver_webService.ToolsSearch;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
 {
@@ -16,22 +17,11 @@ namespace Sciserver_webService.Controllers
                           [FromUri] String sr = null, [FromUri] String uband = null,
                           [FromUri] String gband = null, [FromUri] String rband= null,
                           [FromUri] String iband = null, [FromUri] String zband = null,
-                          [FromUri] String searchtype=null,[FromUri] String returntype=null)
+                          [FromUri] String searchtype=null,[FromUri] String returntype=null,
+                          [FromUri] String limit = "10")
         {
-            try{
-
-                RadialSearch rs = new RadialSearch();
-                HttpResponseMessage resp = new HttpResponseMessage();
-                resp.Content = new StringContent( rs.getData(ra, dec, sr, uband, gband, rband, iband, zband, searchtype, returntype));
-                resp.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                resp.StatusCode = HttpStatusCode.OK;
-               
-               return resp;
- 
-            }
-            catch(Exception e){
-                throw new Exception(""+e.Message);
-            }
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch Tool.");
         }
     }
 }
