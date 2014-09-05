@@ -15,24 +15,139 @@ namespace Sciserver_webService.SDSSFields
 {
     public class SDSSFields
     {
-        string strConn, cmdTemplate, cmdTemplate2, urlPrefix;
-        private static long CJobsWSID = long.Parse(ConfigurationSettings.AppSettings["CJobsWSID"]);
-        private static string CJobsPasswd = ConfigurationSettings.AppSettings["CJobsPassWD"];
-        private static string CJobsTARGET = ConfigurationSettings.AppSettings["CJobsTARGET"];
-        private static string CJobsURL = ConfigurationSettings.AppSettings["CJobsURL"];
+        private string strConn, cmdTemplate, cmdTemplate2, urlPrefix;
+        //private static long CJobsWSID = long.Parse(ConfigurationSettings.AppSettings["CJobsWSID"]);
+        //private static string CJobsPasswd = ConfigurationSettings.AppSettings["CJobsPassWD"];
+        //private static string CJobsTARGET = ConfigurationSettings.AppSettings["CJobsTARGET"];
+        //private static string CJobsURL = ConfigurationSettings.AppSettings["CJobsURL"];
+
         
+        //    /// <summary>
+        //    /// Default constructor, init connection string, sqlcommand template and url prefix
+        //    /// </summary>
+        //    public SDSSFields()
+        //    {               
+        //        // Config
+        //        strConn = ConfigurationManager.AppSettings["SqlConnectString"];
+        //        cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate"];
+        //        cmdTemplate2 = ConfigurationManager.AppSettings["CmdTemplate2"];
+        //        urlPrefix = ConfigurationManager.AppSettings["UrlPrefix"];
 
+        //    }
+        
+        private double ra, dec, sr,dra,ddec;
+        private string band ="all";
+        public String sqlQuery { get; set; }
+
+        public SDSSFields()
+        { }        
+
+        public SDSSFields(Dictionary<string,string> dictionary, String positiontype) {
+
+                this.validateInput(dictionary,positiontype);                
+        }
+
+        private bool validateInput(Dictionary<string, string> requestDir, String positiontype)
+        {
+                try
+                {
+                    this.ra = Convert.ToDouble(requestDir["ra"]);
+                    this.dec = Convert.ToDouble(requestDir["dec"]);
+                    switch (positiontype)
+                    {
+                        case "FieldArray":
+                            cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate"];                            
+                            this.sr = Convert.ToDouble(requestDir["radius"]);
+                            if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");                
+                            this.sqlQuery = this.SqlSelectCommand();                            
+                            break;
+
+                        case "FieldArrayRect":
+                            cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate2"];
+                            this.dra = Convert.ToDouble(requestDir["dra"]);
+                            this.ddec = Convert.ToDouble(requestDir["ddec"]);
+                            this.sqlQuery = this.SqlRectCommand();
+                            break;
+
+                        case "ListOfFields":
+                            cmdTemplate = ConfigurationManager.AppSettings["ListOfFields"];
+                            this.sr = Convert.ToDouble(requestDir["radius"]);
+                            if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");
+                            this.sqlQuery = this.SqlSelectCommand();  
+                            break;
+
+                        case "UrlsOfFields": 
+                            cmdTemplate = ConfigurationManager.AppSettings["UrlsOfFields"];
+                            this.sr = Convert.ToDouble(requestDir["radius"]);
+                            if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");
+                            try { this.band = requestDir["band"]; }catch(Exception e) {}
+                            this.sqlQuery = this.SqlSelectCommand().Replace("TEMPURL",getBandUrl());  
+                            
+                            break;
+
+                        default: break;
+                            
+                   }
+                    
+                    return true;
+                }
+                catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
+                catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request Or Parameters values are not properly entered."); }
+            }
+
+            private bool CheckLimits(System.Double ra, System.Double dec, System.Double sr)
+            {
+                if ((sr < 0.0)) return false;
+                if ((ra < 0.0) || (ra > 360.0)) return false;
+                if ((dec < -90.0) || (dec > 90.0)) return false;
+                return true;
+            }
+
+            ///dbo.fGetUrlFitsCFrame(f.fieldId,'u') as u_url,&#xA;   
+            ///dbo.fGetUrlFitsCFrame(f.fieldId,'g') as g_url,&#xA;  
+            ///dbo.fGetUrlFitsCFrame(f.fieldId,'r') as r_url,&#xA;   
+            ///dbo.fGetUrlFitsCFrame(f.fieldId,'i') as i_url,&#xA;   
+            ///dbo.fGetUrlFitsCFrame(f.fieldId,'z') as z_url&#xA; 
+            ///
             /// <summary>
-            /// Default constructor, init connection string, sqlcommand template and url prefix
+            /// Build SQL query from the input parameters
             /// </summary>
-            public SDSSFields()
-            {               
-                // Config
-                strConn = ConfigurationManager.AppSettings["SqlConnectString"];
-                cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate"];
-                cmdTemplate2 = ConfigurationManager.AppSettings["CmdTemplate2"];
-                urlPrefix = ConfigurationManager.AppSettings["UrlPrefix"];
+            /// <param name="ra">RA of center in degrees (double)</param>
+            /// <param name="dec">Dec of center in degrees (double)</param>
+            /// <param name="radius">Search radius in arcmins (double)</param>
+            /// <returns>SQL query (string)</returns>
+            private string SqlSelectCommand()
+            {
+                StringBuilder sql = new StringBuilder(cmdTemplate);
+                sql.Replace("TEMPLATE", this.ra + "," + this.dec + "," + this.sr);
 
+                return sql.ToString();
+            }
+
+            private string getBandUrl() {
+                string bandurls = "";
+                if (this.band.Equals("all")) this.band = "u,g,r,i,z"; 
+                string[] bands = this.band.Split(',');
+                for (int i = 0; i < bands.Length; i++) {
+                    bandurls += "dbo.fGetUrlFitsCFrame(f.fieldId,'"+bands[i]+"') as "+bands[i]+"_url, ";
+                }
+                return bandurls;
+            }
+            /// <summary>
+            /// Build SQL query from the input parameters
+            /// </summary>
+            /// <param name="ra">RA of center in degrees (double)</param>
+            /// <param name="dec">Dec of center in degrees (double)</param>
+            /// <param name="size">Search size in degrees (double)</param>
+            /// <returns>SQL query (string)</returns>
+            private string SqlRectCommand()
+            {
+                StringBuilder sql = new StringBuilder(cmdTemplate);
+                sql.AppendFormat("and f.raMax >= {0}", this.ra - this.dra);
+                sql.AppendFormat("and f.raMin <= {0}", this.ra + this.dra);
+                sql.AppendFormat("and f.decMax >= {0}", this.dec - this.ddec);
+                sql.AppendFormat("and f.decMin <= {0}", this.dec + this.ddec);
+                return sql.ToString();
             }
 
             ///// <summary>
@@ -45,7 +160,6 @@ namespace Sciserver_webService.SDSSFields
             //    SqlDataAdapter da = new SqlDataAdapter(sql, this.strConn);
             //    da.Fill(ds, "SdssField");
             //}
-
             /// <summary>
             /// Run a free form sql query and return the results in a DataSet passed as a ref
             /// </summary>
@@ -55,7 +169,7 @@ namespace Sciserver_webService.SDSSFields
             {
 
                 JobsSoapClient cjobs = new JobsSoapClient();
-                ds = cjobs.ExecuteQuickJobDS(CJobsWSID, CJobsPasswd, sql, CJobsTARGET, "FOR CONESEARCH", false);
+                ////ds = cjobs.ExecuteQuickJobDS(CJobsWSID, CJobsPasswd, sql, CJobsTARGET, "FOR CONESEARCH", false);
                 //SqlDataAdapter da = new SqlDataAdapter(sql, this.strConn);
                 //da.Fill(ds, "SdssField");
             }
@@ -91,7 +205,6 @@ namespace Sciserver_webService.SDSSFields
                 return sql.ToString();
             }
 
-            
             /// <summary>
             /// Build SQL command for search and return the result as a DataSet
             /// </summary>
@@ -159,9 +272,7 @@ namespace Sciserver_webService.SDSSFields
                 }
                 return field;
             }
-
-
-
+                
             /// <summary>
             /// Runs the query and returns all matching fields
             /// </summary>

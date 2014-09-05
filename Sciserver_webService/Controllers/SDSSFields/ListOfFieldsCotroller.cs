@@ -7,6 +7,11 @@ using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.casjobs;
 using Sciserver_webService.SDSSFields;
 using net.ivoa.VOTable;
+
+using System.Net;
+using System.Net.Http;
+using Sciserver_webService.Common;
+
 namespace Sciserver_webService.Controllers
 {
     [ExceptionHandleAttribute]
@@ -15,19 +20,26 @@ namespace Sciserver_webService.Controllers
 
         [HttpGet]
         [ActionName("ListOfFields")]
-        public String[] ListOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius)
+        [ExceptionHandleAttribute]
+        public HttpResponseMessage ListOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band)
         {
-            Validation valid = new Validation();
-            if (valid.ValidateInput(ra, dec, radius))
-            {
-
-                Sciserver_webService.SDSSFields.SDSSFields sdssFields = new Sciserver_webService.SDSSFields.SDSSFields();
-                return sdssFields.ListOfFields(valid.getRa(), valid.getDec(), valid.getRadius());
-            }
-
-            throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
-
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SDSSFields:ListOfFields");
         }
+        //public String[] ListOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius)
+        //{
+        //    Validation valid = new Validation();
+        //    if (valid.ValidateInput(ra, dec, radius))
+        //    {
+
+        //        Sciserver_webService.SDSSFields.SDSSFields sdssFields = new Sciserver_webService.SDSSFields.SDSSFields();
+        //        return sdssFields.ListOfFields(valid.getRa(), valid.getDec(), valid.getRadius());
+        //    }
+
+        //    throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
+
+        //}
+
      
     }
 }

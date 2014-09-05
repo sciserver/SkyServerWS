@@ -179,6 +179,7 @@
     <Compile Include="Controllers\ImagingQuery\ProximityController.cs" />
     <Compile Include="Controllers\ImagingQuery\RectangularController.cs" />
     <Compile Include="Controllers\ImgCutout\getJpegCodec.cs" />
+    <Compile Include="Controllers\ImgCutout\getJpegCodecController.cs" />
     <Compile Include="Controllers\ImgCutout\getJpegController.cs" />
     <Compile Include="Controllers\IRSpectraQuery\ConeIRController.cs" />
     <Compile Include="Controllers\IRSpectraQuery\NoPositionIRController.cs" />
@@ -187,11 +188,11 @@
     <Compile Include="Controllers\ObjectCrossId\ImgCrossIdController.cs" />
     <Compile Include="Controllers\ObjectCrossId\IRSpectraCrossIdController.cs" />
     <Compile Include="Controllers\ObjectCrossId\SpectraCrossIdController.cs" />
+    <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
     <Compile Include="Controllers\SDSSFields\UrlsOfFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayRectController.cs" />
     <Compile Include="Controllers\SDSSFields\SDSSFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
-    <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
     <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
     <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
     <Compile Include="Controllers\SpectroQuery\ConeSpectroController.cs" />
@@ -205,9 +206,7 @@
     <Compile Include="default.aspx.designer.cs">
       <DependentUpon>default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ImagingQuery\BuildQuery.cs" />
     <Compile Include="Common\BuildQuery.cs" />
-    <Compile Include="ImagingQuery\ImagingQuery.cs" />
     <Compile Include="Common\Utilities.cs" />
     <Compile Include="ImagingQuery\Validation.cs" />
     <Compile Include="Models\JSONStreamResponse.cs" />

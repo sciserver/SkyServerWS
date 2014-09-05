@@ -4,6 +4,9 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Net.Http.Headers;
 using Sciserver_webService.ExceptionFilter;
+using System.Net;
+using System.Net.Http;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
 {
@@ -29,11 +32,18 @@ namespace Sciserver_webService.Controllers
             sdssSIAP.SIAP siap = new sdssSIAP.SIAP();
             return siap.getSiapInfo(POS, SIZE, FORMAT, "");
         }
+
         [ExceptionHandleAttribute]
         public HttpResponseMessage Get()
         {
             throw new ArgumentException("There are not enough parameters to process your request. \n specify POS,SIZE,FORMAT and bandpass values.");
         }
-    }
-    
+        
+        //[ExceptionHandleAttribute]
+        //public HttpResponseMessage getSIAPInfo()
+        //{
+        //    ProcessRequest request = new ProcessRequest();
+        //    return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfo, "SIAP:getSIAPInfo");
+        //}
+    }    
 }

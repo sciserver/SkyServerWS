@@ -31,9 +31,7 @@ namespace Sciserver_webService.Common
         {
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-            Dictionary<String, String> dictionary = null;            
-          
-
+            Dictionary<String, String> dictionary = null;                      
             IEnumerable<string> values;
             string token = "";
             string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
@@ -106,13 +104,21 @@ namespace Sciserver_webService.Common
                     Sciserver_webService.ConeSearch.ConeSearch cs = new Sciserver_webService.ConeSearch.ConeSearch(dictionary);
                     query = cs.getConeSearchQuery();
                     break;
+                case "SDSSFields":
+                    Sciserver_webService.SDSSFields.SDSSFields sf = new Sciserver_webService.SDSSFields.SDSSFields(dictionary, positionType);
+                    query = sf.sqlQuery;                  
+                    break;
+                case "SIAP" :
+                    break;
                 default: 
                     query = QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
                     break;
             }
          
-            RunCasjobs run = new RunCasjobs();
-            resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+            //RunCasjobs run = new RunCasjobs();
+            //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+            OutputFormat of = new OutputFormat();
+            return of.getResults(resp, query, token, casjobsMessage, format);
             return resp;
         }
        
@@ -122,44 +128,61 @@ namespace Sciserver_webService.Common
         {
             try
             {
+                HttpResponseMessage resp = new HttpResponseMessage();
+                Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
+                String query = "";
+                Dictionary<String, String> dictionary = api.Request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+                string token = "";   
                 IEnumerable<string> values;
+                string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
                 if (api.ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
                 {
-                    // Keystone authentication
-                    string token = values.First();
-                    var userAccess = Keystone.Authenticate(token);
+                    try
+                    {
+                        // Keystone authentication
+                        token = values.First();
+                        var userAccess = Keystone.Authenticate(token);
 
-                    Dictionary<String, String> dictionary = api.Request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
-                    String query = "";
+                        // logging for the request
 
-                    //if (dictionary["radecTextarea"] != null)
-                    //{
-                    //    UploadDataReader up = new UploadDataReader();
-                    //    query += up.UploadTo(dictionary["radecTextarea"], queryType, dictionary["nearBy"]);
-                    //}
-                    //else
-                    //{
-                        var task = api.Request.Content.ReadAsStreamAsync();
-                        task.Wait();
-                        Stream stream = task.Result;
+                        Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, api.ControllerContext.Request.ToString());
+                        userid = userAccess.User.Id;
+                        message.UserId = userAccess.User.Id;
+                        log.SendMessage(message);
 
-                        using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
-                        {
-                            query += up.UploadTo(queryType, dictionary["searchNearBy"]);
-                        }
-                    //}
+                    }
+                    catch (Exception e)
+                    {
 
-                    HttpResponseMessage resp = new HttpResponseMessage();
-                    query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
-                    RunCasjobs run = new RunCasjobs();
-                    resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
-                    return resp;
+                        // No authentication (anonymous) // Logg
+                        Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, e.Message);
+                        message.UserId = userid;
+                        log.SendMessage(message);
+                        throw new UnauthorizedAccessException("Given token is not authorized.");
+                    }
+
                 }
                 else
                 {
-                    // No authentication (anonymous) // Logg
-                    throw new UnauthorizedAccessException("Check the token you are using.");
+                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, api.ControllerContext.Request.ToString());
+                    message.UserId = userid;
+                    log.SendMessage(message);
                 }
+
+                var task = api.Request.Content.ReadAsStreamAsync();
+                task.Wait();
+                Stream stream = task.Result;
+
+                using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
+                {
+                    query += up.UploadTo(queryType, dictionary["searchNearBy"]);
+                }
+
+                //HttpResponseMessage resp = new HttpResponseMessage();
+                query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
+                RunCasjobs run = new RunCasjobs();
+                resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+                return resp;
             }
             catch (Exception exp)
             {

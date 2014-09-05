@@ -65,6 +65,9 @@ namespace Sciserver_webService.Common
         public static string RectangularQuery = "RectangularSearch";
         public static string RadialQuery = "RadialSearch";
         public static string ConeSearchQuery = "ConeSearch";
+        public static string SIAP = "SIAP";
+        public static string SDSSFields = "SDSSFields";
+        
 
         public static string limit = "limit";
         public static string dataset = "dataset";
@@ -89,6 +92,15 @@ namespace Sciserver_webService.Common
         public static string rectangular = "rectangular";
         // for galactic co-ordinates in IRSpectraQuery 
         public static string conelb = "conelb";       
+        //SIAP
+        public static string getSIAP = "getSIAP";
+        public static string getSIAPInfo = "getSIAP";
+        public static string getSIAPInfoAll = "getSIAP";        
+        //SDSSFields
+        public static string FieldArray = "FieldArray";
+        public static string FieldArrayRect = "FieldArrayRect";
+        public static string ListOfFields = "ListOfFields";
+        public static string UrlsOfFields = "UrlsOfFields";        
 
         public static string imagingConstraint = "imagingConstraint";
         public static string Lcenter = "Lcenter";

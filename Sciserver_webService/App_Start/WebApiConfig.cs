@@ -18,26 +18,25 @@ namespace Sciserver_webService
                 routeTemplate: "dr10/ConeSearch/{controller}/",
                 defaults: new { controller = "ConeSearch" }
             );
-            
-            
-            // Following four are for SDSS Fields
-            config.Routes.MapHttpRoute(
-                name: "FieldsArray",
-                routeTemplate: "dr10/SDSSFields/{controller}/{id1}",
-                defaults: new { controller = "FieldsArray", id1 = RouteParameter.Optional }
-            );
-
-            config.Routes.MapHttpRoute(
-                name: "ListOfFields",
-                routeTemplate: "dr10/SDSSFields/{controller}/{action}/{id2}",
-                defaults: new { controller = "SDSSFields", id2 = RouteParameter.Optional }
-            );
-
             config.Routes.MapHttpRoute(
                 name: "FieldArrayRect",
-                routeTemplate: "dr10/SDSSFields/{controller}/{id3}",
-                defaults: new { controller = "FieldsArrayRect",id3 = RouteParameter.Optional }
+                routeTemplate: "dr10/SDSSFields/{controller}",
+                defaults: new { controller = "FieldsArrayRect" }
             );
+            
+            //// Following four are for SDSS Fields
+            //config.Routes.MapHttpRoute(
+            //    name: "FieldsArray",
+            //    routeTemplate: "dr10/SDSSFields/{controller}/{id1}",
+            //    defaults: new { controller = "FieldsArray", id1 = RouteParameter.Optional }
+            //);
+            //config.Routes.MapHttpRoute(
+            //    name: "ListOfFields",
+            //    routeTemplate: "dr10/SDSSFields/{controller}/{action}/{id2}",
+            //    defaults: new { controller = "SDSSFields", id2 = RouteParameter.Optional }
+            //);
+
+            
 
             config.Routes.MapHttpRoute(
                 name: "UrlsOfFields",
@@ -108,9 +107,9 @@ namespace Sciserver_webService
 
             /// IR-Spectro Query
             config.Routes.MapHttpRoute(
-                name: "ConeIRSpectro",
-                routeTemplate: "dr10/IRSpectroQuery/{controller}",
-                defaults: new { controller = "ConeIRSpectro" }
+                name: "ConeIR",
+                routeTemplate: "dr10/IRSpectraQuery/{controller}",
+                defaults: new { controller = "ConeIR" }
             );
 
             config.Filters.Add(new ExceptionFilter.ExceptionHandleAttribute());

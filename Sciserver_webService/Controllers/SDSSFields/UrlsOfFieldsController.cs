@@ -7,6 +7,11 @@ using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.casjobs;
 using Sciserver_webService.SDSSFields;
 using net.ivoa.VOTable;
+
+using System.Net;
+using System.Net.Http;
+using Sciserver_webService.Common;
+
 namespace Sciserver_webService.Controllers
 {
     [ExceptionHandleAttribute]
@@ -14,15 +19,23 @@ namespace Sciserver_webService.Controllers
     {
         [HttpGet]
         [ActionName("UrlsOfFields")]
-        public String[] UrlsOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band)
+        //public String[] UrlsOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band)
+        //{
+        //    Validation valid = new Validation();
+        //    Sciserver_webService.SDSSFields.SDSSFields sdssFields = new Sciserver_webService.SDSSFields.SDSSFields();
+        //    if (valid.ValidateInput(ra, dec, radius) && valid.ValidateInput(band))
+        //    {
+        //        return sdssFields.UrlOfFields(valid.getRa(), valid.getDec(), valid.getRadius(), band);
+        //    }
+        //    throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
+        //}
+
+        [ExceptionHandleAttribute]
+        public HttpResponseMessage UrlsOfFields()
         {
-            Validation valid = new Validation();
-            Sciserver_webService.SDSSFields.SDSSFields sdssFields = new Sciserver_webService.SDSSFields.SDSSFields();
-            if (valid.ValidateInput(ra, dec, radius) && valid.ValidateInput(band))
-            {
-                return sdssFields.UrlOfFields(valid.getRa(), valid.getDec(), valid.getRadius(), band);
-            }
-            throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");
         }
+        ///*** input parameters are [FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band
     }
 }

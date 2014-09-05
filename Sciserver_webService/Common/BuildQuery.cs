@@ -540,16 +540,16 @@ namespace Sciserver_webService.QueryTools
             return objType;
         }
 
-        private static string orderClause = "";        
+
+
+        private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
+        private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
         private static string specAlias = "s";
         private static string bestAlias = "p";
         private static string targAlias = "t";
         private static string apogeeAlias = "a";
         private static string aspcapAlias = "q";
         private static string apogeeObjectAlias = "o";
-        private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
-        private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
-
 
         public static string buildQuery(string type, Dictionary<string, string> requestDictionary, string positionType)
         {
@@ -564,6 +564,9 @@ namespace Sciserver_webService.QueryTools
             List<string> imgFields = new List<string>();
             List<string> specFields = new List<string>();
             List<string> IRspecFields = new List<string>();
+            
+            string orderClause = "";        
+           
             
             //string proxMode = " ";
             bool addQA = false;

@@ -38,7 +38,7 @@ namespace Sciserver_webService.ConeSearch
                 return true;
             }
             catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
-            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
+            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request Or Parameters values are not properly entered."); }
         }
 
         public String getConeSearchQuery() {

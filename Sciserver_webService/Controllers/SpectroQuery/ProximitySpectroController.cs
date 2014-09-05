@@ -14,6 +14,7 @@ namespace Sciserver_webService.Controllers
     public class ProximitySpectroController : ApiController
     {
         [ExceptionHandleAttribute]
+        [HttpPost]
         public HttpResponseMessage post(){
             ProcessRequest request = new ProcessRequest();
             return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
