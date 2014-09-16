@@ -78,12 +78,12 @@ namespace Sciserver_webService.Common
                 throw new ArgumentException("Check input parameters properly.");
             }
 
-            String format = "CSV";
+            String format = "csv";
             try
             {
-                format = dictionary["format"].ToUpper();
+                format = dictionary["format"].ToLower();
             }catch(Exception exp){
-                format = "CSV";
+                format = "csv";
             }
 
             String query = "";
@@ -136,7 +136,7 @@ namespace Sciserver_webService.Common
             //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
             ////OutputFormat of = new OutputFormat();
             OutputFormat o = new OutputFormat();
-            if (format.Equals("CSV"))
+            if (format.Equals("csv"))
             {
                 System.Threading.Tasks.Task<HttpResponseMessage> t = o.getResults(query, token, casjobsMessage, format);
                 return t.Result;
