@@ -40,8 +40,7 @@ namespace Sciserver_webService.SDSSFields
 			//double dec0 = (double) row["dec"];
 			//this.center = new SdssCoord(ra0,dec0,-999,-999);
             
-
-			string[] bands = {"u","g","r","i","z"};
+            string[] bands = {"u","g","r","i","z"};
             
 			passband = new Band[bands.Length];
 			for (int i=0; i<passband.Length; i++)

@@ -26,7 +26,7 @@ namespace Sciserver_webService.sdssSIAP
         //private string urlFind = ConfigurationSettings.AppSettings["siap.testURLFind"];
         //private string urlReplace = ConfigurationSettings.AppSettings["siap.testURLReplace"];
         static public string SDSSgetImage = ConfigurationSettings.AppSettings["UrlSdssGetJpeg"];
-       // static public string UrlSdssFields = ConfigurationSettings.AppSettings["UrlSdssFields"];
+        static public string UrlSdssFields = ConfigurationSettings.AppSettings["UrlSdssFields"];
         private double pixPerDeg = 9088.0;
         private double scale = 3600.0 / 9088.0; // 0.396127, SDSS default scale in arcseconds/pixel
 
@@ -296,7 +296,7 @@ namespace Sciserver_webService.sdssSIAP
             this.INFO[ind] = new INFO();
             this.INFO[ind].name = "FieldsUrl";
             this.INFO[ind].Text = new string[1];
-            this.INFO[ind].Text[0] = "TEST HERE!!";//SiapTable.UrlSdssFields;
+            this.INFO[ind].Text[0] = SiapTable.UrlSdssFields;
             ind++;
             this.INFO[ind] = new INFO();
             this.INFO[ind].name = "CutOutUrl";

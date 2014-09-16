@@ -172,14 +172,10 @@ namespace Sciserver_webService.sdssSIAP
                 }
             }
             // finally add the params
-
             if (null != posp) vot.RESOURCE[0].Items[ind++] = posp;
             if (null != sizep) vot.RESOURCE[0].Items[ind++] = sizep;
             if (null != formp) vot.RESOURCE[0].Items[ind++] = formp;
             if (null != bandp) vot.RESOURCE[0].Items[ind++] = bandp;
-
-
-
         }
 
         public static void AddPossibleParams(SiapTable vot)
@@ -208,11 +204,7 @@ namespace Sciserver_webService.sdssSIAP
             addParam(vot, dataType.@char, "INPUT:BANDPASS",
             "Sloan filter you are interested in. Any combination of 'u', 'g', 'r', 'i','z' or '*' to get them all  "
                     , ind++);
-            addValues(vot, bands, ind - 1);
-
-
-
-
+            addValues(vot, bands, ind - 1);            
         }
 
         // assumes parm exists - adds values to it

@@ -13,15 +13,20 @@ namespace Sciserver_webService.Controllers
     public class RadialSearchController : ApiController
     {
         [ExceptionHandleAttribute]
-        public HttpResponseMessage Get([FromUri] String ra = null, [FromUri] String dec = null, 
-                          [FromUri] String sr = null, [FromUri] String uband = null,
-                          [FromUri] String gband = null, [FromUri] String rband= null,
-                          [FromUri] String iband = null, [FromUri] String zband = null,
-                          [FromUri] String searchtype=null,[FromUri] String returntype=null,
-                          [FromUri] String limit = "10")
+        public HttpResponseMessage Get()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch Tool.");
         }
     }
 }
+
+        ///**
+        // * [FromUri] String ra = null, [FromUri] String dec = null, 
+        //                  [FromUri] String sr = null, [FromUri] String uband = null,
+        //                  [FromUri] String gband = null, [FromUri] String rband= null,
+        //                  [FromUri] String iband = null, [FromUri] String zband = null,
+        //                  [FromUri] String searchtype=null,[FromUri] String returntype=null,
+        //                  [FromUri] String fp = "none", [FromUri] String limit = "10")
+        // * /
+ 

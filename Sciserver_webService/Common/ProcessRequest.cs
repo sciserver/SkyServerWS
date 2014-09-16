@@ -12,7 +12,8 @@ using System.IO;
 using SciServer.Logging;
 using System.Web;
 using Sciserver_webService.ToolsSearch;
-
+using System.Text.RegularExpressions;
+using Sciserver_webService.SIAP;
 
 namespace Sciserver_webService.Common
 {
@@ -80,7 +81,7 @@ namespace Sciserver_webService.Common
             String format = "CSV";
             try
             {
-                format = dictionary["format"];
+                format = dictionary["format"].ToUpper();
             }catch(Exception exp){
                 format = "CSV";
             }
@@ -89,37 +90,62 @@ namespace Sciserver_webService.Common
             
             switch (queryType)
             {
-                case "SqlSearch": query = dictionary["query"];break;
+                case "SqlSearch": query = dictionary["cmd"];                     
+                    break;
+
                 case "RectangularSearch" :
                     RectangularSearch rs = new RectangularSearch(dictionary);
-                    resp.Content = new StringContent(rs.getResult(token, casjobsMessage, format));
-                    return resp;
+                    //resp.Content = new StringContent(rs.getResult(token, casjobsMessage, format));
+                    //return resp;
+                    query = rs.query;
                     break;
+
                 case "RadialSearch":
                     RadialSearch radial = new RadialSearch(dictionary);
-                    resp.Content = new StringContent(radial.getResult(token, casjobsMessage, format));
-                    return resp;
+                    //resp.Content = new StringContent(radial.getResult(token, casjobsMessage, format));
+                    //return resp;
+                    query = radial.query;                    
                     break;
+
                 case "ConeSearch":
                     Sciserver_webService.ConeSearch.ConeSearch cs = new Sciserver_webService.ConeSearch.ConeSearch(dictionary);
                     query = cs.getConeSearchQuery();
                     break;
+
                 case "SDSSFields":
                     Sciserver_webService.SDSSFields.SDSSFields sf = new Sciserver_webService.SDSSFields.SDSSFields(dictionary, positionType);
                     query = sf.sqlQuery;                  
                     break;
+
                 case "SIAP" :
+                    ProcessSIAP psiap = new ProcessSIAP();
+                    query = psiap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], dictionary["FORMAT"], dictionary["bandpass"]);
                     break;
+
                 default: 
                     query = QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
                     break;
             }
-         
+
+            query = Regex.Replace(query, @"\/\*(.*\n)*\*\/", "");	// remove all multi-line comments
+            query = Regex.Replace(query, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
+            query = Regex.Replace(query, @"--[^\r^\n]*", "");				// remove all embedded single-line comments
+            query = Regex.Replace(query, @"[ \t\f\v]+", " ");				// replace multiple whitespace with single space
+            query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
             //RunCasjobs run = new RunCasjobs();
             //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
-            OutputFormat of = new OutputFormat();
-            return of.getResults(resp, query, token, casjobsMessage, format);
-            return resp;
+            ////OutputFormat of = new OutputFormat();
+            OutputFormat o = new OutputFormat();
+            if (format.Equals("CSV"))
+            {
+                System.Threading.Tasks.Task<HttpResponseMessage> t = o.getResults(query, token, casjobsMessage, format);
+                return t.Result;
+            }
+            else
+            {
+                return o.getResults(resp, query, token, casjobsMessage, format);
+            }
+            //return resp;
         }
        
 
@@ -144,16 +170,13 @@ namespace Sciserver_webService.Common
                         var userAccess = Keystone.Authenticate(token);
 
                         // logging for the request
-
                         Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, api.ControllerContext.Request.ToString());
                         userid = userAccess.User.Id;
                         message.UserId = userAccess.User.Id;
                         log.SendMessage(message);
-
                     }
                     catch (Exception e)
                     {
-
                         // No authentication (anonymous) // Logg
                         Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, e.Message);
                         message.UserId = userid;

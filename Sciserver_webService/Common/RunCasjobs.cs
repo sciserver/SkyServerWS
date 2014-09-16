@@ -14,6 +14,8 @@ using System.Net.Http.Headers;
 using Sciserver_webService.Common;
 using System.Threading.Tasks;
 //using System.Web.Mvc.ActionResult;
+using System.Text;
+using System.IO;
 
 ///This class is used to submit query to casjobs
 namespace Sciserver_webService.UseCasjobs
@@ -85,7 +87,6 @@ namespace Sciserver_webService.UseCasjobs
         
         public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName)
         {
-            //string casjobsTaskname = "test";
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
@@ -95,22 +96,52 @@ namespace Sciserver_webService.UseCasjobs
             content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
             HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
-                response.EnsureSuccessStatusCode();
+            
+            response.EnsureSuccessStatusCode();
+            
             if(response.IsSuccessStatusCode)
                 return response;
             else
                 throw new ApplicationException("Query did not return results successfully, check input and try again later.");                
         }
 
+        public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName, string format)
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
-        private string createCasjobsQuery() {
-            return "";
+            //StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
+            StringContent content = new StringContent(this.getJsonContent(query,casjobsTaskName));
+            if (!(token == null || token == String.Empty))
+                content.Headers.Add(KeyWords.xauth, token);
+            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+
+            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.IsSuccessStatusCode)
+                return response;
+            else
+                throw new ApplicationException("Query did not return results successfully, check input and try again later.");
         }
 
-        private string getJsonResult() {
-            return "";
+        private String getJsonContent(String query, String casjobsTaskName) {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.WriteStartObject();
+                writer.WritePropertyName("Query");
+                writer.WriteValue(query);
+                writer.WritePropertyName("TaskName");
+                writer.WriteValue(casjobsTaskName);
+                writer.WriteEndObject();
+            }
+            return sb.ToString();
         }
-
+        
         //public async Task<HttpResponseMessage> postCasjobs(string query, String token, string casjobsTaskName, HttpResponseMessage response)
         //{
         //    //string casjobsTaskname = "test";

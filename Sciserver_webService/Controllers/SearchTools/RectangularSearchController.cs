@@ -31,7 +31,7 @@ namespace Sciserver_webService.Controllers
         public HttpResponseMessage Get([FromUri] String min_ra = null, [FromUri] String min_dec = null, [FromUri] String max_ra = null,
                             [FromUri] String max_dec = null, [FromUri] String uband = null, [FromUri] String gband = null,
                             [FromUri] String rband = null, [FromUri] String iband = null, [FromUri] String zband = null,
-                              [FromUri] String whichway = null, [FromUri] String format = "json", [FromUri] String limit = "10" )
+                              [FromUri] String whichway = null,[FromUri] String whichquery =null, [FromUri] String format = "json", [FromUri] String limit = "10" )
         {
 
             ProcessRequest request = new ProcessRequest();

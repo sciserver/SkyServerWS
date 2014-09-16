@@ -195,6 +195,9 @@
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
     <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
     <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
+    <Compile Include="Controllers\SIAP\newSIAPController.cs" />
+    <Compile Include="Controllers\SIAP\newSIAPInfoAllController.cs" />
+    <Compile Include="Controllers\SIAP\newSIAPInfoController.cs" />
     <Compile Include="Controllers\SpectroQuery\ConeSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\NoPositionSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\ProximitySpectroController.cs" />
@@ -211,6 +214,7 @@
     <Compile Include="ImagingQuery\Validation.cs" />
     <Compile Include="Models\JSONStreamResponse.cs" />
     <Compile Include="Models\XMLStreamResponse.cs" />
+    <Compile Include="SIAP\ProcessSIAP.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
     <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />

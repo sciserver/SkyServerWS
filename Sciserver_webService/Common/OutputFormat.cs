@@ -8,12 +8,24 @@ using Sciserver_webService.UseCasjobs;
 using System.Text;
 using System.IO;
 using Newtonsoft.Json;
-
+using System.Threading.Tasks;
+using System.Net.Http.Headers;
 namespace Sciserver_webService.Common
 {
     public class OutputFormat
     {
-
+        public Stream httpStream = null;
+        public async Task<HttpResponseMessage> getResults(String query, String token, String casjobsMessage, String format)
+        {
+            RunCasjobs run = new RunCasjobs();
+            HttpResponseMessage respM = run.postCasjobs(query, token, casjobsMessage, format);
+            httpStream = await respM.Content.ReadAsStreamAsync();
+            HttpResponseMessage resp = new HttpResponseMessage();
+            resp.Content = new StreamContent(httpStream);
+            resp.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+            httpStream.Flush();
+            return resp;
+         }
 
         public HttpResponseMessage getResults(HttpResponseMessage resp,String query,String token,String casjobsMessage, String format) {
 
@@ -26,20 +38,17 @@ namespace Sciserver_webService.Common
                 case "json" :
                     resp.Content = new StringContent(getJson(result,query)); break;
 
-                case "csv":
-                    resp.Content = new StringContent(result); break;
+                //case "csv":
+                //    resp.Content = new StringContent(result); break;
 
-                default: resp.Content = new StringContent(result); break;
+                //default: resp.Content = new StringContent(result); break;
+                default: break;
             }
             return resp;
         }
 
 
-        public static string getString() {
-            return "";
-        }
-
-      
+    
 
         public string getJson(string resultContent, string query)
         {

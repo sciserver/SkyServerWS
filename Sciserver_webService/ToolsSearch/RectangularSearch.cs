@@ -26,6 +26,8 @@ namespace Sciserver_webService.ToolsSearch
             get { return irQuery; }
         }
 
+        public String query = "";
+
         public RectangularSearch() { }
 
         public RectangularSearch(Dictionary<string,string> requestDir) 
@@ -34,8 +36,10 @@ namespace Sciserver_webService.ToolsSearch
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
             if (temp)
             {
-                this.buildImageQuery(val);
-                this.buildIRQuery(val);
+                if(val.whichquery.Equals("imaging"))
+                query = this.buildImageQuery(val);
+                else
+                query = this.buildIRQuery(val);
             }
         }
 
@@ -53,7 +57,7 @@ namespace Sciserver_webService.ToolsSearch
         }
 
 
-        private void buildImageQuery(Validation val)
+        private string buildImageQuery(Validation val)
         {
             string sql;
 
@@ -78,10 +82,11 @@ namespace Sciserver_webService.ToolsSearch
 
             //this.imagingQuery = sql;
             this.imagingQuery += addWhereClause(sql,val);
+            return this.imagingQuery;
         }
 
 
-        private void buildIRQuery(Validation val)
+        private string buildIRQuery(Validation val)
         {
             string sql;
 
@@ -104,6 +109,7 @@ namespace Sciserver_webService.ToolsSearch
             sql += "   WHERE ra BETWEEN " + val.ra + " AND " + val.ra_max + "\n";
             sql += "   AND dec BETWEEN " + val.dec + " AND " + val.dec_max + "\n";            
             this.irQuery = addWhereClause(sql,val);
+            return this.irQuery;
         }
 
 

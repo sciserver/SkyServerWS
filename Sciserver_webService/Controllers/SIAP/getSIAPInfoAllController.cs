@@ -17,9 +17,6 @@ namespace Sciserver_webService.Controllers
             return siap.getSiapInfo(POS, SIZE, "ALL", "*");
         }
 
-        [ExceptionHandleAttribute]
-        public HttpResponseMessage Get() {
-            throw new ArgumentException("Not Enough paramters provided. Enter POS, SIZE.");
-        }
+      
     }
 }

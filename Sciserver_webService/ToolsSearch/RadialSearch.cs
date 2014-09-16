@@ -18,16 +18,27 @@ namespace Sciserver_webService.ToolsSearch
 {
     public class RadialSearch
     {
-
+        public String query = "";
         public String imageQuery = "";
         public String irQuery = "";
+      
         public RadialSearch(Dictionary<string,string> requestDir) 
         {
             Validation val = new Validation(requestDir, "radialSearch");
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
-            this.buildImageQuery(val);
-            this.buildIRQuery(val);
+            if (val.whichquery.Equals("imaging"))
+            {
+              this.buildImageQuery(val);
+              query = imageQuery;
+            }
+            else
+            {
+                this.buildIRQuery(val);
+                query = irQuery;
+            }
         }
+
+
 
         //private void SetRadialArea(HttpRequest request)
         //{
@@ -68,7 +79,7 @@ namespace Sciserver_webService.ToolsSearch
 
                 if (val.format == "html")
                 {
-                    sql += " ''<a target=INFO href=" + KeyWords.skyserverUrl + "/tools/explore/obj.aspx?id='' + cast(p.objId as varchar(20)) + ''>'' + cast(p.objId as varchar(20)) + ''</a>'' as objID,\n";
+                    sql += " '<a target=INFO href=" + KeyWords.skyserverUrl + "/tools/explore/obj.aspx?id=' + cast(p.objId as varchar(20)) +'>' + cast(p.objId as varchar(20)) + '</a>' as objID,\n";
                 }
                 else
                 {
@@ -217,6 +228,8 @@ namespace Sciserver_webService.ToolsSearch
                 throw new Exception("Error while running casjobs:" + e.Message);
             }
         }
+
+        
         /// <summary>
         ///  this is using old casjobs
         /// </summary>

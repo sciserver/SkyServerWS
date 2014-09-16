@@ -16,31 +16,31 @@ namespace Sciserver_webService.SDSSFields
     public class SDSSFields
     {
         private string strConn, cmdTemplate, cmdTemplate2, urlPrefix;
-        //private static long CJobsWSID = long.Parse(ConfigurationSettings.AppSettings["CJobsWSID"]);
-        //private static string CJobsPasswd = ConfigurationSettings.AppSettings["CJobsPassWD"];
-        //private static string CJobsTARGET = ConfigurationSettings.AppSettings["CJobsTARGET"];
-        //private static string CJobsURL = ConfigurationSettings.AppSettings["CJobsURL"];
+        private static long CJobsWSID = long.Parse(ConfigurationSettings.AppSettings["CJobsWSID"]);
+        private static string CJobsPasswd = ConfigurationSettings.AppSettings["CJobsPassWD"];
+        private static string CJobsTARGET = ConfigurationSettings.AppSettings["TARGET"];
+        private static string CJobsURL = ConfigurationSettings.AppSettings["CJobsURL"];
 
-        
-        //    /// <summary>
-        //    /// Default constructor, init connection string, sqlcommand template and url prefix
-        //    /// </summary>
-        //    public SDSSFields()
-        //    {               
-        //        // Config
-        //        strConn = ConfigurationManager.AppSettings["SqlConnectString"];
-        //        cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate"];
-        //        cmdTemplate2 = ConfigurationManager.AppSettings["CmdTemplate2"];
-        //        urlPrefix = ConfigurationManager.AppSettings["UrlPrefix"];
 
-        //    }
+        /// <summary>
+        /// Default constructor, init connection string, sqlcommand template and url prefix
+        /// </summary>
+        public SDSSFields()
+        {
+            // Config
+            strConn = ConfigurationManager.AppSettings["SqlConnectString"];
+            cmdTemplate = ConfigurationManager.AppSettings["CmdTemplate"];
+            cmdTemplate2 = ConfigurationManager.AppSettings["CmdTemplate2"];
+            urlPrefix = ConfigurationManager.AppSettings["UrlPrefix"];
+
+        }
         
         private double ra, dec, sr,dra,ddec;
         private string band ="all";
         public String sqlQuery { get; set; }
 
-        public SDSSFields()
-        { }        
+        //public SDSSFields()
+        //{ }        
 
         public SDSSFields(Dictionary<string,string> dictionary, String positiontype) {
 
@@ -169,7 +169,7 @@ namespace Sciserver_webService.SDSSFields
             {
 
                 JobsSoapClient cjobs = new JobsSoapClient();
-                ////ds = cjobs.ExecuteQuickJobDS(CJobsWSID, CJobsPasswd, sql, CJobsTARGET, "FOR CONESEARCH", false);
+                ds = cjobs.ExecuteQuickJobDS(CJobsWSID, CJobsPasswd, sql, CJobsTARGET, "FOR CONESEARCH", false);
                 //SqlDataAdapter da = new SqlDataAdapter(sql, this.strConn);
                 //da.Fill(ds, "SdssField");
             }
@@ -267,7 +267,6 @@ namespace Sciserver_webService.SDSSFields
                     {
                         field[i].passband[j].url = field[i].bandUrls[j];
                         //field[i].passband[j].url = this.FieldUrl(field[i],field[i].passband[j].filter);
-
                     }
                 }
                 return field;

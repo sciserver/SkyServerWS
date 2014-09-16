@@ -12,6 +12,7 @@ namespace Sciserver_webService.ToolsSearch
        
         private String[] searchtypes = new String[] { "equitorial", "galactic" };
 
+        public String whichquery = "imaging";
         public double ra { get; set; }
         public double dec { get; set; }
         public double radius { get; set; }
@@ -34,7 +35,7 @@ namespace Sciserver_webService.ToolsSearch
         public int rmax { get; set; }
         public int zmin { get; set; }
         public int zmax { get; set; }
-
+                
         public int limit = 10;
         public string searchtype { get; set; }
 
@@ -44,6 +45,8 @@ namespace Sciserver_webService.ToolsSearch
         public double dec_max { get; set; }
 
         public String uband_s =null,  gband_s=null,  rband_s=null,  iband_s=null,  zband_s=null,  limit_s=null, returntype_s=null;
+
+        //public string option = "imaging";
 
         public string returnFormat {
             get { return returnType; }
@@ -70,6 +73,8 @@ namespace Sciserver_webService.ToolsSearch
            try { this.searchtype = requestDir["searchtype"]; } catch (Exception e) { }
            try { this.returntype_s = requestDir["returntype"]; } catch (Exception e) { }
            try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
+           try { this.whichquery = requestDir["whichquery"]; }catch (Exception e) { this.whichquery = "imaging"; }
+           //try { this.option = requestDir["option"]; } catch (Exception e) { this.option = "imaging"; } 
         }
 
         public Validation(Dictionary<string, string> requestDir, String r)
@@ -78,8 +83,14 @@ namespace Sciserver_webService.ToolsSearch
             {
                 this.ra = Convert.ToDouble(requestDir["ra"]);
                 this.dec = Convert.ToDouble(requestDir["dec"]);
-                this.radius = Convert.ToDouble(requestDir["radius"]);             
-                this.fp = requestDir["fp"];
+                this.radius = Convert.ToDouble(requestDir["radius"]);
+                try
+                {
+                    this.fp = requestDir["fp"];
+                }
+                catch (Exception e) {
+                    this.fp = "none";
+                }
             }
             catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
