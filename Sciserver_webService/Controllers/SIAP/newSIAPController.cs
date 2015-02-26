@@ -5,19 +5,17 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Sciserver_webService.ExceptionFilter;
-using Sciserver_webService.QueryTools;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
 {
-    public class GalacticIRController : ApiController
+    public class newSIAPController : ApiController
     {
         [ExceptionHandleAttribute]
-        public IHttpActionResult get()
-        {
+        public IHttpActionResult Get() {
+
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "IRSpectroQuery:RectangularSearch");
+            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAP, "SIAP:newSIAP");
         }
     }
 }

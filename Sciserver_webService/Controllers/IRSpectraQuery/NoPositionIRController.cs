@@ -14,7 +14,7 @@ namespace Sciserver_webService.Controllers
     public class NoPositionIRController : ApiController
     {
         [ExceptionHandleAttribute]
-        public HttpResponseMessage get(){
+        public IHttpActionResult get(){
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "IRSpectroQuery:NoPositionSearch");
         }

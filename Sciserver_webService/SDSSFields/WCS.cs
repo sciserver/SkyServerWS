@@ -4,6 +4,7 @@ namespace Sciserver_webService.SDSSFields
 {
 	/// <summary>
 	/// This class holds all the WCS parameters
+ 	/// @Deoyani Nandrekar-Heinis Feb 2015
 	/// </summary> 
 	public class WCS
 	{

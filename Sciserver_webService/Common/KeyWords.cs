@@ -22,23 +22,35 @@ namespace Sciserver_webService.Common
         /// </summary>
         public static string xauth = "X-Auth-Token";
         public static string contentJson = "application/json";
-        public static string contentXML = "application/XML";
+        public static string contentXML = "application/xml";
+        public static string contentCSV = "text/plain";
+        public static string contentVOTable = "application/x-votable+xml";// – VOTABLE XML
+        public static string contentFITS = "application/fits"; // – FITS
+        public static string contentDataset = "application/x-dataset";// – serialized .NET DataSet
+
         /// <summary>
         /// Casjobs setting for REST api
         /// </summary>
         public static string casjobsREST = ConfigurationManager.AppSettings["CASJobsREST"];
-        public static string casjobsContextPath = "contexts/" + DR + "/query";
+        //public static string casjobsContextPath = "contexts/" + DR + "/query";
         public static string loggingMessageType = "SKYSERVER_WS";
         /// <summary>
         /// CASJobs old settings
         /// </summary>
-        public static long CJobsWSID = long.Parse(ConfigurationManager.AppSettings["CJobsWSID"]);
-        public static string CJobsPasswd = ConfigurationManager.AppSettings["CJobsPassWD"];
-        public static string CJobsTARGET = DR;
+        //public static long CJobsWSID = long.Parse(ConfigurationManager.AppSettings["CJobsWSID"]);
+        //public static string CJobsPasswd = ConfigurationManager.AppSettings["CJobsPassWD"];
+        //public static string CJobsTARGET = DR;
         /// <summary>
         /// 
         /// </summary>
         public static string ConeSelect = ConfigurationSettings.AppSettings["ConeSelect"];
+        
+        
+        ///Casjob messages for VOServices
+        public static string ConeSearch = "FOR CONE SEARCH";
+        public static string SIAPMessage = "FOR SIAP";
+        public static string SDSSFIELDSMessage = "FOR SDSS FIELDS";
+
         /// <summary>
         ///  Search tools and casjobs message
         /// </summary>
@@ -56,7 +68,7 @@ namespace Sciserver_webService.Common
         public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
         
         /// <summary>
-        /// For different types of web service type names 
+        /// For different web service type names 
         /// </summary>
         public static string imagingQuery = "img";
         public static string spectroQuery = "spec";

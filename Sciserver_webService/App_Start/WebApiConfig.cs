@@ -14,49 +14,47 @@ namespace Sciserver_webService
 
             //Consearch 
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "dr10/ConeSearch/{controller}/",
+                name: "ConeSearch",
+                routeTemplate: "{anything}/ConeSearch/{controller}/",
                 defaults: new { controller = "ConeSearch" }
             );
-            config.Routes.MapHttpRoute(
-                name: "FieldArrayRect",
-                routeTemplate: "dr10/SDSSFields/{controller}",
-                defaults: new { controller = "FieldsArrayRect" }
-            );
+            //config.Routes.MapHttpRoute(
+            //    name: "FieldArrayRect",
+            //    routeTemplate: "{anything}/SDSSFields/{controller}",
+            //    defaults: new { controller = "FieldsArrayRect" }
+            //);
             
-            //// Following four are for SDSS Fields
+            ////// Following four are for SDSS Fields
             //config.Routes.MapHttpRoute(
             //    name: "FieldsArray",
-            //    routeTemplate: "dr10/SDSSFields/{controller}/{id1}",
+            //    routeTemplate: "{anything}/SDSSFields/{controller}/{id1}",
             //    defaults: new { controller = "FieldsArray", id1 = RouteParameter.Optional }
             //);
-            //config.Routes.MapHttpRoute(
-            //    name: "ListOfFields",
-            //    routeTemplate: "dr10/SDSSFields/{controller}/{action}/{id2}",
-            //    defaults: new { controller = "SDSSFields", id2 = RouteParameter.Optional }
-            //);
-
-            
-
             config.Routes.MapHttpRoute(
-                name: "UrlsOfFields",
-                routeTemplate: "dr10/SDSSFields/{controller}/{id4}",
-                defaults: new {controller = "UrlsOfFields", id4 = RouteParameter.Optional }
-            );
+                name: "ListOfFields",
+                routeTemplate: "{anything}/SDSSFields/{controller}",
+                defaults: new { controller = "ListOfFields" }
+            );           
+
+            //config.Routes.MapHttpRoute(
+            //    name: "UrlsOfFields",
+            //    routeTemplate: "{anything}/SDSSFields/{controller}/{id4}",
+            //    defaults: new {controller = "UrlsOfFields", id4 = RouteParameter.Optional }
+            //);
 
 
 
             //// SIAP 
             config.Routes.MapHttpRoute(
                 name: "getSIAPInfo",
-                routeTemplate: "dr10/SIAP/{controller}",
+                routeTemplate: "{anything}/SIAP/{controller}",
                 defaults: new { controller = "getSIAPInfo"}
             );
 
             //// SDSS ImageCutout
             config.Routes.MapHttpRoute(
                 name: "getJpeg",
-                routeTemplate: "dr10/ImgCutout/{controller}",
+                routeTemplate: "{anything}/ImgCutout/{controller}",
                 defaults: new { controller = "getJpeg" }
             );
 
@@ -64,28 +62,28 @@ namespace Sciserver_webService
             /// Radial Search
             config.Routes.MapHttpRoute(
                 name: "RadialSearch",
-                routeTemplate: "dr10/SearchTools/{controller}",
+                routeTemplate: "{anything}/SearchTools/{controller}",
                 defaults: new { controller = "RadialSearch" }
             );
 
             /// Rectangular Search
             config.Routes.MapHttpRoute(
                 name: "RectangularSearch",
-                routeTemplate: "dr10/SearchTools/{controller}",
+                routeTemplate: "{anything}/SearchTools/{controller}",
                 defaults: new { controller = "RectangularSearch" }
             );
 
             /// SQL Search
             config.Routes.MapHttpRoute(
                 name: "SqlSearch",
-                routeTemplate: "dr10/SearchTools/{controller}",
+                routeTemplate: "{anything}/SearchTools/{controller}",
                 defaults: new { controller = "SqlSearch" }
             );
 
             /// TESTing new casjobs REST client 
             config.Routes.MapHttpRoute(
                 name: "NewRectangular",
-                routeTemplate: "dr10/SearchTools/{controller}",
+                routeTemplate: "{anything}/SearchTools/{controller}",
                 defaults: new { controller = "NewRectangular" }
             );
 
@@ -93,7 +91,7 @@ namespace Sciserver_webService
             /// Imaging Query
             config.Routes.MapHttpRoute(
                 name: "Cone",
-                routeTemplate: "dr10/ImagingQuery/{controller}",
+                routeTemplate: "{anything}/ImagingQuery/{controller}",
                 defaults: new { controller = "Cone" }
             );
 
@@ -101,14 +99,14 @@ namespace Sciserver_webService
             /// Spectro Query
             config.Routes.MapHttpRoute(
                 name: "ConeSpectro",
-                routeTemplate: "dr10/SpectroQuery/{controller}",
+                routeTemplate: "{anything}/SpectroQuery/{controller}",
                 defaults: new { controller = "ConeSpectro" }
             );
 
             /// IR-Spectro Query
             config.Routes.MapHttpRoute(
                 name: "ConeIR",
-                routeTemplate: "dr10/IRSpectraQuery/{controller}",
+                routeTemplate: "{anything}/IRSpectraQuery/{controller}",
                 defaults: new { controller = "ConeIR" }
             );
 

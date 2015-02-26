@@ -4,6 +4,7 @@ namespace Sciserver_webService.SDSSFields
 {
 	/// <summary>
 	/// A simple class that holds (ra,dec) and (mu,nu) coordinates.
+ 	/// @Deoyani Nandrekar-Heinis Feb 2015
 	/// </summary> 	
 	public class SdssCoord
 	{

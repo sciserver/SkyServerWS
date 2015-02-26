@@ -16,117 +16,138 @@ using System.Threading.Tasks;
 //using System.Web.Mvc.ActionResult;
 using System.Text;
 using System.IO;
+using System.Web.Http;
+using System.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
+
+using System.Xml.Serialization;
+using Sciserver_webService.ConeSearch;
+using Sciserver_webService.SDSSFields;
 
 ///This class is used to submit query to casjobs
 namespace Sciserver_webService.UseCasjobs
 {
 
-    public class RunCasjobs
+    public class RunCasjobs  : IHttpActionResult 
     {
-       
+        String query = "";
+        String casjobsTaskName = "";
+        String returnType = "";
+        String token ="";
+        String casjobsTarget = "";
 
-        private string casjobsMessage { get; set; }
+        net.ivoa.VOTable.VOTABLE vot;
 
-        public RunCasjobs() { }
+        public RunCasjobs(string query, String token, string casjobsTaskName, string returnType, string target) {
+            this.query = query;
+            this.token = token;
+            this.casjobsTaskName = casjobsTaskName;
+            this.returnType = returnType;
+            this.casjobsTarget = target;
+        }    
 
-        public RunCasjobs(string casjobsMessage) {
-            this.casjobsMessage = casjobsMessage;
-        }
 
-        private DataSet getQueryResult(String query)
-        {
-            try
-            {
-                JobsSoapClient cjobs = new JobsSoapClient();
-                DataSet ds = cjobs.ExecuteQuickJobDS(KeyWords.CJobsWSID, KeyWords.CJobsPasswd, query, KeyWords.CJobsTARGET, casjobsMessage, false);
-                return ds;
-            }
-            catch (Exception e) {
-                throw new Exception("Error running Query :\n"+e.Message);
-            }
-        }
-
-        public String executeQuickQuery(String query)
-        {
-            try
-            {
-                JobsSoapClient cjobs = new JobsSoapClient();
-                String ds = cjobs.ExecuteQuickJob(KeyWords.CJobsWSID, KeyWords.CJobsPasswd, query, KeyWords.CJobsTARGET, casjobsMessage, false);
-                return ds;
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error during Query execution:\n" + e.Message);
-            }
-        }
-     
-
-        public String getJSON(String query) {
-            try
-            {
-                return JsonConvert.SerializeObject(getQueryResult(query), Formatting.Indented);
-            }
-            catch (Exception e) {
-                throw new Exception("Error serializing result in JSON format.\n"+e.Message);
-            }
-        }
-       
-        
-        public VOTABLE getVOtable(String query) {
-            try
-            {
-                VOTABLE vot = VOTableUtil.DataSet2VOTable(getQueryResult(query));
-                return vot;
-            }
-            catch (Exception e) {
-                throw new Exception("Error getting results in VOTable format.\n"+e.Message);
-            }
-        }
-
-        //// Using New CAsjobs WebService
-        
-        public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName)
+        public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(KeyWords.casjobsREST);
+            client.BaseAddress = new Uri(KeyWords.casjobsREST + "contexts/" + casjobsTarget + "/query");
 
-            StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskName+"\"}");
-            if(!(token == null || token == String.Empty))
-            content.Headers.Add(KeyWords.xauth, token);
-            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
-
-            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
-            
-            response.EnsureSuccessStatusCode();
-            
-            if(response.IsSuccessStatusCode)
-                return response;
-            else
-                throw new ApplicationException("Query did not return results successfully, check input and try again later.");                
-        }
-
-        public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName, string format)
-        {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(KeyWords.casjobsREST);
-
-            //StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
-            StringContent content = new StringContent(this.getJsonContent(query,casjobsTaskName));
+            StringContent content = new StringContent(this.getJsonContent(query, casjobsTaskName));
             if (!(token == null || token == String.Empty))
                 content.Headers.Add(KeyWords.xauth, token);
             content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
-            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
 
-            response.EnsureSuccessStatusCode();
+            System.IO.Stream stream = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
+            var response  = new HttpResponseMessage();
+            DataSet ds;
+            if (returnType.Equals(KeyWords.contentDataset))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                ds = (DataSet)formatter.Deserialize(stream);
+                NewSDSSFields sf = new NewSDSSFields();
+                switch (casjobsTaskName) {
 
-            if (response.IsSuccessStatusCode)
-                return response;
-            else
-                throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+                  case "FOR CONE SEARCH":                    
+                        DefaultCone cstest = new DefaultCone();
+                        vot = cstest.ConeSearch(ds);
+                        response.Content = new StringContent(ToXML(vot), Encoding.UTF8, "application/xml");                  
+                        break;
+
+                  case "SDSSFields:FieldArray":
+                       
+                        response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, "application/xml"); 
+                       break;
+
+                  case "SDSSFields:FieldArrayRect":
+                       
+                       response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, "application/xml");
+                       break;
+
+                  case "SDSSFields:ListOfFields":
+                       
+                       response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, "application/xml");
+                       break;
+
+                  case "SDSSFields:UrlsOfFields":
+                       
+                       response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, "application/xml");
+                       break;
+
+
+                  default :
+                       response.Content = new StreamContent(stream);    
+                      break;
+
+                }       
+
+            }else {
+                response.Content = new StreamContent(stream);  
+            }
+
+          
+            /////// Just testing
+            //if (casjobsTaskName.Equals(KeyWords.ConeSearch))
+            //{
+            //    try
+            //    {
+            //        BinaryFormatter formatter = new BinaryFormatter();
+
+            //        // Deserialize the hashtable from the file and  
+            //        // assign the reference to the local variable.
+            //        DataSet ds = (DataSet)formatter.Deserialize(stream);
+            //        DefaultCone cstest = new DefaultCone();
+            //        vot = cstest.ConeSearch(ds);
+            //        //vot = cstest.ConeSearch(ds);
+
+
+            //    }
+            //    catch (SerializationException e)
+            //    {
+            //        Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
+            //        throw;
+            //    }
+            //    //response = new HttpResponseMessage()
+            //    //{
+
+            //     response.Content = new StringContent(ToXML(), Encoding.UTF8, "application/xml");
+            //    //};
+            //}
+            //else {
+
+            //    //response = new HttpResponseMessage()
+            //    //{
+            //    response.Content = new StreamContent(stream);                                    
+            //    //};
+
+            //}
+
+            return response;
         }
 
-        private String getJsonContent(String query, String casjobsTaskName) {
+        private String getJsonContent(String query, String casjobsTaskName)
+        {
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
             using (JsonWriter writer = new JsonTextWriter(sw))
@@ -141,50 +162,132 @@ namespace Sciserver_webService.UseCasjobs
             }
             return sb.ToString();
         }
+
+
+        /// <summary>
+        ///  This is specifically used for the sdss vo services which are returning random types of xml outputs
+        /// </summary>
+        /// <returns></returns>
+        public string ToXML(Object o)
+        {
+            var stringwriter = new System.IO.StringWriter();
+            var serializer = new XmlSerializer(o.GetType());
+            serializer.Serialize(stringwriter, o);
+            return stringwriter.ToString();
+        }
+
+       
+        // for simple quick queries need to find the better way
+        public async Task<Stream>  quickRun() {            
+
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(KeyWords.casjobsREST + "contexts/" + casjobsTarget + "/query");
+
+                StringContent content = new StringContent(this.getJsonContent(query, casjobsTaskName));
+                if (!(token == null || token == String.Empty))
+                    content.Headers.Add(KeyWords.xauth, token);
+                content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
+
+                Stream output = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
+
+
+                return output;
+           
+        }
+      
+     
+
+       
+        ////// Using New CAsjobs WebService
         
-        //public async Task<HttpResponseMessage> postCasjobs(string query, String token, string casjobsTaskName, HttpResponseMessage response)
+        //public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName)
         //{
-        //    //string casjobsTaskname = "test";
         //    HttpClient client = new HttpClient();
         //    client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
-        //    StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
+        //    StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\""+casjobsTaskName+"\"}");
+        //    if(!(token == null || token == String.Empty))
+        //    content.Headers.Add(KeyWords.xauth, token);
+        //    content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+
+        //    HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
+            
+        //    response.EnsureSuccessStatusCode();
+            
+        //    if(response.IsSuccessStatusCode)
+        //        return response;
+        //    else
+        //        throw new ApplicationException("Query did not return results successfully, check input and try again later.");                
+        //}
+
+        //public HttpResponseMessage postCasjobs(string query, String token, string casjobsTaskName, string format)
+        //{
+        //    HttpClient client = new HttpClient();
+        //    client.BaseAddress = new Uri(KeyWords.casjobsREST);
+
+        //    //StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
+        //    StringContent content = new StringContent(this.getJsonContent(query,casjobsTaskName));
         //    if (!(token == null || token == String.Empty))
         //        content.Headers.Add(KeyWords.xauth, token);
         //    content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
-        //    System.IO.Stream stream = await client.PostAsync(KeyWords.casjobsContextPath, content).Result.Content.ReadAsStreamAsync();
-        //    //response.EnsureSuccessStatusCode();
-        //    //if (response.IsSuccessStatusCode)
-        //    //    return response;
-        //    //else
-        //    //    throw new ApplicationException("Query did not return results successfully, check input and try again later.");
-        //    return response;
+        //    HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
+
+        //    response.EnsureSuccessStatusCode();
+
+        //    if (response.IsSuccessStatusCode)
+        //        return response;
+        //    else
+        //        throw new ApplicationException("Query did not return results successfully, check input and try again later.");
         //}
 
-        /// <summary>
-        ///  Upload data to run queries using table join
-        /// </summary>
-        /// <param name="datastring"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public HttpResponseMessage uploadCasjobs(string datastring, string token)
-        {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(KeyWords.casjobsREST);
+        
+        
+        ////public async Task<HttpResponseMessage> postCasjobs(string query, String token, string casjobsTaskName, HttpResponseMessage response)
+        ////{
+        ////    //string casjobsTaskname = "test";
+        ////    HttpClient client = new HttpClient();
+        ////    client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
-            StringContent content = new StringContent("\"" + datastring + "\"");
+        ////    StringContent content = new StringContent("{\"Query\":\"" + query + "\" , \"TaskName\":\"" + casjobsTaskName + "\"}");
+        ////    if (!(token == null || token == String.Empty))
+        ////        content.Headers.Add(KeyWords.xauth, token);
+        ////    content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
-            content.Headers.Add(KeyWords.xauth, token);
-            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+        ////    System.IO.Stream stream = await client.PostAsync(KeyWords.casjobsContextPath, content).Result.Content.ReadAsStreamAsync();
+        ////    //response.EnsureSuccessStatusCode();
+        ////    //if (response.IsSuccessStatusCode)
+        ////    //    return response;
+        ////    //else
+        ////    //    throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+        ////    return response;
+        ////}
 
-            HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
-            response.EnsureSuccessStatusCode();
-            if (response.IsSuccessStatusCode)
-                return response;
-            else
-                throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+        ///// <summary>
+        /////  Upload data to run queries using table join
+        ///// </summary>
+        ///// <param name="datastring"></param>
+        ///// <param name="token"></param>
+        ///// <returns></returns>
+        //public HttpResponseMessage uploadCasjobs(string datastring, string token)
+        //{
+        //    HttpClient client = new HttpClient();
+        //    client.BaseAddress = new Uri(KeyWords.casjobsREST);
 
-        }
+        //    StringContent content = new StringContent("\"" + datastring + "\"");
+
+        //    content.Headers.Add(KeyWords.xauth, token);
+        //    content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+
+        //    HttpResponseMessage response = client.PostAsync(KeyWords.casjobsContextPath, content).Result;
+        //    response.EnsureSuccessStatusCode();
+        //    if (response.IsSuccessStatusCode)
+        //        return response;
+        //    else
+        //        throw new ApplicationException("Query did not return results successfully, check input and try again later.");
+
+        //}
     }
 }

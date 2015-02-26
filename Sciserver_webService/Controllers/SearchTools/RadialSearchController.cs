@@ -13,7 +13,7 @@ namespace Sciserver_webService.Controllers
     public class RadialSearchController : ApiController
     {
         [ExceptionHandleAttribute]
-        public HttpResponseMessage Get()
+        public IHttpActionResult Get()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch Tool.");

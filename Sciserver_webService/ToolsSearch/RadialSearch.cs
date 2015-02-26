@@ -207,20 +207,20 @@ namespace Sciserver_webService.ToolsSearch
         {
             try
             {
-                RunCasjobs run = new RunCasjobs();
-                String imageQueryResult = run.postCasjobs(this.imageQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                String irQueryResult = run.postCasjobs(this.irQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                String results = "";
-                if (format.Equals("json"))
-                    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.imageQuery, this.irQuery });
-                else
-                {
-                    results = "# Imaging Query:" + this.imageQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
-                    results += "\n\n#IR Spectra Query:" + this.irQuery.Replace("\n", "") + "\n\n" + irQueryResult;
-                }
+                //RunCasjobs run = new RunCasjobs();
+                //String imageQueryResult = run.postCasjobs(this.imageQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+                //String irQueryResult = run.postCasjobs(this.irQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+                //String results = "";
+                //if (format.Equals("json"))
+                //    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.imageQuery, this.irQuery });
+                //else
+                //{
+                //    results = "# Imaging Query:" + this.imageQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
+                //    results += "\n\n#IR Spectra Query:" + this.irQuery.Replace("\n", "") + "\n\n" + irQueryResult;
+                //}
+                //return results;
 
-
-                return results;
+                return "";
 
             }
             catch (Exception e)

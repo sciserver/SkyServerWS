@@ -4,16 +4,19 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.IO;
+using SciServer.Logging;
+using System.Web;
+using System.Text.RegularExpressions;
+
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.QueryTools;
 using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
-using System.IO;
-using SciServer.Logging;
-using System.Web;
 using Sciserver_webService.ToolsSearch;
-using System.Text.RegularExpressions;
 using Sciserver_webService.SIAP;
+using Sciserver_webService.ConeSearch;
+using Sciserver_webService.SDSSFields;
 
 namespace Sciserver_webService.Common
 {
@@ -28,8 +31,9 @@ namespace Sciserver_webService.Common
         /// <param name="positionType"></param>
         /// <param name="casjobsMessage"></param>
         /// <returns></returns>
-        public HttpResponseMessage runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
+        public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
+            string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
             Dictionary<String, String> dictionary = null;                      
@@ -78,14 +82,8 @@ namespace Sciserver_webService.Common
                 throw new ArgumentException("Check input parameters properly.");
             }
 
-            String format = "csv";
-            try
-            {
-                format = dictionary["format"].ToLower();
-            }catch(Exception exp){
-                format = "csv";
-            }
-
+            String format = "";
+           
             String query = "";
             
             switch (queryType)
@@ -108,12 +106,29 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "ConeSearch":
-                    Sciserver_webService.ConeSearch.ConeSearch cs = new Sciserver_webService.ConeSearch.ConeSearch(dictionary);
+                    try
+                    {
+                        format = dictionary["format"].ToLower();
+                        if (format.Equals("votable")) format = "dataset";
+                    }
+                    catch (Exception e)
+                    {
+                        format = "dataset"; // or votable
+                    }
+                    ConeSearch.ConeSearch cs = new ConeSearch.ConeSearch(dictionary);
                     query = cs.getConeSearchQuery();
                     break;
 
                 case "SDSSFields":
-                    Sciserver_webService.SDSSFields.SDSSFields sf = new Sciserver_webService.SDSSFields.SDSSFields(dictionary, positionType);
+                    try
+                    {
+                        format = dictionary["format"].ToLower();                        
+                    }
+                    catch (Exception e)
+                    {
+                        format = "dataset"; 
+                    }
+                    NewSDSSFields sf = new NewSDSSFields(dictionary, positionType);
                     query = sf.sqlQuery;                  
                     break;
 
@@ -131,21 +146,32 @@ namespace Sciserver_webService.Common
             query = Regex.Replace(query, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
             query = Regex.Replace(query, @"--[^\r^\n]*", "");				// remove all embedded single-line comments
             query = Regex.Replace(query, @"[ \t\f\v]+", " ");				// replace multiple whitespace with single space
-            query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
-            //RunCasjobs run = new RunCasjobs();
-            //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
-            ////OutputFormat of = new OutputFormat();
-            OutputFormat o = new OutputFormat();
-            if (format.Equals("csv"))
+            query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines          
+
+            
+            try
             {
-                System.Threading.Tasks.Task<HttpResponseMessage> t = o.getResults(query, token, casjobsMessage, format);
-                return t.Result;
+                if(format.Equals(""))
+                 format = dictionary["format"].ToLower();
+
+                switch (format)
+                {
+
+                    case "csv": format = KeyWords.contentCSV; break;
+                    case "xml": format = KeyWords.contentXML; break;
+                    case "votable": format = KeyWords.contentVOTable; break;
+                    case "json": format = KeyWords.contentJson; break;
+                    case "fits": format = KeyWords.contentFITS; break;
+                    case "dataset": format = KeyWords.contentDataset; break;
+                    default: format = KeyWords.contentCSV; break;
+                }
             }
-            else
+            catch (Exception exp)
             {
-                return o.getResults(resp, query, token, casjobsMessage, format);
-            }
-            //return resp;
+                format = KeyWords.contentCSV;
+            }            
+
+            return new RunCasjobs( query, token, casjobsMessage, format, datarelease );
         }
        
 
@@ -201,10 +227,10 @@ namespace Sciserver_webService.Common
                     query += up.UploadTo(queryType, dictionary["searchNearBy"]);
                 }
 
-                //HttpResponseMessage resp = new HttpResponseMessage();
+                
                 query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
-                RunCasjobs run = new RunCasjobs();
-                resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+                //RunCasjobs run = new RunCasjobs();
+                //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
                 return resp;
             }
             catch (Exception exp)
@@ -247,8 +273,8 @@ namespace Sciserver_webService.Common
 
                 HttpResponseMessage resp = new HttpResponseMessage();
                 query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
-                RunCasjobs run = new RunCasjobs();
-                resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
+                //RunCasjobs run = new RunCasjobs();
+                //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
                 return resp;                
                 }
                 else

@@ -31,7 +31,7 @@ namespace Sciserver_webService.Controllers
         //}
 
         [ExceptionHandleAttribute]
-        public HttpResponseMessage UrlsOfFields()
+        public IHttpActionResult UrlsOfFields()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");

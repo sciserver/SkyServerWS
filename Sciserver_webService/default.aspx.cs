@@ -39,46 +39,46 @@ namespace Sciserver_webService
         private static string SDSSFields2 = urlbase + "/SDSSFields/FieldArrayRect?ra=132&dec=12&dra=0.1&ddec=0.1&format=json";
         private static string fieldsParams2 = "ra,dec,dra,ddec";
 
-        private static string SDSSFields3 = urlbase + "/SDSSFields/ListOfFields?ra=132&dec=12&radius=0.1";
+        private static string SDSSFields3 = urlbase + "/SDSSFields/ListOfFields?ra=132&dec=12&radius=10";
         private static string fieldsParams3 = "ra,dec,radius | optional : format";
 
         private static string SDSSFields4 = urlbase + "/SDSSFields/UrlsOfFields?ra=132&dec=12&radius=10&band=i,z&format=json";
         private static string fieldsParams4 = "ra,dec,radius,band | optional Parameter: format";
         
         //Search Tools 3
-        private static string SqlSearch = urlbase + "/SearchTools/SqlSearch?query=select top 10 ra,dec from Frame&format=csv";
-        private static string sqlParam = "query,format";
+        private static string SqlSearch = urlbase + "/SearchTools/SqlSearch?cmd=select top 10 ra,dec from Frame&format=csv";
+        private static string sqlParam = "cmd,format";
         //whichway=equitorial&ra=258.25&dec=64.05&radius=3&min_u=0&max_u=20&min_g=0&max_g=20&min_r=0&max_r=20&min_i=0&max_i=20&min_z=0&max_z=20&format=html&limit=10
-        private static string RadialSearch = urlbase + "/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equitorial&limit=10&format=json&fp=none&uband=0,15&gband=0,17";
+        private static string RadialSearch = urlbase + "/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equitorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging";
         private static string radialParam = "ra,dec,radius,searchtype,limit,format,fp \n optional parameters: uband,gband,rband,iband,zband";
 
-        private static string RectangleSearch = urlbase + "/SearchTools/RectangularSearch?min_ra=258.2&max_ra=258.3&min_dec=64&max_dec=64.1&searchtype=equitorial&limit=10&format=json&uband=0,15&gband=0,17";
+        private static string RectangleSearch = urlbase + "/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equitorial&limit=10&format=json&whichquery=irspectra";
         private static string rectParam = "min_ra,max_ra,min_dec,max_dec,searchtype,limit,format \n optional parameters: uband,gband,rband,iband,zband";
 
         //imageQyery 4
-        private static string ImagingQuery1 = urlbase + "/ImagingQuery/Cone?radius=5.0&dec=0.2&ra=10&objType=doGalaxy,doStar&uMin=0&uMax=20";
+        private static string ImagingQuery1 = urlbase + "/ImagingQuery/Cone?limit=50&format=csv&imgparams=minimal&specparams=none&ra=10&dec=0.2&radius=5.0&magType=model&uMin=0&gMin=&rMin=&iMin=&zMin=&uMax=20&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&riMin=&izMin=&ugMax=&grMax=&riMax=&izMax=&objType=doGalaxy,doStar&minQA=&flagsOnList=ignore&flagsOffList=ignore";
         private static string imgParams1 = "ra,dec,radius,objType,uMin,uMax";
-
-        private static string ImagingQuery2 = urlbase + "/ImagingQuery/NoPosition?izMin=3&izMax=4&riMin=&riMax=&flagsonlist=BRIGHT,EDGE";
+        //limit=50&format=csv&imgparams=minimal&specparams=none&ra=10&dec=0.2&radius=5.0&magType=model&uMin=0&gMin=&rMin=&iMin=&zMin=&uMax=20&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&riMin=&izMin=&ugMax=&grMax=&riMax=&izMax=&objType=doGalaxy,doStar&minQA=&flagsOnList=ignore&flagsOffList=ignore
+        private static string ImagingQuery2 = urlbase + "/ImagingQuery/NoPosition?limit=30&izMin=3&izMax=4&riMin=&riMax=&flagsonlist=BRIGHT,EDGE&magType=model&uMin=0&gMin=&rMin=&iMin=&zMin=&uMax=20&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&ugMax=&grMax=&objType=doGalaxy,doStar&minQA=&flagsOffList=ignore";
         private static string imgParams2 = "OptionalParams :izMin,izMax,riMin,riMax,flagsonlist";
 
         private static string ImagingQuery3 = urlbase + "/ImagingQuery/Proximity";//?radius=1.0&searchNearBy=nearest";
         private static string imgParams3 = "POST : radius,searchNearBy,nearest";
 
-        private static string ImagingQuery4 = urlbase + "/ImagingQuery/Rectangular?izMin=3&izMax=4&riMin=0&riMax=20&flagsonlist=BRIGHT,EDGE&ramin=258&ramax=258.2&decmin=64&decmax=64.1&imgparams=typical,minimal,radec,model_mags";
+        private static string ImagingQuery4 = urlbase + "/ImagingQuery/Rectangular?limit=50&izMin=3&izMax=4&riMin=0&riMax=20&flagsonlist=BRIGHT,EDGE&ramin=258&ramax=258.2&decmin=64&decmax=64.1&imgparams=typical,minimal&magType=model&uMin=&gMin=&rMin=&iMin=&zMin=&uMax=&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&ugMax=&grMax=&objType=doGalaxy,doStar&minQA=&flagsOffList=ignore&format=csv";
         private static string imgParams4 = "ramin,decmin,ramax,decmax";        
 
         //spectro Query 4
-        private static string SpectroQuery1 = urlbase + "/SpectroQuery/ConeSpectro?radius=5.0&dec=0.2&ra=10&uMin=0&uMax=20&objType=doGalaxy,doStar";
+        private static string SpectroQuery1 = urlbase + "/SpectroQuery/ConeSpectro?radius=5.0&dec=0.2&ra=10&uMin=0&uMax=20&objType=doGalaxy,doStar&limit=50&format=csv&specparams=minimal&imgparams=none&redshiftMin=&zWarning=on&redshiftMax=&priFlagsOnList=ignore&priFlagsOffList=ignore&secFlagsOnList=ignore&secFlagsOffList=ignore&magType=model&gMin=&rMin=&iMin=&zMin=&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&riMin=&izMin=&ugMax=&grMax=&riMax=&izMax=&minQA=&flagsOnList=ignore&flagsOffList=ignore";
         private static string specParams1 = "ra,dec,radius,uMin,uMax,gMin,gMax,rMin,rMax,iMin,iMax,zMin,zMax";        
 
-        private static string SpectroQuery2 = urlbase + "/SpectroQuery/NoPositionSpectro";
+        private static string SpectroQuery2 = urlbase + "/SpectroQuery/NoPositionSpectro?uMin=0&uMax=20&objType=doGalaxy,doStar&limit=50&format=csv&specparams=minimal&imgparams=none&redshiftMin=&zWarning=on&redshiftMax=&priFlagsOnList=ignore&priFlagsOffList=ignore&secFlagsOnList=ignore&secFlagsOffList=ignore&magType=model&gMin=&rMin=&iMin=&zMin=&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&riMin=&izMin=&ugMax=&grMax=&riMax=&izMax=&minQA=&flagsOnList=ignore&flagsOffList=ignore";
         private static string specParams2 = "uMin,uMax,gMin,gMax,rMin,rMax,iMin,iMax,zMin,zMax,flagonlist,flagofflist";
 
         private static string SpectroQuery3 = urlbase + "/SpectroQuery/ProximitySpectro?radius=1.0&searchNearBy=nearest";
         private static string specParams3 = "POST: list of ra,dec,radius ";
 
-        private static string SpectroQuery4 = urlbase + "/SpectroQuery/RectangularSpectro?ramin=258&ramax=258.2&decmin=64&decmax=64.1&redshiftMin=0&redshiftMax=0.1&zWarning=0&class=star";
+        private static string SpectroQuery4 = urlbase + "/SpectroQuery/RectangularSpectro?ramin=258&ramax=258.2&decmin=64&decmax=64.1&redshiftMin=0&redshiftMax=0.1&zWarning=0&class=galaxy&uMin=0&uMax=20&objType=doGalaxy,doStar&limit=50&format=csv&specparams=minimal&imgparams=none&priFlagsOnList=ignore&priFlagsOffList=ignore&secFlagsOnList=ignore&secFlagsOffList=ignore&magType=model&gMin=&rMin=&iMin=&zMin=&gMax=&rMax=&iMax=&zMax=&ugMin=&grMin=&riMin=&izMin=&ugMax=&grMax=&riMax=&izMax=&minQA=&flagsOnList=ignore&flagsOffList=ignore";
         private static string specParams4 = "ramin,ramax,decmin,decmax,redshiftmin,redshiftmax,zwarning,class";
 
         //irspectro 3
@@ -88,7 +88,7 @@ namespace Sciserver_webService
         private static string IRSpectraQuery2 = urlbase + "/IRSpectraQuery/GalacticIR?limit=50&format=csv&irspecparams=typical&Lcenter=10&Bcenter=0.2&lbRadius=5.0&jMin=&hMin=&kMin=&jMax=&hMax=&kMax=&jhMin=&hkMin=&jhMax=&hkMax=&snrMin=&vhelioMin=&scatterMin=&snrMax=&vhelioMax=&scatterMax=&tempMin=&loggMin=&fehMin=&afeMin=&tempMax=&loggMax=&fehMax=&afeMax=&irTargetFlagsOnList=ignore&irTargetFlagsOffList=ignore&irTargetFlags2OnList=ignore&irTargetFlags2OffList=ignore";
         private static string irspecParams2 = "";
 
-        private static string IRSpectraQuery3 = urlbase + "/IRSpectraQuery/NoPositionIR";
+        private static string IRSpectraQuery3 = urlbase + "/IRSpectraQuery/NoPositionIR?limit=50&format=csv&irspecparams=typical&jMin=&hMin=&kMin=&jMax=&hMax=&kMax=&jhMin=&hkMin=&jhMax=&hkMax=&snrMin=&vhelioMin=&scatterMin=&snrMax=&vhelioMax=&scatterMax=&tempMin=&loggMin=&fehMin=&afeMin=&tempMax=&loggMax=&fehMax=&afeMax=&irTargetFlagsOnList=ignore&irTargetFlagsOffList=ignore&irTargetFlags2OnList=ignore&irTargetFlags2OffList=ignore";
         private static string irspecParams3 = "";
         
         //objid 3

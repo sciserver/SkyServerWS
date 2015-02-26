@@ -40,12 +40,20 @@ namespace Sciserver_webService.SDSSFields
 			this.node = (double) row["node"];
 			this.incl = (double) row["incl"];
 			string postfix = "_"+band;
-			this.a = (double)row["a"+postfix];
-            this.b = (double)row["b" + postfix];
-            this.c = (double)row["c" + postfix];
-            this.d = (double)row["d" + postfix];
-            this.e = (double)row["e" + postfix];
-            this.f = (double)row["f" + postfix];
+            //this.a = (double)row["a"+postfix];
+            //this.b = (double)row["b"+postfix];
+            //this.c = (double)row["c"+postfix];
+            //this.d = (double)row["d"+postfix];
+            //this.e = (double)row["e"+postfix];
+            //this.f = (double)row["f"+postfix];
+            // this Convert is used because only dr8 gives problem it has float values 
+            // otherwise simple (double) cast works for all others
+            this.a = Convert.ToDouble(row["a" + postfix]);
+            this.b = Convert.ToDouble(row["b" + postfix]);
+            this.c = Convert.ToDouble(row["c" + postfix]);
+            this.d = Convert.ToDouble(row["d" + postfix]);
+            this.e = Convert.ToDouble(row["e" + postfix]);
+            this.f = Convert.ToDouble(row["f" + postfix]);
 			this.pixperdeg = 9088;
 			this.wcs = this.Wcs();
 		}

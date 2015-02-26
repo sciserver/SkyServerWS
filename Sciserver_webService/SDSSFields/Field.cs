@@ -5,7 +5,9 @@ namespace Sciserver_webService.SDSSFields
 {
 	/// <summary>
 	/// The Field class stores run, rerun, etc... and an array of the passbands with the astrometry (See Band)
-	/// </summary> 
+	 /// @Deoyani Nandrekar-Heinis Feb 2015
+    /// </summary> 
+    [Serializable]
 	public class Field
 	{
 		public int stripe, run, rerun, camcol, field;
@@ -49,9 +51,9 @@ namespace Sciserver_webService.SDSSFields
 			}
             
 			string[] urls ={row["u_url"].ToString(), row["g_url"].ToString(), row["r_url"].ToString(), row["i_url"].ToString(),row["z_url"].ToString() };
-            for(int i=0;i<bands.Length;i++){
-                bandUrl.Add(new KeyValuePair<string,string>(bands[i], urls[i]));
-            }
+            //for(int i=0;i<bands.Length;i++){
+            //    bandUrl.Add(new KeyValuePair<string,string>(bands[i], urls[i]));
+            //}
 
             this.bandUrls = urls;
 		}

@@ -14,7 +14,8 @@ namespace Sciserver_webService.Controllers
     public class ConeIRController : ApiController
     {      
        [ExceptionHandleAttribute]
-       public HttpResponseMessage get(){
+        public IHttpActionResult get()
+        {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.cone, "IRSpectroQuery:ConeSearch");
         }

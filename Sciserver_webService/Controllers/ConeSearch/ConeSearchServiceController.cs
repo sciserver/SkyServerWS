@@ -17,10 +17,11 @@ namespace Sciserver_webService.Controllers
 {
     public class ConeSearchServiceController : ApiController
     {
-        [ExceptionHandleAttribute]      
-        public HttpResponseMessage Get() {
+        [ExceptionHandleAttribute]
+        public IHttpActionResult Get()
+        {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "Cone Search.");            
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);            
         }
 
         //[ExceptionHandleAttribute]

@@ -14,7 +14,8 @@ namespace Sciserver_webService.Controllers
     public class RectangularSpectroController : ApiController
     {
         [ExceptionHandleAttribute]
-        public HttpResponseMessage get(){
+        public IHttpActionResult get()
+        {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.spectroQuery, KeyWords.rectangular, "SpectroQuery:RectangularSearch");
         }

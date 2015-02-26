@@ -21,7 +21,7 @@ namespace Sciserver_webService.Controllers
         [ActionName("FieldArrayRect")]
         [ExceptionHandleAttribute]
 
-        public HttpResponseMessage FieldArrayRect()
+        public IHttpActionResult FieldArrayRect()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SDSSFields:FieldArrayRect");

@@ -228,18 +228,19 @@ namespace Sciserver_webService.ToolsSearch
         public String getResult(String token, String casjobsMessage, String format) {
             try
             {
-                RunCasjobs run = new RunCasjobs();
-                String imageQueryResult = run.postCasjobs(this.ImagingQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                String irQueryResult = run.postCasjobs(this.IRQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                String results = "";
-                if (format.Equals("json"))
-                    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.ImagingQuery, this.IRQuery });
-                else
-                {
-                    results = "# Imaging Query:" + this.ImagingQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
-                    results += "\n\n#IR Spectra Query:" + this.IRQuery.Replace("\n", "") + "\n\n" + irQueryResult;
-                }
-                return results;
+                //RunCasjobs run = new RunCasjobs();
+                //String imageQueryResult = run.postCasjobs(this.ImagingQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+                //String irQueryResult = run.postCasjobs(this.IRQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+                //String results = "";
+                //if (format.Equals("json"))
+                //    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.ImagingQuery, this.IRQuery });
+                //else
+                //{
+                //    results = "# Imaging Query:" + this.ImagingQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
+                //    results += "\n\n#IR Spectra Query:" + this.IRQuery.Replace("\n", "") + "\n\n" + irQueryResult;
+                //}
+                //return results;
+                return "";
             }
             catch (Exception e) {
                 throw new Exception("Error while running casjobs:"+e.Message);

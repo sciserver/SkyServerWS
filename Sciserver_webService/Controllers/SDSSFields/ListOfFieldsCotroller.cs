@@ -21,7 +21,7 @@ namespace Sciserver_webService.Controllers
         [HttpGet]
         [ActionName("ListOfFields")]
         [ExceptionHandleAttribute]
-        public HttpResponseMessage ListOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band)
+        public IHttpActionResult ListOfFields()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SDSSFields:ListOfFields");
