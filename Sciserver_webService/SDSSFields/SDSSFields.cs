@@ -167,8 +167,8 @@ namespace Sciserver_webService.SDSSFields
             /// <param name="ds">output data set (DataSet</param>
             private void QueryCasjobs(string sql, ref DataSet ds)
             {
-
-                JobsSoapClient cjobs = new JobsSoapClient();
+               
+                //JobsSoapClient cjobs = new JobsSoapClient();
                 //ds = cjobs.ExecuteQuickJobDS(CJobsWSID, CJobsPasswd, sql, CJobsTARGET, "FOR CONESEARCH", false);
                 //SqlDataAdapter da = new SqlDataAdapter(sql, this.strConn);
                 //da.Fill(ds, "SdssField");

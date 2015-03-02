@@ -153,8 +153,8 @@
     <Compile Include="Common\ImpTypes\IntegerImpTypes.cs" />
     <Compile Include="Common\ImpTypes\MiscImpTypes.cs" />
     <Compile Include="Common\KeyWords.cs" />
-    <Compile Include="Common\OutputFormat.cs" />
     <Compile Include="Common\ProcessRequest.cs" />
+    <Compile Include="SIAP\ReturnSIAPresults.cs" />
     <Compile Include="Common\UploadDataReader.cs" />
     <Compile Include="ConeSearch\ConeSearch.cs" />
     <Compile Include="ConeSearch\DefaultCone.cs" />
@@ -181,9 +181,6 @@
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
     <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
     <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
-    <Compile Include="Controllers\SIAP\newSIAPController.cs" />
-    <Compile Include="Controllers\SIAP\newSIAPInfoAllController.cs" />
-    <Compile Include="Controllers\SIAP\newSIAPInfoController.cs" />
     <Compile Include="Controllers\SpectroQuery\ConeSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\NoPositionSpectroController.cs" />
     <Compile Include="Controllers\SpectroQuery\ProximitySpectroController.cs" />
@@ -208,7 +205,7 @@
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPInfoController.cs" />
-    <Compile Include="Controllers\SIAP\getSIAPInfoAllController.cs" />
+    <Compile Include="Controllers\SIAP\getAllSIAPInfoController.cs" />
     <Compile Include="ImgCutout\Coord.cs" />
     <Compile Include="ImgCutout\HTMRegion.cs" />
     <Compile Include="ImgCutout\ImgCutout.cs" />

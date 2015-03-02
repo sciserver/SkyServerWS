@@ -10,8 +10,12 @@ namespace Sciserver_webService
 {
     public partial class _default : System.Web.UI.Page
     {
-        private static string urlbase = string.Format("{0}://{1}{2}{3}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath,"/" + KeyWords.DR);
+        //private static string urlbase = string.Format("{0}://{1}{2}{3}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath,"<DR>" );
+
+        private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx","<DR>");
+
         //cone search 1
+
         private static string ConeSearch1 = urlbase + "/ConeSearch/ConeSearchService?ra=145&dec=34&sr=1 \n\t";
         private static string coneParams = " ra,dec,sr";
 

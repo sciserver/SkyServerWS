@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using System.Xml.Serialization;
-
+using System.Collections;
 namespace Sciserver_webService.SDSSFields
 {
 	/// <summary>
@@ -58,6 +58,8 @@ namespace Sciserver_webService.SDSSFields
 			this.wcs = this.Wcs();
 		}
 
+
+        
 		/// <summary>
 		/// Calculate (RA,Dec) from (mu,nu) coordinates in the field
 		/// </summary>
@@ -199,7 +201,32 @@ namespace Sciserver_webService.SDSSFields
 
 			return wcs;
 		}
-		
+
+        //******** For SIAP etc @Deoyani added by deoyani
+        /// <summary>
+        /// Constructor with data to init variables and the name of the passband
+        /// </summary>
+        /// <param name="row">Field info from query (DataRow)</param>
+        /// <param name="band">Passband name (string)</param>
+        public Band(Hashtable row, string band)
+        {
+            if ("ugriz".IndexOf(band.ToLower()) < 0)
+                throw new ApplicationException("Parameter 'band' is invalid! Should be one of u,g,r,i or z...");
+            this.filter = band;
+            this.node = Convert.ToDouble(row["node"]);
+            this.incl = Convert.ToDouble(row["incl"]);
+            string postfix = "_" + band;           
+            // this Convert is used because only dr8 gives problem it has float values 
+            // otherwise simple (double) cast works for all others
+            this.a = Convert.ToDouble(row["a" + postfix]);
+            this.b = Convert.ToDouble(row["b" + postfix]);
+            this.c = Convert.ToDouble(row["c" + postfix]);
+            this.d = Convert.ToDouble(row["d" + postfix]);
+            this.e = Convert.ToDouble(row["e" + postfix]);
+            this.f = Convert.ToDouble(row["f" + postfix]);
+            this.pixperdeg = 9088;
+            this.wcs = this.Wcs();
+        }
 	}
 }
 

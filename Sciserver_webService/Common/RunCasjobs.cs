@@ -35,6 +35,7 @@ namespace Sciserver_webService.UseCasjobs
         String returnType = "";
         String token ="";
         String casjobsTarget = "";
+      
 
         net.ivoa.VOTable.VOTABLE vot;
 
@@ -60,89 +61,59 @@ namespace Sciserver_webService.UseCasjobs
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
 
             System.IO.Stream stream = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
-            var response  = new HttpResponseMessage();
+
+            return processCasjobsResults(stream);
+        }
+
+
+        private HttpResponseMessage processCasjobsResults(Stream stream) {
+
+            var response = new HttpResponseMessage();
             DataSet ds;
             if (returnType.Equals(KeyWords.contentDataset))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 ds = (DataSet)formatter.Deserialize(stream);
                 NewSDSSFields sf = new NewSDSSFields();
-                switch (casjobsTaskName) {
+                switch (casjobsTaskName)
+                {
 
-                  case "FOR CONE SEARCH":                    
+                    case "FOR CONE SEARCH":
                         DefaultCone cstest = new DefaultCone();
                         vot = cstest.ConeSearch(ds);
-                        response.Content = new StringContent(ToXML(vot), Encoding.UTF8, "application/xml");                  
+                        response.Content = new StringContent(ToXML(vot), Encoding.UTF8, "application/xml");
                         break;
 
-                  case "SDSSFields:FieldArray":
-                       
-                        response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, "application/xml"); 
-                       break;
+                    case "SDSSFields:FieldArray":
 
-                  case "SDSSFields:FieldArrayRect":
-                       
-                       response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, "application/xml");
-                       break;
+                        response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, "application/xml");
+                        break;
 
-                  case "SDSSFields:ListOfFields":
-                       
-                       response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, "application/xml");
-                       break;
+                    case "SDSSFields:FieldArrayRect":
 
-                  case "SDSSFields:UrlsOfFields":
-                       
-                       response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, "application/xml");
-                       break;
+                        response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, "application/xml");
+                        break;
 
+                    case "SDSSFields:ListOfFields":
 
-                  default :
-                       response.Content = new StreamContent(stream);    
-                      break;
+                        response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, "application/xml");
+                        break;
 
-                }       
+                    case "SDSSFields:UrlsOfFields":
 
-            }else {
-                response.Content = new StreamContent(stream);  
+                        response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, "application/xml");
+                        break;
+
+                    default:
+                        response.Content = new StreamContent(stream);
+                        break;
+                }
+
             }
-
-          
-            /////// Just testing
-            //if (casjobsTaskName.Equals(KeyWords.ConeSearch))
-            //{
-            //    try
-            //    {
-            //        BinaryFormatter formatter = new BinaryFormatter();
-
-            //        // Deserialize the hashtable from the file and  
-            //        // assign the reference to the local variable.
-            //        DataSet ds = (DataSet)formatter.Deserialize(stream);
-            //        DefaultCone cstest = new DefaultCone();
-            //        vot = cstest.ConeSearch(ds);
-            //        //vot = cstest.ConeSearch(ds);
-
-
-            //    }
-            //    catch (SerializationException e)
-            //    {
-            //        Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
-            //        throw;
-            //    }
-            //    //response = new HttpResponseMessage()
-            //    //{
-
-            //     response.Content = new StringContent(ToXML(), Encoding.UTF8, "application/xml");
-            //    //};
-            //}
-            //else {
-
-            //    //response = new HttpResponseMessage()
-            //    //{
-            //    response.Content = new StreamContent(stream);                                    
-            //    //};
-
-            //}
-
+            else
+            {
+                response.Content = new StreamContent(stream);
+            }            
             return response;
         }
 
@@ -174,28 +145,8 @@ namespace Sciserver_webService.UseCasjobs
             var serializer = new XmlSerializer(o.GetType());
             serializer.Serialize(stringwriter, o);
             return stringwriter.ToString();
-        }
-
-       
-        // for simple quick queries need to find the better way
-        public async Task<Stream>  quickRun() {            
-
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(KeyWords.casjobsREST + "contexts/" + casjobsTarget + "/query");
-
-                StringContent content = new StringContent(this.getJsonContent(query, casjobsTaskName));
-                if (!(token == null || token == String.Empty))
-                    content.Headers.Add(KeyWords.xauth, token);
-                content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
-
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
-
-                Stream output = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
-
-
-                return output;
-           
-        }
+        }       
+      
       
      
 

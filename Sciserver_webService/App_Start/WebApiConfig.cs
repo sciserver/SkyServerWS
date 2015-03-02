@@ -11,7 +11,7 @@ namespace Sciserver_webService
     {
         public static void Register(HttpConfiguration config)
         {
-
+            
             //Consearch 
             config.Routes.MapHttpRoute(
                 name: "ConeSearch",
@@ -48,7 +48,7 @@ namespace Sciserver_webService
             config.Routes.MapHttpRoute(
                 name: "getSIAPInfo",
                 routeTemplate: "{anything}/SIAP/{controller}",
-                defaults: new { controller = "getSIAPInfo"}
+                defaults: new { controller = "getSIAP"}
             );
 
             //// SDSS ImageCutout

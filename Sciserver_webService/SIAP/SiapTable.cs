@@ -7,7 +7,8 @@ using System.Text;
 
 using net.ivoa.VOTable;
 using Sciserver_webService.SDSSFields;
-
+using Sciserver_webService.Common;
+using System.Web;
 
 namespace Sciserver_webService.sdssSIAP
 {
@@ -19,40 +20,34 @@ namespace Sciserver_webService.sdssSIAP
     public class SiapTable : VOTABLE
     {
 
-        protected bool dobandpass = false;
+        
+        private string SDSSgetImage = ConfigurationSettings.AppSettings["UrlSdssGetJpeg"];
+        //private string ppd = "";
 
+        protected bool dobandpass = false;
         static public int FIELDCOUNT = 16;
-        //private bool test = ConfigurationSettings.AppSettings["siap.test"].CompareTo("true") == 0;
-        //private string urlFind = ConfigurationSettings.AppSettings["siap.testURLFind"];
-        //private string urlReplace = ConfigurationSettings.AppSettings["siap.testURLReplace"];
-        static public string SDSSgetImage = ConfigurationSettings.AppSettings["UrlSdssGetJpeg"];
-        static public string UrlSdssFields = ConfigurationSettings.AppSettings["UrlSdssFields"];
+        private string UrlSdssFields = "";
         private double pixPerDeg = 9088.0;
         private double scale = 3600.0 / 9088.0; // 0.396127, SDSS default scale in arcseconds/pixel
-
+        private string datarelease = "";
+        
 
         public SiapTable()
         {
-            //if (null == SDSSgetImage)
+            ///******
+            ///This part is added to get any data release working with thsi DR1 to DRxx
+            ///******
+            datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
+            SDSSgetImage = SDSSgetImage.Replace("*DataRelease*", datarelease);
+            string[] temp = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Split(new string[]{"siap"}, StringSplitOptions.None);
+            UrlSdssFields = temp[0]+"SDSSFields";
+            ///******
+            
+            ////old code
+            //if (null != ppd)
             //{
-            //    throw new Exception(" Please set UrlSdssGetJpeg in web.config");
+            //    this.pixPerDeg = Convert.ToInt32(ppd);
             //}
-
-            //if (null == UrlSdssFields)
-            //{
-            //    throw new Exception(" Please set UrlSdssFields in web.config");
-            //}
-            //else
-            //{
-            //    if (test) UrlSdssFields = UrlSdssFields.Replace(urlFind, urlReplace);
-            //}
-
-
-            string ppd = ConfigurationSettings.AppSettings["PixPerDegree"];
-            if (null != ppd)
-            {
-                this.pixPerDeg = Convert.ToInt32(ppd);
-            }
 
             this.version = net.ivoa.VOTable.VOTABLEVersion.Item11;
             this.RESOURCE = new RESOURCE[1];
@@ -296,12 +291,12 @@ namespace Sciserver_webService.sdssSIAP
             this.INFO[ind] = new INFO();
             this.INFO[ind].name = "FieldsUrl";
             this.INFO[ind].Text = new string[1];
-            this.INFO[ind].Text[0] = SiapTable.UrlSdssFields;
+            this.INFO[ind].Text[0] = UrlSdssFields;
             ind++;
             this.INFO[ind] = new INFO();
             this.INFO[ind].name = "CutOutUrl";
             this.INFO[ind].Text = new string[1];
-            this.INFO[ind].Text[0] = SiapTable.SDSSgetImage;
+            this.INFO[ind].Text[0] = SDSSgetImage;
             ind++;
             return ind;
         }
@@ -403,6 +398,8 @@ namespace Sciserver_webService.sdssSIAP
             return deg / 180 * Math.PI;
         }
 
+       
+
         /// <summary>
         ///  need to look at another service to get this data
         ///  then we just put it in the format we want here
@@ -419,11 +416,17 @@ namespace Sciserver_webService.sdssSIAP
             SDSSFields.SDSSFields sdssf = new SDSSFields.SDSSFields();
 
             // we have degrees size1 it wants arcmin
-            Field[] fa;
+            Field[] fa; string uri;
             if (size2.HasValue)
-                fa = sdssf.FieldArrayRect(ra, dec, size1, size2.Value);
+               
+                //fa = sdssf.FieldArrayRect(ra, dec, size1, size2.Value);
+                uri = UrlSdssFields+"/FieldArrayRect?ra="+ra+"&dec="+dec+"&dra="+size1+"&ddec="+size2.Value;
             else
-                fa = sdssf.FieldArray(ra, dec, size1 * 60.0 * 0.5 + 8.4F);
+                //fa = sdssf.FieldArray(ra, dec, size1 * 60.0 * 0.5 + 8.4F);
+                uri = UrlSdssFields+"/FieldArray?ra="+ra+"&dec="+dec+"&radius="+(size1 * 60.0 * 0.5 + 8.4F);
+
+            ReturnSIAPresults rs=  new ReturnSIAPresults();
+            fa = rs.runSDSSField(uri);
 
             // 8.4 is half diagonal is requested by the NearbyFrameEq SQL query to bring the
             // correct number of frames.
@@ -537,23 +540,10 @@ namespace Sciserver_webService.sdssSIAP
                 t.TD[i].Text[0] = values[i];
             }
         }
-
-        /// <summary>
-        /// Revision from CVS
-        /// </summary>
-        public static string Revision
-        {
-            get
-            {
-                return "$Revision: 1.7 $";
-            }
-        }
-
-
     }
 }
 
-/* Revision History
+/* Revision History for the soap web services // @deoyani just updated to make it RESTful, would be a good task to clean and rewrite
 
 	$Log: not supported by cvs2svn $
 	Revision 1.5  2004/06/22 20:34:48  womullan

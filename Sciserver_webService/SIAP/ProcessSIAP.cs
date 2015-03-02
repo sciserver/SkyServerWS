@@ -13,7 +13,7 @@ namespace Sciserver_webService.SIAP
         public static string[] formats = { "metadata", "all", "fits", "graphic", "jpeg" };
         public static string[] bands = { "u", "g", "r", "i", "z", "*" };
 
-        public String getSiapInfo(string POS, string SIZE, string FORMAT, string bandpass)
+        public String getSiapQuery(string POS, string SIZE, string FORMAT, string bandpass)
         {
             String query = "";
             double ra, dec;

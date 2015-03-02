@@ -67,8 +67,7 @@ namespace Sciserver_webService.SDSSFields
                             this.sr = Convert.ToDouble(requestDir["radius"]);
                             if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");
                             try { this.band = requestDir["band"]; }catch(Exception e) {}
-                            this.sqlQuery = this.SqlSelectCommand().Replace("TEMPURL",getBandUrl());  
-                            
+                            this.sqlQuery = this.SqlSelectCommand().Replace("TEMPURL",getBandUrl());                              
                             break;
 
                         default: break;
@@ -90,11 +89,7 @@ namespace Sciserver_webService.SDSSFields
             }
 
             ///dbo.fGetUrlFitsCFrame(f.fieldId,'u') as u_url,&#xA;   
-            ///dbo.fGetUrlFitsCFrame(f.fieldId,'g') as g_url,&#xA;  
-            ///dbo.fGetUrlFitsCFrame(f.fieldId,'r') as r_url,&#xA;   
-            ///dbo.fGetUrlFitsCFrame(f.fieldId,'i') as i_url,&#xA;   
-            ///dbo.fGetUrlFitsCFrame(f.fieldId,'z') as z_url&#xA; 
-            ///
+           
             /// <summary>
             /// Build SQL query from the input parameters
             /// </summary>
@@ -115,9 +110,11 @@ namespace Sciserver_webService.SDSSFields
                 if (this.band.Equals("all")) this.band = "u,g,r,i,z"; 
                 string[] bands = this.band.Split(',');
                 for (int i = 0; i < bands.Length; i++) {
-                    bandurls += "dbo.fGetUrlFitsCFrame(f.fieldId,'"+bands[i]+"') as "+bands[i]+"_url, ";
+                    bandurls += "dbo.fGetUrlFitsCFrame(f.fieldId,'"+bands[i]+"') as "+bands[i]+"_url,";
                 }
+                bandurls = bandurls.TrimEnd(',');
                 return bandurls;
+
             }
             /// <summary>
             /// Build SQL query from the input parameters
@@ -252,42 +249,28 @@ namespace Sciserver_webService.SDSSFields
                 }
                 return ret;
             }
-
-
-
+           
             /// <summary>
-            /// Simple interface to get the urls of fields within the search radius
+            /// 
             /// </summary>
-            /// <param name="ra">RA of center in degrees (double)</param>
-            /// <param name="dec">Dec of center in degrees (double)</param>
-            /// <param name="radius">Search radius in arcmins (double)</param>
-            /// <param name="band">Passband name, one of u,g,r,i,z (string)</param>
-            /// <returns>URLs (string[])</returns>
-            public string[] UrlOfFields(DataSet ds)
+            /// <param name="dataSet"></param>
+            /// <returns></returns>
+            public string[] UrlOfFields(DataSet dataSet)
             {
-                //band = band.ToLower();
-                band = "ugriz";
-                char[] bands = { 'u', 'g', 'r', 'i', 'z' };
-                int num = ds.Tables[0].Rows.Count;
-                Field[] field = new Field[num];
-                string[] ret = new string[num * band.Length];
-                int j = 0;
-                for (int i = 0; i < num; i++)
+                string[] ret = new string[1];
+                foreach (DataTable thisTable in dataSet.Tables)
                 {
-                    DataRow row = ds.Tables[0].Rows[i];
-                    field[i] = new Field(ds.Tables[0].Rows[i]);
-
-                    //foreach (char b in band)
-                    //{
-                    //    if ("ugriz".IndexOf(b) == -1)
-                    //        throw new ArgumentException("Band should be one of \"ugriz\", it was " + b);
-
-                    //    int pos = Array.IndexOf(bands, b);
-                    for (int pos = 0; pos < bands.Length; pos++)
-                    {
-                        ret[j++] = field[i].bandUrls[pos];
+                    int cnt = 0;
+                    ret = new string[thisTable.Rows.Count*thisTable.Columns.Count];
+                    // For each row, print the values of each column. 
+                    foreach (DataRow row in thisTable.Rows)
+                    {                                               
+                        foreach (DataColumn column in thisTable.Columns)
+                        {
+                            ret[cnt] = row[column].ToString();
+                            cnt++;
+                        }                        
                     }
-
                 }
                 return ret;
             }
@@ -329,5 +312,7 @@ namespace Sciserver_webService.SDSSFields
             return FieldUrl(f.run, f.rerun, f.camcol, f.field, band);
         }
 
+        
+        
    }
 }

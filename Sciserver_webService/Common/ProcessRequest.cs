@@ -14,9 +14,10 @@ using Sciserver_webService.QueryTools;
 using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 using Sciserver_webService.ToolsSearch;
-using Sciserver_webService.SIAP;
+//using Sciserver_webService.SIAP;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
+using Sciserver_webService.sdssSIAP;
 
 namespace Sciserver_webService.Common
 {
@@ -33,7 +34,8 @@ namespace Sciserver_webService.Common
         /// <returns></returns>
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
-            string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
+            string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
             Dictionary<String, String> dictionary = null;                      
@@ -82,8 +84,7 @@ namespace Sciserver_webService.Common
                 throw new ArgumentException("Check input parameters properly.");
             }
 
-            String format = "";
-           
+            String format = "";           
             String query = "";
             
             switch (queryType)
@@ -92,16 +93,12 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "RectangularSearch" :
-                    RectangularSearch rs = new RectangularSearch(dictionary);
-                    //resp.Content = new StringContent(rs.getResult(token, casjobsMessage, format));
-                    //return resp;
+                    RectangularSearch rs = new RectangularSearch(dictionary);                  
                     query = rs.query;
                     break;
 
                 case "RadialSearch":
-                    RadialSearch radial = new RadialSearch(dictionary);
-                    //resp.Content = new StringContent(radial.getResult(token, casjobsMessage, format));
-                    //return resp;
+                    RadialSearch radial = new RadialSearch(dictionary);                  
                     query = radial.query;                    
                     break;
 
@@ -122,19 +119,20 @@ namespace Sciserver_webService.Common
                 case "SDSSFields":
                     try
                     {
-                        format = dictionary["format"].ToLower();                        
+                        format = dictionary["format"].ToLower();
+                        if (format.Equals("votable")) format = "dataset";
                     }
                     catch (Exception e)
                     {
-                        format = "dataset"; 
+                        format = "dataset";
+                       
                     }
                     NewSDSSFields sf = new NewSDSSFields(dictionary, positionType);
                     query = sf.sqlQuery;                  
                     break;
 
                 case "SIAP" :
-                    ProcessSIAP psiap = new ProcessSIAP();
-                    query = psiap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], dictionary["FORMAT"], dictionary["bandpass"]);
+                    return new ReturnSIAPresults(casjobsMessage, "VOTable", datarelease, dictionary); // this is tricky code
                     break;
 
                 default: 
@@ -171,7 +169,7 @@ namespace Sciserver_webService.Common
                 format = KeyWords.contentCSV;
             }            
 
-            return new RunCasjobs( query, token, casjobsMessage, format, datarelease );
+            return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
         }
        
 
