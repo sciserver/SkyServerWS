@@ -23,20 +23,33 @@ namespace Sciserver_webService.Controllers
 {
     public class RectangularSearchController : ApiController
     {
-        /// <summary>
-        /// This is using new REST casjobs
-        /// </summary>
-        /// <returns></returns>        
-        [ExceptionHandleAttribute]
-        public IHttpActionResult Get([FromUri] String min_ra = null, [FromUri] String min_dec = null, [FromUri] String max_ra = null,
-                            [FromUri] String max_dec = null, [FromUri] String uband = null, [FromUri] String gband = null,
-                            [FromUri] String rband = null, [FromUri] String iband = null, [FromUri] String zband = null,
-                              [FromUri] String whichway = null,[FromUri] String whichquery =null, [FromUri] String format = "json", [FromUri] String limit = "10" )
-        {
+        ///// <summary>
+        ///// This is using new REST casjobs
+        ///// </summary>
+        ///// <returns></returns>        
+        //[ExceptionHandleAttribute]
+        //public IHttpActionResult Get([FromUri] String min_ra = null, [FromUri] String min_dec = null, [FromUri] String max_ra = null,
+        //                    [FromUri] String max_dec = null, [FromUri] String uband = null, [FromUri] String gband = null,
+        //                    [FromUri] String rband = null, [FromUri] String iband = null, [FromUri] String zband = null,
+        //                      [FromUri] String whichway = null,[FromUri] String whichquery =null, [FromUri] String format = "json", [FromUri] String limit = "10" )
+        //{
 
+        //    ProcessRequest request = new ProcessRequest();
+        //    return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "RectangularSearch Tool.");
+        //}      
+        [ExceptionHandleAttribute]
+        public IHttpActionResult Get()
+        {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "RectangularSearch Tool.");
-        }      
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+        }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult Post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+        }
     }
 }
 

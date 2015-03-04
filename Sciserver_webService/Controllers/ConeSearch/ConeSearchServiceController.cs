@@ -18,12 +18,18 @@ namespace Sciserver_webService.Controllers
     public class ConeSearchServiceController : ApiController
     {
         [ExceptionHandleAttribute]
-        public IHttpActionResult Get()
+        public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);            
         }
 
+        [ExceptionHandleAttribute]
+        public IHttpActionResult post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
+        }
         //[ExceptionHandleAttribute]
         //public VOTABLE Get([FromUri] String ra = null, [FromUri] String dec = null, [FromUri] String sr = null)
         //{

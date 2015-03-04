@@ -8,6 +8,7 @@ using System.IO;
 using SciServer.Logging;
 using System.Web;
 using System.Text.RegularExpressions;
+using System.Configuration;
 
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.QueryTools;
@@ -18,6 +19,7 @@ using Sciserver_webService.ToolsSearch;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
 using Sciserver_webService.sdssSIAP;
+
 
 namespace Sciserver_webService.Common
 {
@@ -35,6 +37,9 @@ namespace Sciserver_webService.Common
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
             string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+            
+            /// this is temporary read from the web.config
+            string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"]+datarelease;
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
@@ -86,7 +91,8 @@ namespace Sciserver_webService.Common
 
             String format = "";           
             String query = "";
-            
+            dictionary.Add("skyserverUrl", skyserverUrl);
+
             switch (queryType)
             {
                 case "SqlSearch": query = dictionary["cmd"];                     
@@ -161,6 +167,7 @@ namespace Sciserver_webService.Common
                     case "json": format = KeyWords.contentJson; break;
                     case "fits": format = KeyWords.contentFITS; break;
                     case "dataset": format = KeyWords.contentDataset; break;
+                    
                     default: format = KeyWords.contentCSV; break;
                 }
             }
@@ -168,7 +175,7 @@ namespace Sciserver_webService.Common
             {
                 format = KeyWords.contentCSV;
             }            
-
+           
             return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
         }
        

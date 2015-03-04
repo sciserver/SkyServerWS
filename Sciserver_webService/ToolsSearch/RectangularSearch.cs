@@ -14,7 +14,7 @@ namespace Sciserver_webService.ToolsSearch
 {
     public class RectangularSearch
     {        
-        private string imagingQuery = "", irQuery = "";
+        private string imagingQuery = "", irQuery = "", skyserverUrl="";
 
         public string ImagingQuery
         {
@@ -33,28 +33,30 @@ namespace Sciserver_webService.ToolsSearch
         public RectangularSearch(Dictionary<string,string> requestDir) 
         {
             Validation val = new Validation(requestDir);
+            skyserverUrl = requestDir["skyserverUrl"];
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
-            if (temp)
-            {
-                if(val.whichquery.Equals("imaging"))
-                query = this.buildImageQuery(val);
-                else
-                query = this.buildIRQuery(val);
-            }
+            query = this.buildImageQuery(val) + " ; " + this.buildIRQuery(val);
+            //if (temp)
+            //{
+            //    if(val.whichquery.Equals("imaging"))
+            //    query = this.buildImageQuery(val);
+            //    else
+            //    query = this.buildIRQuery(val);
+            //}
         }
 
-        public RectangularSearch(String ra, String dec, String ra2, String dec2,String uband ,String gband,
-                                String rband , String iband,String zband,String searchtype , String returntype, String limit) {
+        //public RectangularSearch(String ra, String dec, String ra2, String dec2,String uband ,String gband,
+        //                        String rband , String iband,String zband,String searchtype , String returntype, String limit) {
            
-            if (ra == null || dec == null || ra2 == null || dec2 == null) throw new ArgumentException("There are not enough parameters to process your request.");
+        //    if (ra == null || dec == null || ra2 == null || dec2 == null) throw new ArgumentException("There are not enough parameters to process your request.");
 
-            Validation val = new Validation();
-            if(val.ValidateInput(ra,dec,ra2,dec2)){
-               bool temp = val.ValidateOtherParameters(uband, gband, rband, iband, zband, searchtype, returntype, limit);               
-               this.buildImageQuery(val);
-               this.buildIRQuery(val);
-            }
-        }
+        //    Validation val = new Validation();
+        //    if(val.ValidateInput(ra,dec,ra2,dec2)){
+        //       bool temp = val.ValidateOtherParameters(uband, gband, rband, iband, zband, searchtype, returntype, limit);               
+        //       this.buildImageQuery(val);
+        //       this.buildIRQuery(val);
+        //    }
+        //}
 
 
         private string buildImageQuery(Validation val)
@@ -66,7 +68,7 @@ namespace Sciserver_webService.ToolsSearch
 
             if (val.returnFormat == "html")
             {
-                sql += " ''<a target=INFO href=" + KeyWords.skyserverUrl + "/tools/explore/obj.aspx?id='' + cast(p.objId as varchar(20)) + ''>'' + cast(p.objId as varchar(20)) + ''</a>'' as objID,\n";
+                sql += " ''<a target=INFO href=" + skyserverUrl + "/en/tools/explore/obj.aspx?id='' + cast(p.objId as varchar(20)) + ''>'' + cast(p.objId as varchar(20)) + ''</a>'' as objID,\n";
             }
             else
             {
@@ -95,7 +97,7 @@ namespace Sciserver_webService.ToolsSearch
 
             if (val.returnFormat == "html"){
           
-                sql += " ''<a target=INFO href=" + KeyWords.skyserverUrl + "/tools/explore/summary.aspx?apid='' + cast(p.apstar_id as varchar(40)) + ''>'' + cast(p.apstar_id as varchar(40)) + ''</a>'' as apstar_id,\n";
+                sql += " ''<a target=INFO href=" + skyserverUrl + "/en/tools/explore/summary.aspx?apid='' + cast(p.apstar_id as varchar(40)) + ''>'' + cast(p.apstar_id as varchar(40)) + ''</a>'' as apstar_id,\n";
             }
             else
             {
@@ -159,93 +161,93 @@ namespace Sciserver_webService.ToolsSearch
             return queryString;
         }
 
-        public string getJson(string[] resultContent, string[] query)
-        {
-            string[] lines = resultContent[0].Split('\n');
-            var csv = new List<string[]>(); // or, List<YourClass>            
-            foreach (string line in lines)
-                csv.Add(line.Split(',')); // or, populate YourClass          
-            //string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(csv);
+        //public string getJson(string[] resultContent, string[] query)
+        //{
+        //    string[] lines = resultContent[0].Split('\n');
+        //    var csv = new List<string[]>(); // or, List<YourClass>            
+        //    foreach (string line in lines)
+        //        csv.Add(line.Split(',')); // or, populate YourClass          
+        //    //string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(csv);
 
-            string[] lines2 = resultContent[1].Split('\n');
-            var csv2 = new List<string[]>(); // or, List<YourClass>            
-            foreach (string line2 in lines2)
-                csv2.Add(line2.Split(',')); // or, populate YourClass          
+        //    string[] lines2 = resultContent[1].Split('\n');
+        //    var csv2 = new List<string[]>(); // or, List<YourClass>            
+        //    foreach (string line2 in lines2)
+        //        csv2.Add(line2.Split(',')); // or, populate YourClass          
 
-            string[] querytype = new string[2] { "Imaging", "IR Spectra" };
+        //    string[] querytype = new string[2] { "Imaging", "IR Spectra" };
 
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
+        //    StringBuilder sb = new StringBuilder();
+        //    StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                writer.Formatting = Formatting.Indented;
-                writer.WriteStartArray();
+        //    using (JsonWriter writer = new JsonTextWriter(sw))
+        //    {
+        //        writer.Formatting = Formatting.Indented;
+        //        writer.WriteStartArray();
 
-                for (int r = 0; r < resultContent.Length; r++)
-                {
-                    writer.WriteStartObject();
-                    writer.WritePropertyName("Query");
-                    writer.WriteValue(query[r]);
-                    writer.WritePropertyName("Query type");
-                    writer.WriteValue(querytype[r]);
-                    writer.WritePropertyName("Query Results:");
-                    writer.WriteStartArray();
-                    if (r == 0)
-                    {
-                        for (int i = 1; i < lines.Length; i++)
-                        {
-                            writer.WriteStartObject();
-                            for (int Index = 0; Index < csv[0].Length; Index++)
-                            {
-                                writer.WritePropertyName(csv[0][Index]);
-                                writer.WriteValue(csv[i][Index]);
-                            }
-                            writer.WriteEndObject();
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 1; i < lines2.Length; i++)
-                        {
-                            writer.WriteStartObject();
-                            for (int Index = 0; Index < csv2[0].Length; Index++)
-                            {
-                                writer.WritePropertyName(csv2[0][Index]);
-                                writer.WriteValue(csv2[i][Index]);
-                            }
-                            writer.WriteEndObject();
-                        }
-                    }
-                    writer.WriteEndArray();
-                    writer.WriteEndObject();
-                }
-                writer.WriteEndArray();
-            }
-            return sb.ToString();
-        }
+        //        for (int r = 0; r < resultContent.Length; r++)
+        //        {
+        //            writer.WriteStartObject();
+        //            writer.WritePropertyName("Query");
+        //            writer.WriteValue(query[r]);
+        //            writer.WritePropertyName("Query type");
+        //            writer.WriteValue(querytype[r]);
+        //            writer.WritePropertyName("Query Results:");
+        //            writer.WriteStartArray();
+        //            if (r == 0)
+        //            {
+        //                for (int i = 1; i < lines.Length; i++)
+        //                {
+        //                    writer.WriteStartObject();
+        //                    for (int Index = 0; Index < csv[0].Length; Index++)
+        //                    {
+        //                        writer.WritePropertyName(csv[0][Index]);
+        //                        writer.WriteValue(csv[i][Index]);
+        //                    }
+        //                    writer.WriteEndObject();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                for (int i = 1; i < lines2.Length; i++)
+        //                {
+        //                    writer.WriteStartObject();
+        //                    for (int Index = 0; Index < csv2[0].Length; Index++)
+        //                    {
+        //                        writer.WritePropertyName(csv2[0][Index]);
+        //                        writer.WriteValue(csv2[i][Index]);
+        //                    }
+        //                    writer.WriteEndObject();
+        //                }
+        //            }
+        //            writer.WriteEndArray();
+        //            writer.WriteEndObject();
+        //        }
+        //        writer.WriteEndArray();
+        //    }
+        //    return sb.ToString();
+        //}
 
-        public String getResult(String token, String casjobsMessage, String format) {
-            try
-            {
-                //RunCasjobs run = new RunCasjobs();
-                //String imageQueryResult = run.postCasjobs(this.ImagingQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                //String irQueryResult = run.postCasjobs(this.IRQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-                //String results = "";
-                //if (format.Equals("json"))
-                //    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.ImagingQuery, this.IRQuery });
-                //else
-                //{
-                //    results = "# Imaging Query:" + this.ImagingQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
-                //    results += "\n\n#IR Spectra Query:" + this.IRQuery.Replace("\n", "") + "\n\n" + irQueryResult;
-                //}
-                //return results;
-                return "";
-            }
-            catch (Exception e) {
-                throw new Exception("Error while running casjobs:"+e.Message);
-            }
-        }
+        //public String getResult(String token, String casjobsMessage, String format) {
+        //    try
+        //    {
+        //        //RunCasjobs run = new RunCasjobs();
+        //        //String imageQueryResult = run.postCasjobs(this.ImagingQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+        //        //String irQueryResult = run.postCasjobs(this.IRQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
+        //        //String results = "";
+        //        //if (format.Equals("json"))
+        //        //    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.ImagingQuery, this.IRQuery });
+        //        //else
+        //        //{
+        //        //    results = "# Imaging Query:" + this.ImagingQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
+        //        //    results += "\n\n#IR Spectra Query:" + this.IRQuery.Replace("\n", "") + "\n\n" + irQueryResult;
+        //        //}
+        //        //return results;
+        //        return "";
+        //    }
+        //    catch (Exception e) {
+        //        throw new Exception("Error while running casjobs:"+e.Message);
+        //    }
+        //}
 
     }
 }

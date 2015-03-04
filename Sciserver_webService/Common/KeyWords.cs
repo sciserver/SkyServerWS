@@ -185,7 +185,7 @@ namespace Sciserver_webService.Common
 
 
         // this skyserver url
-        public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
+        //public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
         
         
     }

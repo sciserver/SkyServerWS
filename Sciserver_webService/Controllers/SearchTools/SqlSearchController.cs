@@ -26,6 +26,12 @@ namespace Sciserver_webService.Controllers
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Searcg Tool.");
-        }        
+        }
+        [ExceptionHandleAttribute]
+        public IHttpActionResult post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Searcg Tool.");
+        }     
     }
 }

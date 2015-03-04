@@ -18,6 +18,13 @@ namespace Sciserver_webService.Controllers
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch Tool.");
         }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult Post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch Tool.");
+        }
     }
 }
 
