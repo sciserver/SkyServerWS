@@ -19,5 +19,12 @@ namespace Sciserver_webService.Controllers
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "IRSpectroQuery:RectangularSearch");
         }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "IRSpectroQuery:RectangularSearch");
+        }
     }
 }

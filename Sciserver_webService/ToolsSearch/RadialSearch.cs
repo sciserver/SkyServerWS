@@ -1,18 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Configuration;
-using System.Data;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using System.Text;
-using System.IO;
-using Sciserver_webService.casjobs;
-using Sciserver_webService.Common;
-using Sciserver_webService.UseCasjobs;
-
-
 
 namespace Sciserver_webService.ToolsSearch
 {
@@ -22,12 +9,16 @@ namespace Sciserver_webService.ToolsSearch
         public String imageQuery = "";
         public String irQuery = "";
         String skyserverUrl = "";
+        int datarelease = 1; // SDSS data release number
         public RadialSearch(Dictionary<string,string> requestDir) 
         {
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
+            datarelease =Convert.ToInt32( requestDir["datarelease"]);
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
-            query = this.buildImageQuery(val) +" ; " + this.buildIRQuery(val);
+            query = this.buildImageQuery(val) + " ; ";
+            if(datarelease >9)
+            query += this.buildIRQuery(val);
             //if (val.whichquery.Equals("imaging"))
             //{
             //  this.buildImageQuery(val);
@@ -118,7 +109,9 @@ namespace Sciserver_webService.ToolsSearch
             //}
             sql += "   p.apogee_id,p.ra, p.dec, p.glon, p.glat,\n";
             sql += "   p.vhelio_avg,p.vscatter,\n";
-            sql += "   a.teff,a.logg,a.metals\n";
+            sql += "   a.teff,a.logg,\n";
+            if(datarelease >= 12) sql += " a.param_m \n";
+            else sql += " a.metals\n";
             sql += "   FROM apogeeStar p\n";
             sql += "   JOIN fGetNearbyApogeeStarEq(" + val.ra + "," + val.dec + "," + val.radius + ") n on p.apstar_id=n.apstar_id\n";
             sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id";

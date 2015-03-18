@@ -15,7 +15,7 @@ namespace Sciserver_webService.Controllers
     {
         
         [ExceptionHandleAttribute]
-        public HttpResponseMessage post() 
+        public IHttpActionResult post() 
         {       
             ProcessRequest request = new ProcessRequest();
             return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");

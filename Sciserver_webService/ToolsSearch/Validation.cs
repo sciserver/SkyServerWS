@@ -227,7 +227,7 @@ namespace Sciserver_webService.ToolsSearch
                 return true;
             }
             catch (Exception ex) {
-                throw new Exception(""+ex.Message);
+                throw new Exception("Input Parameters Validation Exception:"+ex.Message);
             }
         }
 

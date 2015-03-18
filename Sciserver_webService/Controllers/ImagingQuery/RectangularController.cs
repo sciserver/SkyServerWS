@@ -19,5 +19,12 @@ namespace Sciserver_webService.Controllers
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.imagingQuery, KeyWords.rectangular, "ImagingQuery:RectangularSearch");
         }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult post()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.rectangular, "ImagingQuery:RectangularSearch");
+        }
     }
 }

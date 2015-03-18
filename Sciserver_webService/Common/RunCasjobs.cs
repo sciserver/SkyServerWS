@@ -1,28 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Configuration;
 using System.Data;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using net.ivoa.VOTable;
-using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
-
-using System.Threading.Tasks;
-using System.Text;
 using System.IO;
-using System.Web.Http;
-using System.Threading;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Http;
 using System.Xml.Serialization;
-
-using Sciserver_webService.casjobs;
+using Newtonsoft.Json;
+using Sciserver_webService.Common;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
-using Sciserver_webService.Common;
 
 ///This class is used to submit query to casjobs
 namespace Sciserver_webService.UseCasjobs

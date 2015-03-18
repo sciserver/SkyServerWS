@@ -14,35 +14,26 @@ namespace Sciserver_webService.ToolsSearch
 {
     public class RectangularSearch
     {        
-        private string imagingQuery = "", irQuery = "", skyserverUrl="";
-
-        public string ImagingQuery
-        {
-            get { return imagingQuery; }
-        }
-
-        public string IRQuery
-        {
-            get { return irQuery; }
-        }
-
-        public String query = "";
+        string imagingQuery = "", irQuery = "", skyserverUrl="";
+        public string query = "";
 
         public RectangularSearch() { }
+
+        int datarelease = 1; 
 
         public RectangularSearch(Dictionary<string,string> requestDir) 
         {
             Validation val = new Validation(requestDir);
             skyserverUrl = requestDir["skyserverUrl"];
+            datarelease = Convert.ToInt32(requestDir["datarelease"]);
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
-            query = this.buildImageQuery(val) + " ; " + this.buildIRQuery(val);
-            //if (temp)
-            //{
-            //    if(val.whichquery.Equals("imaging"))
-            //    query = this.buildImageQuery(val);
-            //    else
-            //    query = this.buildIRQuery(val);
-            //}
+            if (temp)
+            {
+                query = this.buildImageQuery(val) + " ; ";
+                if (datarelease > 9)
+                    query += this.buildIRQuery(val);
+            }
+            
         }
 
         //public RectangularSearch(String ra, String dec, String ra2, String dec2,String uband ,String gband,
@@ -105,7 +96,9 @@ namespace Sciserver_webService.ToolsSearch
             }
             sql += "   p.apogee_id,p.ra, p.dec, p.glon, p.glat,\n";
             sql += "   p.vhelio_avg,p.vscatter,\n";
-            sql += "   a.teff,a.logg,a.metals\n";
+            sql += "   a.teff,a.logg,\n";
+            if (datarelease >= 12) sql += " a.param_m \n";
+            else sql += " a.metals\n";
             sql += "   FROM apogeeStar p\n";
             sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
             sql += "   WHERE ra BETWEEN " + val.ra + " AND " + val.ra_max + "\n";

@@ -17,11 +17,18 @@ namespace Sciserver_webService.Controllers
     public class FieldArrayRectController : ApiController
     {
 
-        [HttpGet]
-        [ActionName("FieldArrayRect")]
+      
         [ExceptionHandleAttribute]
 
-        public IHttpActionResult FieldArrayRect()
+        public IHttpActionResult get()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SDSSFields:FieldArrayRect");
+        }
+
+        [ExceptionHandleAttribute]
+
+        public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SDSSFields:FieldArrayRect");

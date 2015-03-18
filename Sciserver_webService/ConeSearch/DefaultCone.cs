@@ -1,24 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.IO;
-using System.Net.Http;
-using System.Net;
-using System.Configuration;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Data;
-using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 using System.Xml;
-
 using net.ivoa.VOTable;
-using Sciserver_webService.casjobs;
-using Sciserver_webService.UseCasjobs;
-using Sciserver_webService.Common;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 
 
 namespace Sciserver_webService.ConeSearch

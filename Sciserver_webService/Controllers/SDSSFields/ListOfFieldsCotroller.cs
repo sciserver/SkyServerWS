@@ -17,10 +17,16 @@ namespace Sciserver_webService.Controllers
     [ExceptionHandleAttribute]
     public class ListOfFieldsController : ApiController
     {
-        [HttpGet]
-        [ActionName("ListOfFields")]
+      
         [ExceptionHandleAttribute]
-        public IHttpActionResult ListOfFields()
+        public IHttpActionResult get()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SDSSFields:ListOfFields");
+        }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SDSSFields:ListOfFields");

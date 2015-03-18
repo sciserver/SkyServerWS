@@ -17,21 +17,16 @@ namespace Sciserver_webService.Controllers
     [ExceptionHandleAttribute]
     public class UrlsOfFieldsController : ApiController
     {
-        [HttpGet]
-        [ActionName("UrlsOfFields")]
-        //public String[] UrlsOfFields([FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band)
-        //{
-        //    Validation valid = new Validation();
-        //    Sciserver_webService.SDSSFields.SDSSFields sdssFields = new Sciserver_webService.SDSSFields.SDSSFields();
-        //    if (valid.ValidateInput(ra, dec, radius) && valid.ValidateInput(band))
-        //    {
-        //        return sdssFields.UrlOfFields(valid.getRa(), valid.getDec(), valid.getRadius(), band);
-        //    }
-        //    throw new Exception("There is error processing your request at this time. Check your request/input parameters and try again later!");
-        //}
+       
+        [ExceptionHandleAttribute]
+        public IHttpActionResult get()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");
+        }
 
         [ExceptionHandleAttribute]
-        public IHttpActionResult UrlsOfFields()
+        public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");

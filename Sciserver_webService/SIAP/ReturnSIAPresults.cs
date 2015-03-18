@@ -1,26 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Sciserver_webService.casjobs;
-using System.Configuration;
-using System.Data;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using net.ivoa.VOTable;
-using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-
-using System.Text;
-using System.IO;
-using System.Web.Http;
-using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Xml.Serialization;
 using System.Collections;
-using Sciserver_webService.Common;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Http;
+using System.Xml.Serialization;
 using Sciserver_webService.SDSSFields;
 
 namespace Sciserver_webService.sdssSIAP

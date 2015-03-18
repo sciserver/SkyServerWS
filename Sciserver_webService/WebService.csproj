@@ -68,7 +68,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="openstacknet">
+    <Reference Include="openstacknet, Version=1.3.0.0, Culture=neutral, PublicKeyToken=79399ea17da6cadd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\openstacknet.dll</HintPath>
     </Reference>
     <Reference Include="RabbitMQ.Client, Version=3.3.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
@@ -177,7 +178,6 @@
     <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
     <Compile Include="Controllers\SDSSFields\UrlsOfFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayRectController.cs" />
-    <Compile Include="Controllers\SDSSFields\SDSSFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\ListOfFieldsCotroller.cs" />
     <Compile Include="Controllers\SearchTools\RadialSearchController.cs" />
     <Compile Include="Controllers\SearchTools\RectangularSearchController.cs" />
@@ -199,7 +199,6 @@
     <Compile Include="Models\XMLStreamResponse.cs" />
     <Compile Include="SDSSFields\FieldQueries.cs" />
     <Compile Include="SDSSFields\NewSDSSFields.cs" />
-    <Compile Include="SIAP\ProcessSIAP.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
     <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />

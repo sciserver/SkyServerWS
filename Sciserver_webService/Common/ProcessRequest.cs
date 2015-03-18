@@ -1,24 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.IO;
-using SciServer.Logging;
-using System.Web;
-using System.Text.RegularExpressions;
 using System.Configuration;
-
-using Sciserver_webService.ExceptionFilter;
-using Sciserver_webService.QueryTools;
-using Sciserver_webService.UseCasjobs;
-using Sciserver_webService.Common;
-using Sciserver_webService.ToolsSearch;
-//using Sciserver_webService.SIAP;
-using Sciserver_webService.ConeSearch;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.Http;
+using SciServer.Logging;
 using Sciserver_webService.SDSSFields;
 using Sciserver_webService.sdssSIAP;
+using Sciserver_webService.ToolsSearch;
+using Sciserver_webService.UseCasjobs;
 
 
 namespace Sciserver_webService.Common
@@ -40,6 +33,10 @@ namespace Sciserver_webService.Common
             
             /// this is temporary read from the web.config
             string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"]+datarelease;
+
+            // get data release number
+            string drnumber = datarelease.ToUpper().Replace("DR","");
+
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
@@ -92,6 +89,7 @@ namespace Sciserver_webService.Common
             String format = "";           
             String query = "";
             dictionary.Add("skyserverUrl", skyserverUrl);
+            dictionary.Add("datarelease", drnumber);
 
             switch (queryType)
             {
@@ -146,10 +144,10 @@ namespace Sciserver_webService.Common
                     break;
             }
 
-            query = Regex.Replace(query, @"\/\*(.*\n)*\*\/", "");	// remove all multi-line comments
+            query = Regex.Replace(query, @"\/\*(.*\n)*\*\/", "");	                                // remove all multi-line comments
             query = Regex.Replace(query, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
-            query = Regex.Replace(query, @"--[^\r^\n]*", "");				// remove all embedded single-line comments
-            query = Regex.Replace(query, @"[ \t\f\v]+", " ");				// replace multiple whitespace with single space
+            query = Regex.Replace(query, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
+            query = Regex.Replace(query, @"[ \t\f\v]+", " ");				                        // replace multiple whitespace with single space
             query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines          
 
             
@@ -168,7 +166,7 @@ namespace Sciserver_webService.Common
                     case "fits": format = KeyWords.contentFITS; break;
                     case "dataset": format = KeyWords.contentDataset; break;
                     
-                    default: format = KeyWords.contentCSV; break;
+                    default: format = KeyWords.contentJson; break;
                 }
             }
             catch (Exception exp)
@@ -181,10 +179,12 @@ namespace Sciserver_webService.Common
        
 
         /// Upload table        
-        public HttpResponseMessage proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
+        public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
             try
             {
+                string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                                                                                                                        /// 
                 HttpResponseMessage resp = new HttpResponseMessage();
                 Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
                 String query = "";
@@ -236,7 +236,32 @@ namespace Sciserver_webService.Common
                 query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
                 //RunCasjobs run = new RunCasjobs();
                 //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
-                return resp;
+                //return resp;
+                String format = "";   
+                try
+                {
+                    if (format.Equals(""))
+                        format = dictionary["format"].ToLower();
+
+                    switch (format)
+                    {
+
+                        case "csv": format = KeyWords.contentCSV; break;
+                        case "xml": format = KeyWords.contentXML; break;
+                        case "votable": format = KeyWords.contentVOTable; break;
+                        case "json": format = KeyWords.contentJson; break;
+                        case "fits": format = KeyWords.contentFITS; break;
+                        case "dataset": format = KeyWords.contentDataset; break;
+
+                        default: format = KeyWords.contentJson; break;
+                    }
+                }
+                catch (Exception exp)
+                {
+                    format = KeyWords.contentCSV;
+                }            
+
+                return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
             }
             catch (Exception exp)
             {
