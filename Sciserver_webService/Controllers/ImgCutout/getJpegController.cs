@@ -37,15 +37,19 @@ namespace Sciserver_webService.Controllers
                     token = values.First();
                     var userAccess = Keystone.Authenticate(token);
 
-                    Message message = log.CreateCustomMessage("Auth-SQlSearchRequest", JsonConvert.SerializeObject(Request));
+                    // logging for the request
+
+                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, Request.ToString());
                     userid = userAccess.User.Id;
                     message.UserId = userAccess.User.Id;
                     log.SendMessage(message);
+
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
 
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, ex.Message);
+                    // No authentication (anonymous) // Logg
+                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, e.Message);
                     message.UserId = userid;
                     log.SendMessage(message);
                     throw new UnauthorizedAccessException("Given token is not authorized.");
@@ -60,7 +64,8 @@ namespace Sciserver_webService.Controllers
            
            Validation valid = new Validation();
 
-           if (ra == null || dec == null || scale == null) throw new ArgumentException("There are not enough parameters to process your request. Enter position (ra,dec) values properly.ra must be in [0,360], dec must be in [-90,90], scale must be in [0.015, 60.0]. ");
+           if (ra == null || dec == null || scale == null) 
+               throw new ArgumentException("There are not enough parameters to process your request. Enter position (ra,dec) values properly.ra must be in [0,360], dec must be in [-90,90], scale must be in [0.015, 60.0]. ");
            if (valid.ValidateInput(ra, dec, scale))
            {
                ImgCutout.ImgCutout img = new ImgCutout.ImgCutout();               
@@ -69,7 +74,7 @@ namespace Sciserver_webService.Controllers
                /// This part can be changed later if we change internal ImgCutout code.
                if (opt != null) opt = "C" + opt;  else opt = "C";
 
-               resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", ""));
+               resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token));
                resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                resp.StatusCode = HttpStatusCode.OK;
                

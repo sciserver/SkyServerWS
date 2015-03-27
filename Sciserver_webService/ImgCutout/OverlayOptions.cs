@@ -5,6 +5,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Collections;
 using System.Text;
+using Sciserver_webService.UseCasjobs;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.ImgCutout
 {
@@ -18,6 +20,19 @@ namespace Sciserver_webService.ImgCutout
         double radius;
         double fradius;
         int zoom;
+        string datarelease;
+
+        public OverlayOptions(SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease)
+        {
+            this.canvas = canvas;
+            this.ra = ra;
+            this.dec = dec;
+            this.size = size;
+            this.radius = radius;
+            this.zoom = zoom;
+            this.fradius = fradius;
+            this.datarelease = datarelease;
+        }
 
         public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius)
         {
@@ -63,25 +78,31 @@ namespace Sciserver_webService.ImgCutout
             StringBuilder sQ = new StringBuilder(" select *");
             sQ.AppendFormat(" from dbo.fGetObjectsEq({0},{1},{2},{3},{4})",
                 flag, ra, dec, radius, zoom);
-            SqlDataReader reader = null;
+            //SqlDataReader reader = null;
+
+            RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+            DataSet ds = run.runQuery();
             try
             {
-                SqlCommand cmd = new SqlCommand(sQ.ToString(), this.SqlConn);
+                //SqlCommand cmd = new SqlCommand(sQ.ToString(), this.SqlConn);
                 double oRa, oDec;
                 byte oFlag;
-                reader = cmd.ExecuteReader();					// invoke fGetObjectsEq()
-                while (reader.Read())
+                //reader = cmd.ExecuteReader();					// invoke fGetObjectsEq()
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    oRa = Convert.ToDouble(reader[0]);		// get ra
-                    oDec = Convert.ToDouble(reader[1]);		// get dec
-                    oFlag = Convert.ToByte(reader[2]);		    // get flag												
-                    if (drawSpecObjs && (oFlag & SdssConstants.sflag) > 0)
-                        canvas.drawSpecObj(oRa, oDec, size);
-                    if (drawPhotoObjs && (oFlag & SdssConstants.pflag) > 0)
-                        canvas.drawPhotoObj(oRa, oDec, size);
-                    //canvas.drawApogeeObj(oRa,oDec,size);
-                    if (drawTargetObjs && (oFlag & SdssConstants.tflag) > 0)
-                        canvas.drawTargetObj(oRa, oDec, size);
+                    while (reader.Read())
+                    {
+                        oRa = Convert.ToDouble(reader[0]);		// get ra
+                        oDec = Convert.ToDouble(reader[1]);		// get dec
+                        oFlag = Convert.ToByte(reader[2]);		// get flag												
+                        if (drawSpecObjs && (oFlag & SdssConstants.sflag) > 0)
+                            canvas.drawSpecObj(oRa, oDec, size);
+                        if (drawPhotoObjs && (oFlag & SdssConstants.pflag) > 0)
+                            canvas.drawPhotoObj(oRa, oDec, size);
+                        //canvas.drawApogeeObj(oRa,oDec,size);
+                        if (drawTargetObjs && (oFlag & SdssConstants.tflag) > 0)
+                            canvas.drawTargetObj(oRa, oDec, size);
+                    }
                 }
                 
             }
@@ -89,7 +110,9 @@ namespace Sciserver_webService.ImgCutout
             {
                 showException("getObjects() [Photo|Spec|Target]", sQ.ToString(), e);
             }
-            finally { try { if (reader != null) reader.Close(); } catch (Exception e) { } }
+            finally { 
+                //try { if (reader != null) reader.Close(); } catch (Exception e) { } 
+            }
         }
 
 
@@ -103,16 +126,22 @@ namespace Sciserver_webService.ImgCutout
             {
                 //canvas.drawLabel("Here Are Apgee:"+radius);
                 sq1.AppendFormat("select ra,dec from dbo.fGetNearbyApogeeStarEq ({0},{1},{2})", ra,dec,radius);                
-                SqlCommand cmd = new SqlCommand(sq1.ToString(), SqlConn);
+                //SqlCommand cmd = new SqlCommand(sq1.ToString(), SqlConn);
                 double oRa, oDec;
-                SqlDataReader sReader = cmd.ExecuteReader();					// invoke fGetObjectsEq()               
-                while (sReader.Read())
+                //SqlDataReader sReader = cmd.ExecuteReader();					// invoke fGetObjectsEq()               
+
+                RunCasjobs run = new RunCasjobs(sq1.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                DataSet ds = run.runQuery();
+                using (DataTableReader sReader = ds.Tables[0].CreateDataReader())
                 {
-                    oRa = Convert.ToDouble(sReader[0]);		// get ra
-                    oDec = Convert.ToDouble(sReader[1]);		// get dec
-                    canvas.drawApogeeObj(oRa, oDec, size);
+                    while (sReader.Read())
+                    {
+                        oRa = Convert.ToDouble(sReader[0]);		// get ra
+                        oDec = Convert.ToDouble(sReader[1]);		// get dec
+                        canvas.drawApogeeObj(oRa, oDec, size);
+                    }
+                    if (sReader != null) sReader.Close();
                 }
-                if (sReader != null) sReader.Close();
             }
             catch (Exception e)
             {
@@ -150,34 +179,39 @@ namespace Sciserver_webService.ImgCutout
             sQ.Append(" ON f.objid=o.objid  group by rmin,rmax,cmin,cmax ) q\n");
             sQ.Append(" ON m.objid=q.objid");
 
-            SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
+            //SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
             try
             {
                 String fieldid;
                 StringBuilder span;
                 double rmin, rmax, cmin, cmax;
                 Coord fc;
-                SqlDataReader reader = cmd.ExecuteReader();		// invoke fGetObjectsEq
-                while (reader.Read())							// read the next record in the dataset
+                //SqlDataReader reader = cmd.ExecuteReader();		// invoke fGetObjectsEq
+                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                DataSet ds = run.runQuery();
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    fieldid = Convert.ToString(reader[0]);
-                    rmin = Convert.ToDouble(reader[1]) * SdssConstants.OutlinePix;
-                    rmax = Convert.ToDouble(reader[2]) * SdssConstants.OutlinePix;
-                    cmin = Convert.ToDouble(reader[3]) * SdssConstants.OutlinePix;
-                    cmax = Convert.ToDouble(reader[4]) * SdssConstants.OutlinePix;
+                    while (reader.Read())							// read the next record in the dataset
+                    {
+                        fieldid = Convert.ToString(reader[0]);
+                        rmin = Convert.ToDouble(reader[1]) * SdssConstants.OutlinePix;
+                        rmax = Convert.ToDouble(reader[2]) * SdssConstants.OutlinePix;
+                        cmin = Convert.ToDouble(reader[3]) * SdssConstants.OutlinePix;
+                        cmax = Convert.ToDouble(reader[4]) * SdssConstants.OutlinePix;
 
-                    span = new StringBuilder("\"" + Convert.ToString(reader[5]) + "\"");
-                    fc = (Coord)cTable[fieldid];
-                    if (drawBoundingBox)
-                    {
-                        canvas.drawBoundingBox(fc, cmin, cmax, rmin, rmax);
+                        span = new StringBuilder("\"" + Convert.ToString(reader[5]) + "\"");
+                        fc = (Coord)cTable[fieldid];
+                        if (drawBoundingBox)
+                        {
+                            canvas.drawBoundingBox(fc, cmin, cmax, rmin, rmax);
+                        }
+                        if (drawOutline)
+                        {
+                            canvas.drawOutline(fc, span);
+                        }
                     }
-                    if (drawOutline)
-                    {
-                        canvas.drawOutline(fc, span);
-                    }
+                    if (reader != null) reader.Close();						// we have to close the reader.
                 }
-                if (reader != null) reader.Close();						// we have to close the reader.
             }
             catch (Exception e)
             {
@@ -198,16 +232,21 @@ namespace Sciserver_webService.ImgCutout
             sQ.Append(" (m.type = 2) \n");
             sQ.Append(" or (m.type in (0,1,3) and  m.filter = 2) \n");
             sQ.Append(" or (m.type = 4 and m.filter = 2 and m.seeing > 1.7 ) )");
-            SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
+            //SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
             try
             {
-                SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
-                while (reader.Read())							// read the next record in the dataset
+               // SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
+                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                DataSet ds = run.runQuery();
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    StringBuilder area = new StringBuilder(Convert.ToString(reader[0]));
-                    canvas.drawMask(area);
+                    while (reader.Read())							// read the next record in the dataset
+                    {
+                        StringBuilder area = new StringBuilder(Convert.ToString(reader[0]));
+                        canvas.drawMask(area);
+                    }
+                    if (reader != null) reader.Close();				// close the reader.
                 }
-                if (reader != null) reader.Close();				// close the reader.
             }
             catch (Exception e)
             {
@@ -247,19 +286,24 @@ namespace Sciserver_webService.ImgCutout
             StringBuilder sQ = new StringBuilder(" select ra, dec ");
             sQ.AppendFormat(" from dbo.fGetObjectsEq({0},{1},{2},{3},{4}) ",
             SdssConstants.plateflag, ra, dec, 2 * radius + SdssConstants.plateRadiusArcMin, zoom);
-            SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
+            //SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConn);
             try
             {
                 double oRa, oDec, oRadius;						//					
-                SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
-                while (reader.Read())							// read the next record in the dataset
+                //SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
+                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                DataSet ds = run.runQuery();
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    oRa = Convert.ToDouble(reader[0]);		// get ra
-                    oDec = Convert.ToDouble(reader[1]);		// get dec
-                    oRadius = SdssConstants.plateRadiusArcMin;	// plate radius																											
-                    canvas.drawPlate(oRa, oDec, oRadius);
+                    while (reader.Read())							// read the next record in the dataset
+                    {
+                        oRa = Convert.ToDouble(reader[0]);		// get ra
+                        oDec = Convert.ToDouble(reader[1]);		// get dec
+                        oRadius = SdssConstants.plateRadiusArcMin;	// plate radius																											
+                        canvas.drawPlate(oRa, oDec, oRadius);
+                    }
+                    if (reader != null) reader.Close();				// close the reader.
                 }
-                if (reader != null) reader.Close();				// close the reader.
             }
             catch (Exception e)
             {

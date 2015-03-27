@@ -15,6 +15,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Net;
+using Sciserver_webService.UseCasjobs;
+using Sciserver_webService.Common;
+
 
 namespace Sciserver_webService.ImgCutout
 {
@@ -127,33 +130,35 @@ namespace Sciserver_webService.ImgCutout
         public SDSSGraphicsEnv canvas = null;
         //-------------------------------------
 
-        //-------------------------------------
-        // DataBase properties
-        //-------------------------------------
-        private string sConnect = null;
-        private string sDataRelease = null;
-        private int sDR = -1;  /// Added for releases after dr7
-        private SqlConnection SqlConn = null;
-        private SqlDataReader reader = null;
-        //-------------------------------------
+        ////-------------------------------------
+        //// DataBase properties
+        ////-------------------------------------
+        //private string sConnect = null;
+        //private string sDataRelease = null;
+        //private int sDR = -1;  /// Added for releases after dr7
+        //private SqlConnection SqlConn = null;
+        //private SqlDataReader reader = null;
+        ////-------------------------------------
 
-        //----------------------------------------------------
-        // DataBase properties for new database only for Image
-        // Added after discussions for DR9/10
-        //----------------------------------------------------
-        private string sConnectImage = null;
-        private SqlConnection SqlConnImage = null;
-        private SqlDataReader readerImage = null;
-        //----------------------------------------------------
+        ////----------------------------------------------------
+        //// DataBase properties for new database only for Image
+        //// Added after discussions for DR9/10
+        ////----------------------------------------------------
+        //private string sConnectImage = null;
+        //private SqlConnection SqlConnImage = null;
+        //private SqlDataReader readerImage = null;
+        ////----------------------------------------------------
 
-        //----------------------------------------------------
-        // DataBase properties for new database only for 2Mass Images
-        //----------------------------------------------------
-        private string sConnectImage2Mass = null;
-        private SqlConnection SqlConnImage2Mass = null;
-        private SqlDataReader readerImage2Mass = null;
-        //----------------------------------------------------
-     
+        ////----------------------------------------------------
+        //// DataBase properties for new database only for 2Mass Images
+        ////----------------------------------------------------
+        //private string sConnectImage2Mass = null;
+        //private SqlConnection SqlConnImage2Mass = null;
+        ////private SqlDataReader readerImage2Mass = null;
+        ////----------------------------------------------------
+        // Authentication token
+        private string token = "";
+        private string datarelease = "";
 
         /// <summary>
         /// Constructor and getting connection strings for databases
@@ -161,23 +166,23 @@ namespace Sciserver_webService.ImgCutout
         public ImgCutout()
         {
             
-            sDataRelease = SdssConstants.sDataRelease;
-            if (sDataRelease == null)
-                throw new System.Exception("DataRelease keyword not found or invalid.\n" +
-                "Please check AppSettings in the Web.config file!");
-            sDR = SdssConstants.sDR;
+            //sDataRelease = SdssConstants.sDataRelease;
+            //if (sDataRelease == null)
+            //    throw new System.Exception("DataRelease keyword not found or invalid.\n" +
+            //    "Please check AppSettings in the Web.config file!");
+            //sDR = SdssConstants.sDR;
 
-            sConnect = ConfigurationManager.AppSettings["SkyServer"];
-            sConnectImage = ConfigurationManager.AppSettings["SkyServerImage"];
+            //sConnect = ConfigurationManager.AppSettings["SkyServer"];
+            //sConnectImage = ConfigurationManager.AppSettings["SkyServerImage"];
 
-            if (sConnect == null || sDataRelease == null || sConnectImage == null)
-                throw new System.Exception("SkyServer keyword not found or invalid. \n" +
-                "Please check AppSettings in the Web.config file!");
+            //if (sConnect == null || sDataRelease == null || sConnectImage == null)
+            //    throw new System.Exception("SkyServer keyword not found or invalid. \n" +
+            //    "Please check AppSettings in the Web.config file!");
 
-            sConnectImage2Mass = ConfigurationManager.AppSettings["SkyServer2Mass"];
-            if (sConnectImage2Mass == null || sDataRelease == null)
-                throw new System.Exception("SkyServer2Mass keyword not found or invalid. \n" +
-                 "Please check AppSettings in the Web.config file!");
+            //sConnectImage2Mass = ConfigurationManager.AppSettings["SkyServer2Mass"];
+            //if (sConnectImage2Mass == null || sDataRelease == null)
+            //    throw new System.Exception("SkyServer2Mass keyword not found or invalid. \n" +
+            //     "Please check AppSettings in the Web.config file!");
             
         }
 
@@ -223,10 +228,11 @@ namespace Sciserver_webService.ImgCutout
             string opt_,						// drawing options
             string query_,
             string imgtype_,
-            string imgfield_
+            string imgfield_,
+            string token_
             )
         {
-            return GetJpegQuery(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_);
+            return GetJpegQuery(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_);
         }
 
 
@@ -240,12 +246,13 @@ namespace Sciserver_webService.ImgCutout
             string opt_,						// drawing options
             string query_,						// mark objects selected by a query, or Region list
             string imgtype_,
-            string imgfield_
+            string imgfield_,
+            string token_
             )
         {
             try{
 
-                getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_);
+                getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_);
             }
             catch (Exception e)
             {
@@ -294,15 +301,20 @@ namespace Sciserver_webService.ImgCutout
             string opt_,						// drawing options
             string query_,						// mark objects selected by a query, or Region list
             string imgtype_,
-            string imgfield_
+            string imgfield_,
+            string token_
             ) {
 
                 try
                 {
+                    // to get datarelease
+                    datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                                                                                                                     
                     //-------------------------------------
                     // validate ranges and values of input
                     //-------------------------------------
                     validateInput(ra_, dec_, scale_, height_, width_, opt_, query_, imgtype_, imgfield_);
+                    token = token_;
                     if (draw2Mass) SdssConstants.isSdss = false;
                     else SdssConstants.isSdss = true;
 
@@ -330,8 +342,8 @@ namespace Sciserver_webService.ImgCutout
                     if (drawQuery) validateQuery(query_);
 
                     canvas = new SDSSGraphicsEnv(width, height, imageScale, ppd, debug, imgtype);
-                    //connectToAllDatabases();
-                    connectToDataBase();
+                    
+                    //connectToDataBase();
 
                     byte oflag = 0;
                     if (drawPhotoObjs) oflag |= SdssConstants.pflag;
@@ -345,15 +357,15 @@ namespace Sciserver_webService.ImgCutout
 
                     if (drawFrames | drawField) getFrames();
                     if (drawQuery) getQueryObjects(query_);
-
-                    OverlayOptions options = new OverlayOptions(SqlConn, canvas, size, ra, dec, radius, zoom, fradius);
+                    
+                    OverlayOptions options = new OverlayOptions( canvas, size, ra, dec, radius, zoom, fradius,datarelease);
 
                     if (drawApogee) options.getApogeeObjects();
                     if (drawField) options.getFields(cTable);
                     if (drawPhotoObjs | drawSpecObjs | drawTargetObjs) options.getObjects(drawPhotoObjs, drawSpecObjs, drawTargetObjs);
                     if (drawBoundingBox | drawOutline) options.getOutlines(drawBoundingBox, drawOutline, cTable);
                     if (drawMask) options.getMasks();
-                    if (drawLabel) options.getLabel(sDataRelease, scale, imageScale);
+                    if (drawLabel) options.getLabel(datarelease, scale, imageScale);
                     if (drawPlate) options.getPlates();
                     if (drawList) getListObjects();
                     if (drawRuler)
@@ -377,7 +389,9 @@ namespace Sciserver_webService.ImgCutout
                     }
                 }
                 catch (Exception e) { throw e; }
-                finally { disconnectFromDataBase(); }
+                finally { 
+                    ///disconnectFromDataBase(); 
+                }
             
         }
 
@@ -396,57 +410,68 @@ namespace Sciserver_webService.ImgCutout
                 if (draw2Mass)
                 {
                     try{
-                        connectToDataBaseImage2Mass();
+
+                        
+                        //connectToDataBaseImage2Mass();
                         sQ.Append ("SELECT  f.img, f.CRVAL1,f.CRVAL2, f.CRPIX1,f.CRPIX2, f.CDELT1, f.CDELT2,f.fieldid \n");
                         sQ.AppendFormat (" From dbo.fTwoMassGetNearbyFrameEq({0}, {1}, {2}) as n  \n",ra,dec, fradius);
                         sQ.Append(" join  dbo.TwoMassImageFrame as f  on f.fieldid=n.fieldid  \n");
-                        
-                        SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
-                        readerImage2Mass = cmd1.ExecuteReader();
 
-                        if (!readerImage2Mass.HasRows) {//throw new Exception("Requested (ra, dec) is outside the 2MASS footprint. \n");
-                            canvas.addDebugMessage("Requested (ra, dec) is outside the 2MASS footprint. \n");
-                            canvas.drawDebugMessage(width,height);
-                            return;
-                        }
+                        RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
+                        DataSet ds = run.runQuery();
 
-                        while (readerImage2Mass.Read())
+                        //SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
+                        //readerImage2Mass = cmd1.ExecuteReader();
+                        using (DataTableReader readerImage2Mass = ds.Tables[0].CreateDataReader())
                         {
-                            
-                            Image tile = null;
-                            try
+                            if (!readerImage2Mass.HasRows)
+                            {//throw new Exception("Requested (ra, dec) is outside the 2MASS footprint. \n");
+                                canvas.addDebugMessage("Requested (ra, dec) is outside the 2MASS footprint. \n");
+                                canvas.drawDebugMessage(width, height);
+                                return;
+                            }
+
+                            while (readerImage2Mass.Read())
                             {
-                                 tile = Image.FromStream(new MemoryStream((Byte[])readerImage2Mass[0]));
-                            }
-                            catch (Exception e) {
 
-                                tile = null;
-                                
-                            }
-                            
-                            if (tile != null)
-                            {
-                                coord = new Coord(
-                                    Convert.ToDouble(readerImage2Mass[1]),
-                                    Convert.ToDouble(readerImage2Mass[2]),
-                                    Convert.ToDouble(readerImage2Mass[3]),
-                                    Convert.ToDouble(readerImage2Mass[4]),
-                                    Convert.ToDouble(readerImage2Mass[5]),
-                                    Convert.ToDouble(readerImage2Mass[6]));
+                                Image tile = null;
+                                try
+                                {
+                                    tile = Image.FromStream(new MemoryStream((Byte[])readerImage2Mass[0]));
+                                }
+                                catch (Exception e)
+                                {
 
-                                coord.m = canvas.getAffineTransform(coord);
+                                    tile = null;
 
-                                canvas.drawFrame(coord, tile);
+                                }
+
+                                if (tile != null)
+                                {
+                                    coord = new Coord(
+                                        Convert.ToDouble(readerImage2Mass[1]),
+                                        Convert.ToDouble(readerImage2Mass[2]),
+                                        Convert.ToDouble(readerImage2Mass[3]),
+                                        Convert.ToDouble(readerImage2Mass[4]),
+                                        Convert.ToDouble(readerImage2Mass[5]),
+                                        Convert.ToDouble(readerImage2Mass[6]));
+
+                                    coord.m = canvas.getAffineTransform(coord);
+
+                                    canvas.drawFrame(coord, tile);
+                                }
                             }
+                            if (readerImage2Mass != null) readerImage2Mass.Close();
+                            //canvas.drawWarning(" Two MASS Image !");
+
                         }
-                        if (readerImage2Mass != null) readerImage2Mass.Close();
-                        //canvas.drawWarning(" Two MASS Image !");
+                       
                     }
                     catch(Exception e){
                         showException("Exception in getFrame() Test ::", sQ.ToString(), e);
                     }
                     finally{
-                       disconnectFromDataBaseImage2Mass();
+                       ///disconnectFromDataBaseImage2Mass();
                     }
 
                 }
@@ -454,81 +479,87 @@ namespace Sciserver_webService.ImgCutout
                 {
                     try
                     {
-                        connectToDataBaseImage();
+                        //connectToDataBaseImage();
                         sQ.Append("SELECT img , f.a, f.b, f.c, f.d, f.e, f.f, f.node, f.incl, f.ra, f.dec, f.fieldID, \n");
                         sQ.Append(" dbo.fSDSS(f.fieldID) , f.run, f.camcol, f.rerun,f.field \n");
                         sQ.AppendFormat("FROM dbo.fGetNearbyFrameEq({0}, {1}, {2}, {3}) as n JOIN Frame f \n", ra, dec, fradius, zoom10x);
                         sQ.AppendFormat("ON f.fieldID = n.fieldID  and f.zoom =  {0} \n", zoom10x);
                         sQ.Append(" and f.iflag = 1  and f.ifieldflag=1 order by f.iorder");
 
-                        IntPtr imageFromBytedata = IntPtr.Zero;
-                        cTable = new Hashtable();
-                        SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
-                        reader = cmd.ExecuteReader();
+                        RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, "sdssimgdb");
+                        DataSet ds = run.runQuery();
 
-                        if (!reader.HasRows)
+                        using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                         {
-                            //throw new Exception("Requested (ra, dec) is outside the SDSS footprint. \n");
-                            canvas.addDebugMessage("Requested (ra, dec) is outside the SDSS footprint. \n");
-                            canvas.drawDebugMessage(width, height);
-                            return;
-                        }
+                            IntPtr imageFromBytedata = IntPtr.Zero;
+                            cTable = new Hashtable();
+                            // SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
+                            //reader = cmd.ExecuteReader();
 
-                        while (reader.Read())
-                        {
-                            //----------------------------------------------
-                            // get the astrometry coordinates of this tile
-                            //----------------------------------------------
-                            coord = new Coord(
-                                Convert.ToDouble(reader[1]),		// a
-                                Convert.ToDouble(reader[2]),		// b 
-                                Convert.ToDouble(reader[3]),		// c
-                                Convert.ToDouble(reader[4]),		// d
-                                Convert.ToDouble(reader[5]),		// e
-                                Convert.ToDouble(reader[6]),		// f
-                                Convert.ToDouble(reader[7]),		// node
-                                Convert.ToDouble(reader[8]), 		// inclination
-                                zoomScale,							// zoomScale
-                                Convert.ToString(reader[12])		// info
-                                );
-
-                            if (debug)
+                            if (!reader.HasRows)
                             {
-                                //canvas.addDebugMessage("info="+ coord.info+" "+Convert.ToString(reader[11])+"\n");
+                                //throw new Exception("Requested (ra, dec) is outside the SDSS footprint. \n");
+                                canvas.addDebugMessage("Requested (ra, dec) is outside the SDSS footprint. \n");
+                                canvas.drawDebugMessage(width, height);
+                                return;
                             }
 
-                            // compute the affine transformation
-                            coord.m = canvas.getAffineTransform(coord);
-                            // fetch fieldId, and save coord in Hashtable
-                            string fieldId = Convert.ToString(reader[11]);
-                            cTable.Add(fieldId, coord);
-
-                            if (drawFrames)
+                            while (reader.Read())
                             {
-                                //-----------------------------------------
-                                // fetch the tile into the memory stream
-                                //-----------------------------------------
-                                Image tile = Image.FromStream(new MemoryStream((Byte[])reader[0]));
+                                //----------------------------------------------
+                                // get the astrometry coordinates of this tile
+                                //----------------------------------------------
+                                coord = new Coord(
+                                    Convert.ToDouble(reader[1]),		// a
+                                    Convert.ToDouble(reader[2]),		// b 
+                                    Convert.ToDouble(reader[3]),		// c
+                                    Convert.ToDouble(reader[4]),		// d
+                                    Convert.ToDouble(reader[5]),		// e
+                                    Convert.ToDouble(reader[6]),		// f
+                                    Convert.ToDouble(reader[7]),		// node
+                                    Convert.ToDouble(reader[8]), 		// inclination
+                                    zoomScale,							// zoomScale
+                                    Convert.ToString(reader[12])		// info
+                                    );
 
-                                //--------------------------------
-                                // draw the tile onto the canvas
-                                //--------------------------------
-                                if (tile != null)
+                                if (debug)
                                 {
-                                    canvas.drawFrame(coord, tile);
-
+                                    //canvas.addDebugMessage("info="+ coord.info+" "+Convert.ToString(reader[11])+"\n");
                                 }
-                                tile.Dispose();
+
+                                // compute the affine transformation
+                                coord.m = canvas.getAffineTransform(coord);
+                                // fetch fieldId, and save coord in Hashtable
+                                string fieldId = Convert.ToString(reader[11]);
+                                cTable.Add(fieldId, coord);
+
+                                if (drawFrames)
+                                {
+                                    //-----------------------------------------
+                                    // fetch the tile into the memory stream
+                                    //-----------------------------------------
+                                    Image tile = Image.FromStream(new MemoryStream((Byte[])reader[0]));
+
+                                    //--------------------------------
+                                    // draw the tile onto the canvas
+                                    //--------------------------------
+                                    if (tile != null)
+                                    {
+                                        canvas.drawFrame(coord, tile);
+
+                                    }
+                                    tile.Dispose();
+                                }
                             }
+                            if (reader != null) reader.Close();
                         }
-                        if (reader != null) reader.Close();
                     }
                     catch (Exception exp)
                     {
                         showException("Exception in getFrame()",sQ.ToString(),exp);
                     }
                     finally {
-                        disconnectFromDataBaseImage();
+                        //disconnectFromDataBaseImage();
                     }
                 }            
          
@@ -647,9 +678,14 @@ namespace Sciserver_webService.ImgCutout
                 string cmdStr = "SELECT img FROM Frame WHERE zoom=" + zoom + " AND run="
                               + run + " AND camCol=" + camcol + " AND field=" + field;
 
-                connectToDataBaseImage();
-                SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                reader = cmd.ExecuteReader();
+                //connectToDataBaseImage();
+                //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
+                //reader = cmd.ExecuteReader();
+                RunCasjobs runcas = new RunCasjobs(cmdStr, "", "ImgCutout:GetJPGImg", KeyWords.contentDataset, "sdssimgdb");
+                        DataSet ds = runcas.runQuery();
+
+               using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+               {
                 while (reader.Read())       // read the next record in the dataset
                 {
                     MemoryStream theJpeg = new MemoryStream();
@@ -663,6 +699,7 @@ namespace Sciserver_webService.ImgCutout
                     bytes = theJpeg.ToArray();
                 }
                 if (reader != null) reader.Close();    // close the reader.  
+               }
             }
             catch (Exception e)
             {
@@ -670,7 +707,7 @@ namespace Sciserver_webService.ImgCutout
             }
             finally
             {
-                disconnectFromDataBaseImage();
+                //disconnectFromDataBaseImage();
             }
             return bytes;
         }
@@ -707,9 +744,10 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                 //set up the data adapter to get our data...
-                DataSet ds = new DataSet();
-                SqlDataAdapter da = new SqlDataAdapter(query.ToString(), SqlConn);
-                da.Fill(ds, "MarkedObjects");
+                
+                RunCasjobs runcas = new RunCasjobs(query.ToString(), "", "ImgCutout:GetJPGImg", KeyWords.contentDataset, datarelease);
+                DataSet ds = runcas.runQuery();
+                
                 if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
                 {
                     throw new Exception("");
@@ -964,108 +1002,108 @@ namespace Sciserver_webService.ImgCutout
         }
 
 
-        /// <summary>
-        /// Disconnect from Database.
-        /// </summary>
-        private void disconnectFromDataBase()
-        {
-            if (reader != null) reader.Close();	// deallocate the SQL connection
-            if (SqlConn != null)				// close the SQL connection
-            {
-                SqlConn.Close();
-                SqlConn.Dispose();
-            }
-        }
-        /// <summary>
-        /// Connect to Database.
-        /// </summary>
-        private void connectToDataBase()
-        {
-            SqlConn = new SqlConnection(sConnect);
-            try { SqlConn.Open(); }
-            catch (Exception e)
-            {
-                StringBuilder msg = new StringBuilder();
-                msg.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-                                  SqlConn.Database, SqlConn.DataSource);
-                throw new Exception(msg.ToString() + e.Message);
-            }
-        }
+        ///// <summary>
+        ///// Disconnect from Database.
+        ///// </summary>
+        //private void disconnectFromDataBase()
+        //{
+        //    if (reader != null) reader.Close();	// deallocate the SQL connection
+        //    if (SqlConn != null)				// close the SQL connection
+        //    {
+        //        SqlConn.Close();
+        //        SqlConn.Dispose();
+        //    }
+        //}
+        ///// <summary>
+        ///// Connect to Database.
+        ///// </summary>
+        //private void connectToDataBase()
+        //{
+        //    SqlConn = new SqlConnection(sConnect);
+        //    try { SqlConn.Open(); }
+        //    catch (Exception e)
+        //    {
+        //        StringBuilder msg = new StringBuilder();
+        //        msg.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+        //                          SqlConn.Database, SqlConn.DataSource);
+        //        throw new Exception(msg.ToString() + e.Message);
+        //    }
+        //}
         ////All this is added if we use two different souces of data one specifically for images
         /// <summary>
         /// Disconnect from Database.
         /// </summary>
-        private void disconnectFromDataBaseImage()
-        {
-            if (readerImage != null) readerImage.Close();	// deallocate the SQL connection
-            if (SqlConnImage != null)				// close the SQL connection
-            {
-                SqlConnImage.Close();
-                SqlConnImage.Dispose();
-            }
-        }
+        //private void disconnectFromDataBaseImage()
+        //{
+        //    if (readerImage != null) readerImage.Close();	// deallocate the SQL connection
+        //    if (SqlConnImage != null)				// close the SQL connection
+        //    {
+        //        SqlConnImage.Close();
+        //        SqlConnImage.Dispose();
+        //    }
+        //}
 
-        /// <summary>
-        /// Connect to Database.
-        /// </summary>
-        private void connectToDataBaseImage()
-        {
-            SqlConnImage = new SqlConnection(sConnectImage);
-            try { SqlConnImage.Open(); }
-            catch (Exception e)
-            {
-                StringBuilder msgImage = new StringBuilder();
-                msgImage.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-                                  SqlConnImage.Database, SqlConnImage.DataSource);
-                throw new Exception(msgImage.ToString() + e.Message);
-            }
-        }
-
-
-        private void connectToAllDatabases() {
-            connectToDataBase(); //Main SDSS
-            connectToDataBaseImage(); // only for images db
-            connectToDataBaseImage2Mass(); // To get only 2mass data         
-        }
-
-        private void disconnectAllDatabases() {
-            disconnectFromDataBase();
-            disconnectFromDataBaseImage();
-            disconnectFromDataBaseImage2Mass();            
-        }
-
-        //*******************************************************************************************
-        // This is for Two Mass Images access   
-        //*******************************************************************************************     
-        /// <summary>
-        /// Disconnect from Database.
-        /// </summary>
-        private void disconnectFromDataBaseImage2Mass()
-        {
-            if (readerImage2Mass != null) readerImage2Mass.Close();	// deallocate the SQL connection
-            if (SqlConnImage2Mass != null)				// close the SQL connection
-            {
-                SqlConnImage2Mass.Close();
-                SqlConnImage2Mass.Dispose();
-            }
-        }
+        ///// <summary>
+        ///// Connect to Database.
+        ///// </summary>
+        //private void connectToDataBaseImage()
+        //{
+        //    SqlConnImage = new SqlConnection(sConnectImage);
+        //    try { SqlConnImage.Open(); }
+        //    catch (Exception e)
+        //    {
+        //        StringBuilder msgImage = new StringBuilder();
+        //        msgImage.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+        //                          SqlConnImage.Database, SqlConnImage.DataSource);
+        //        throw new Exception(msgImage.ToString() + e.Message);
+        //    }
+        //}
 
 
-        /// <summary>
-        /// Connect to Database.
-        /// </summary>
-        private void connectToDataBaseImage2Mass()
-        {
-            SqlConnImage2Mass = new SqlConnection(sConnectImage2Mass);
-            try { SqlConnImage2Mass.Open(); }
-            catch (Exception e)
-            {
-                StringBuilder msgImage2Mass = new StringBuilder();
-                msgImage2Mass.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-                                  SqlConnImage2Mass.Database, SqlConnImage2Mass.DataSource);
-                throw new Exception(msgImage2Mass.ToString() + e.Message);
-            }
-        }
+        //private void connectToAllDatabases() {
+        //    connectToDataBase(); //Main SDSS
+        //    connectToDataBaseImage(); // only for images db
+        //    connectToDataBaseImage2Mass(); // To get only 2mass data         
+        //}
+
+        //private void disconnectAllDatabases() {
+        //    disconnectFromDataBase();
+        //    disconnectFromDataBaseImage();
+        //    disconnectFromDataBaseImage2Mass();            
+        //}
+
+        ////*******************************************************************************************
+        //// This is for Two Mass Images access   
+        ////*******************************************************************************************     
+        ///// <summary>
+        ///// Disconnect from Database.
+        ///// </summary>
+        //private void disconnectFromDataBaseImage2Mass()
+        //{
+        //    if (readerImage2Mass != null) readerImage2Mass.Close();	// deallocate the SQL connection
+        //    if (SqlConnImage2Mass != null)				// close the SQL connection
+        //    {
+        //        SqlConnImage2Mass.Close();
+        //        SqlConnImage2Mass.Dispose();
+        //    }
+        //}
+
+
+        ///// <summary>
+        ///// Connect to Database.
+        ///// </summary>
+        //private void connectToDataBaseImage2Mass()
+        //{
+        //    SqlConnImage2Mass = new SqlConnection(sConnectImage2Mass);
+        //    try { SqlConnImage2Mass.Open(); }
+        //    catch (Exception e)
+        //    {
+        //        StringBuilder msgImage2Mass = new StringBuilder();
+        //        msgImage2Mass.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+        //                          SqlConnImage2Mass.Database, SqlConnImage2Mass.DataSource);
+        //        throw new Exception(msgImage2Mass.ToString() + e.Message);
+        //    }
+        //}
         
         /// <summary>
         /// 
@@ -1087,18 +1125,20 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                 string cmdStr = "SELECT img FROM Frame2Mass WHERE zoom=" + zoom + " AND id=" + id;
-                connectToDataBaseImage();
-                //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                reader = cmd.ExecuteReader();
-                while (reader.Read())       // read the next record in the dataset
+
+                RunCasjobs run = new RunCasjobs(cmdStr, "", "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
+                DataSet ds = run.runQuery(); 
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    MemoryStream theJpeg = new MemoryStream();
-                    Image img_ = Image.FromStream(new MemoryStream((Byte[])reader[0]));
-                    img_.Save(theJpeg, ImageFormat.Jpeg);
-                    bytes = theJpeg.ToArray();
+                    while (reader.Read())       // read the next record in the dataset
+                    {
+                        MemoryStream theJpeg = new MemoryStream();
+                        Image img_ = Image.FromStream(new MemoryStream((Byte[])reader[0]));
+                        img_.Save(theJpeg, ImageFormat.Jpeg);
+                        bytes = theJpeg.ToArray();
+                    }
+                    if (reader != null) reader.Close();    // close the reader.  
                 }
-                if (reader != null) reader.Close();    // close the reader.  
             }
             catch (Exception e)
             {
@@ -1106,7 +1146,7 @@ namespace Sciserver_webService.ImgCutout
             }
             finally
             {
-                disconnectFromDataBaseImage();
+                //disconnectFromDataBaseImage();
             }
             return bytes;
         }
@@ -1117,43 +1157,43 @@ namespace Sciserver_webService.ImgCutout
        //###############################
        
 
-        [WebMethod(BufferResponse = false, Description = "This is just to check availability of service")]
-        public byte[] checkAvailability(
-            double ra_,						// right ascension in J2000 degrees
-            double dec_, 					// declination in J2000 degrees
-            double scale_,					// arcsec/pixel (0.3961267 is native 1:1 for SDSS)
-            Int32 width_,					// image width  (in pixels)
-            Int32 height_,					// image height (in pixels)
-            string opt_,					// drawing options
-            string query_,
-            string imgtype_,
-            string imgfield_
-            )
-        {
+        //[WebMethod(BufferResponse = false, Description = "This is just to check availability of service")]
+        //public byte[] checkAvailability(
+        //    double ra_,						// right ascension in J2000 degrees
+        //    double dec_, 					// declination in J2000 degrees
+        //    double scale_,					// arcsec/pixel (0.3961267 is native 1:1 for SDSS)
+        //    Int32 width_,					// image width  (in pixels)
+        //    Int32 height_,					// image height (in pixels)
+        //    string opt_,					// drawing options
+        //    string query_,
+        //    string imgtype_,
+        //    string imgfield_
+        //    )
+        //{
 
-            try
-            {
+        //    try
+        //    {
 
-                connectToAllDatabases();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            finally { disconnectAllDatabases(); }
+        //        connectToAllDatabases();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //    finally { disconnectAllDatabases(); }
 
-            try{
+        //    try{
                 
-                getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_);
-                return canvas.getBuffer();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            finally { disconnectAllDatabases(); }
+        //        getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_,"");
+        //        return canvas.getBuffer();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //    finally { disconnectAllDatabases(); }
             
-        }
+        //}
     }
 }
 
@@ -1201,3 +1241,4 @@ namespace Sciserver_webService.ImgCutout
 ///						    2013-04-18: Deoyani: Updated getFrames with the optimized query, this connects to different database serves only images.
 ///						                         Commented some part of alex's code and put  back 'query' option related code
 ///						    2013-06-07: Deoyani:  Added 2mass related code for 2mass cutout service                       
+///						    2014-2015: Deoyani : worked on converting everything in RESTful web services, removing direct connections to databases and running all queries through casjobs

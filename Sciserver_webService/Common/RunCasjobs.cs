@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
+using System.Configuration;
 using Sciserver_webService.Common;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
+using System.Net;
+
 
 ///This class is used to submit query to casjobs
 namespace Sciserver_webService.UseCasjobs
@@ -135,9 +138,51 @@ namespace Sciserver_webService.UseCasjobs
             var serializer = new XmlSerializer(o.GetType());
             serializer.Serialize(stringwriter, o);
             return stringwriter.ToString();
-        }       
-      
-      
+        }
+
+
+        // this is just to Dataset from running query in casjobs
+        public DataSet runQuery()
+        {
+            // throw new IndexOutOfRangeException("There is an invalid argument");
+
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(KeyWords.casjobsREST + "contexts/" + casjobsTarget + "/query");
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                request.Accept = this.returnType;//"application/x-dataset";
+
+                if (!token.Equals("") && token != null)
+                    request.Headers.Add("X-Auth-Token", token);
+
+                StreamWriter streamWriter = new StreamWriter(request.GetRequestStream());
+                StringWriter sw = new StringWriter();
+                JsonWriter jsonWriter = new JsonTextWriter(sw);
+                jsonWriter.WriteStartObject();
+                jsonWriter.WritePropertyName("Query");
+                jsonWriter.WriteValue(this.query);
+                //jsonWriter.WritePropertyName("ReturnDataSet");
+                //jsonWriter.WriteValue(true);
+                jsonWriter.WriteEndObject();
+                jsonWriter.Close();
+                streamWriter.Write(sw.ToString());
+                streamWriter.Close();
+
+                DataSet ds = null;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    BinaryFormatter fmt = new BinaryFormatter();
+                    ds = (DataSet)fmt.Deserialize(response.GetResponseStream());
+                }
+                return ds;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
+
+            }
+        }
      
 
        
