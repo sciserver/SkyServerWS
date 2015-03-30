@@ -182,8 +182,15 @@ namespace Sciserver_webService.QueryTools
                             addField(IRspecFields, "vscatter");
                             addField(IRspecFields, "teff");
                             addField(IRspecFields, "logg");
-                            addField(IRspecFields, "metals");
-                            addField(IRspecFields, "alphafe");
+                            if(datarelease >= 12)
+                                addField(IRspecFields, "param_m_h");
+                            else
+                                addField(IRspecFields, "metals");
+
+                            if(datarelease >= 12)
+                                addField(IRspecFields, "param_alpha_m");
+                            else
+                                addField(IRspecFields, "alphafe");
                         }
                         else if (j == "twomassj") { addField(IRspecFields, "j"); }
                         else if (j == "twomassh") { addField(IRspecFields, "h"); }
@@ -371,16 +378,28 @@ namespace Sciserver_webService.QueryTools
                     constraint = " " + prefix + ".logg < " + val;
                     break;
                 case "fehMin":
-                    constraint = " " + prefix + ".metals > " + val;
+                    if(datarelease >=12)
+                        constraint = " " + prefix + ".param_m_h > " + val;
+                    else
+                        constraint = " " + prefix + ".metals > " + val;
                     break;
                 case "fehMax":
-                    constraint = " " + prefix + ".metals < " + val;
+                    if(datarelease  >=12)
+                        constraint = " " + prefix + ".param_m_h < " + val;
+                    else
+                        constraint = " " + prefix + ".metals < " + val;
                     break;
                 case "afeMin":
-                    constraint = " " + prefix + ".alphafe > " + val;
+                    if (datarelease >= 12)
+                        constraint = " " + prefix + ".param_alpha_m > " + val;
+                    else
+                        constraint = " " + prefix + ".alphafe > " + val;
                     break;
                 case "afeMax":
-                    constraint = " " + prefix + ".alphafe < " + val;
+                    if (datarelease >= 12)
+                        constraint = " " + prefix + ".param_alpha_m < " + val;
+                    else
+                        constraint = " " + prefix + ".alphafe < " + val;
                     break;
                 default:
                     break;
@@ -550,11 +569,11 @@ namespace Sciserver_webService.QueryTools
         private static string apogeeAlias = "a";
         private static string aspcapAlias = "q";
         private static string apogeeObjectAlias = "o";
-
+        private static int datarelease = 0;
         public static string buildQuery(string type, Dictionary<string, string> requestDictionary, string positionType)
         {
 
-
+            datarelease = Convert.ToInt32(requestDictionary["datarelease"]);
             Dictionary<string,string> dictionary = getDictionary(positionType,type,requestDictionary);
             
             string cmd = "";            
@@ -1197,7 +1216,7 @@ namespace Sciserver_webService.QueryTools
         {
             for (int i = 0; i < theFields.Count; i++)
             {
-                if (theFields[i] == "teff" | theFields[i] == "logg" | theFields[i] == "metals" | theFields[i] == "cfe" | theFields[i] == "nfe" | theFields[i] == "alphafe")
+                if (theFields[i] == "teff" | theFields[i] == "logg" | theFields[i] == "metals" | theFields[i]=="param_m_h" | theFields[i] == "cfe" | theFields[i] == "nfe" | theFields[i] == "alphafe" | theFields[i] == "param_alpha_m")
                 {
                     selectClause += addImgSelect(theFields[i], "q");
                 }
