@@ -65,7 +65,7 @@ namespace Sciserver_webService.Controllers
             if (valid.ValidateInput(R, C, F, Z))
             {
                 ImgCutout.ImgCutout img = new ImgCutout.ImgCutout();            
-                resp.Content = new ByteArrayContent(img.GetJpegImg(valid.getRun(), valid.getCamcol(), valid.getField(),valid.getZoom()));
+                resp.Content = new ByteArrayContent(img.GetJpegImg(valid.getRun(), valid.getCamcol(), valid.getField(),valid.getZoom(), token));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                 resp.StatusCode = HttpStatusCode.OK;
                 return resp;

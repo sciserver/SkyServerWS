@@ -21,8 +21,9 @@ namespace Sciserver_webService.ImgCutout
         double fradius;
         int zoom;
         string datarelease;
+        string token;
 
-        public OverlayOptions(SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease)
+        public OverlayOptions(SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token)
         {
             this.canvas = canvas;
             this.ra = ra;
@@ -32,6 +33,7 @@ namespace Sciserver_webService.ImgCutout
             this.zoom = zoom;
             this.fradius = fradius;
             this.datarelease = datarelease;
+            this.token = token;
         }
 
         public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius)
@@ -80,7 +82,7 @@ namespace Sciserver_webService.ImgCutout
                 flag, ra, dec, radius, zoom);
             //SqlDataReader reader = null;
 
-            RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+            RunCasjobs run = new RunCasjobs(sQ.ToString(),token, "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
             DataSet ds = run.runQuery();
             try
             {
@@ -130,7 +132,7 @@ namespace Sciserver_webService.ImgCutout
                 double oRa, oDec;
                 //SqlDataReader sReader = cmd.ExecuteReader();					// invoke fGetObjectsEq()               
 
-                RunCasjobs run = new RunCasjobs(sq1.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                RunCasjobs run = new RunCasjobs(sq1.ToString(), token, "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
                 DataSet ds = run.runQuery();
                 using (DataTableReader sReader = ds.Tables[0].CreateDataReader())
                 {
@@ -187,7 +189,7 @@ namespace Sciserver_webService.ImgCutout
                 double rmin, rmax, cmin, cmax;
                 Coord fc;
                 //SqlDataReader reader = cmd.ExecuteReader();		// invoke fGetObjectsEq
-                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
                 DataSet ds = run.runQuery();
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
@@ -236,7 +238,7 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                // SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
-                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                RunCasjobs run = new RunCasjobs(sQ.ToString(),token, "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
                 DataSet ds = run.runQuery();
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
@@ -291,7 +293,7 @@ namespace Sciserver_webService.ImgCutout
             {
                 double oRa, oDec, oRadius;						//					
                 //SqlDataReader reader = cmd.ExecuteReader();					// invoke fGetObjectsEq
-                RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
+                RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:SDSS", KeyWords.contentDataset, datarelease);
                 DataSet ds = run.runQuery();
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {

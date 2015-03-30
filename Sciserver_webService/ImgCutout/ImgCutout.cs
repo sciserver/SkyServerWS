@@ -358,7 +358,7 @@ namespace Sciserver_webService.ImgCutout
                     if (drawFrames | drawField) getFrames();
                     if (drawQuery) getQueryObjects(query_);
                     
-                    OverlayOptions options = new OverlayOptions( canvas, size, ra, dec, radius, zoom, fradius,datarelease);
+                    OverlayOptions options = new OverlayOptions( canvas, size, ra, dec, radius, zoom, fradius,datarelease, token);
 
                     if (drawApogee) options.getApogeeObjects();
                     if (drawField) options.getFields(cTable);
@@ -417,7 +417,7 @@ namespace Sciserver_webService.ImgCutout
                         sQ.AppendFormat (" From dbo.fTwoMassGetNearbyFrameEq({0}, {1}, {2}) as n  \n",ra,dec, fradius);
                         sQ.Append(" join  dbo.TwoMassImageFrame as f  on f.fieldid=n.fieldid  \n");
 
-                        RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
+                        RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
                         DataSet ds = run.runQuery();
 
                         //SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
@@ -486,7 +486,7 @@ namespace Sciserver_webService.ImgCutout
                         sQ.AppendFormat("ON f.fieldID = n.fieldID  and f.zoom =  {0} \n", zoom10x);
                         sQ.Append(" and f.iflag = 1  and f.ifieldflag=1 order by f.iorder");
 
-                        RunCasjobs run = new RunCasjobs(sQ.ToString(), "", "ImgCutout:SDSS", KeyWords.contentDataset, "sdssimgdb");
+                        RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:SDSS", KeyWords.contentDataset, "sdssimgdb");
                         DataSet ds = run.runQuery();
 
                         using (DataTableReader reader = ds.Tables[0].CreateDataReader())
@@ -668,7 +668,8 @@ namespace Sciserver_webService.ImgCutout
             string run,
             string camcol,
             string field,
-            string zoom
+            string zoom,
+            string token
             )
         {
             byte[] bytes = null;
@@ -681,7 +682,7 @@ namespace Sciserver_webService.ImgCutout
                 //connectToDataBaseImage();
                 //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
                 //reader = cmd.ExecuteReader();
-                RunCasjobs runcas = new RunCasjobs(cmdStr, "", "ImgCutout:GetJPGImg", KeyWords.contentDataset, "sdssimgdb");
+                RunCasjobs runcas = new RunCasjobs(cmdStr, token, "ImgCutout:GetJPGImg", KeyWords.contentDataset, "sdssimgdb");
                         DataSet ds = runcas.runQuery();
 
                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
@@ -745,7 +746,7 @@ namespace Sciserver_webService.ImgCutout
             {
                 //set up the data adapter to get our data...
                 
-                RunCasjobs runcas = new RunCasjobs(query.ToString(), "", "ImgCutout:GetJPGImg", KeyWords.contentDataset, datarelease);
+                RunCasjobs runcas = new RunCasjobs(query.ToString(), token, "ImgCutout:GetJPGImg", KeyWords.contentDataset, datarelease);
                 DataSet ds = runcas.runQuery();
                 
                 if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
@@ -1126,7 +1127,7 @@ namespace Sciserver_webService.ImgCutout
             {
                 string cmdStr = "SELECT img FROM Frame2Mass WHERE zoom=" + zoom + " AND id=" + id;
 
-                RunCasjobs run = new RunCasjobs(cmdStr, "", "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
+                RunCasjobs run = new RunCasjobs(cmdStr, token, "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
                 DataSet ds = run.runQuery(); 
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
