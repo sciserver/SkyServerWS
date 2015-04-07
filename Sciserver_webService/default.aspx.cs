@@ -12,7 +12,7 @@ namespace Sciserver_webService
     {
         //private static string urlbase = string.Format("{0}://{1}{2}{3}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath,"<DR>" );
 
-        private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx","<DR>");
+        private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx","DR12");
 
         //cone search 1
 

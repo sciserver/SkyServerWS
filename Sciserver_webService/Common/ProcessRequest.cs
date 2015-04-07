@@ -223,6 +223,11 @@ namespace Sciserver_webService.Common
                     log.SendMessage(message);
                 }
 
+                // get data release number
+                string drnumber = datarelease.ToUpper().Replace("DR", "");
+
+                dictionary.Add("datarelease", drnumber);
+
                 var task = api.Request.Content.ReadAsStreamAsync();
                 task.Wait();
                 Stream stream = task.Result;
