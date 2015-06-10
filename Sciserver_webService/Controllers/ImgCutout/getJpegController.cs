@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 
-/// deoyani@pha.jhu.edu
+/// deoyani@jhu.edu
 namespace Sciserver_webService.Controllers
 {
     public class getJpegController : ApiController
