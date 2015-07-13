@@ -749,11 +749,12 @@ namespace Sciserver_webService.ImgCutout
                 RunCasjobs runcas = new RunCasjobs(query.ToString(), token, "ImgCutout:GetJPGImg", KeyWords.contentDataset, datarelease);
                 DataSet ds = runcas.runQuery();
                 
-                if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
-                {
-                    throw new Exception("");
-                }
-                drawTable(ds.Tables["MarkedObjects"]);
+                //if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
+                //{
+                //    throw new Exception("");
+                //}
+                //drawTable(ds.Tables["MarkedObjects"]);
+                drawTable(ds.Tables[0]);
             }
             catch (Exception e)
             {

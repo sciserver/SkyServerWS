@@ -103,7 +103,8 @@ namespace Sciserver_webService.ToolsSearch
             sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
             sql += "   WHERE ra BETWEEN " + val.ra + " AND " + val.ra_max + "\n";
             sql += "   AND dec BETWEEN " + val.dec + " AND " + val.dec_max + "\n";            
-            this.irQuery = addWhereClause(sql,val);
+            //this.irQuery = addWhereClause(sql,val);
+            this.irQuery = sql;
             return this.irQuery;
         }
 

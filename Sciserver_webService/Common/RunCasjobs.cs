@@ -177,10 +177,22 @@ namespace Sciserver_webService.UseCasjobs
                 }
                 return ds;
             }
-            catch (Exception e)
+            //catch (Exception e)
+            //{
+            //    throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
+            //
+            //}
+            catch (WebException e)
             {
-                throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
-
+                //throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
+                WebResponse errResp = e.Response;
+                string text="";
+                using (Stream respStream = errResp.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(respStream);
+                    text = reader.ReadToEnd();
+                }
+                throw new Exception("There is an error while running Query:\n Query:" + this.query + " " + text + " ");
             }
         }
      

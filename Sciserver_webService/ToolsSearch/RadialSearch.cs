@@ -118,7 +118,8 @@ namespace Sciserver_webService.ToolsSearch
 
             int ccount = 0;
 
-            this.irQuery = this.addWhereClause(sql, val);
+            //this.irQuery = this.addWhereClause(sql, val);
+            this.irQuery = sql;
             return this.irQuery;
         }
 

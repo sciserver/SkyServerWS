@@ -22,7 +22,7 @@ namespace Sciserver_webService.Controllers
         }
 
         [ExceptionHandleAttribute]
-        [HttpPost]
+        //[HttpPost]
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
