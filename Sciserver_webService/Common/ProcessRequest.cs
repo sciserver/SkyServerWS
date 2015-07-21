@@ -149,8 +149,10 @@ namespace Sciserver_webService.Common
             query = Regex.Replace(query, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
             query = Regex.Replace(query, @"[ \t\f\v]+", " ");				                        // replace multiple whitespace with single space
             query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines          
-
-            
+            if (queryType == "SqlSearch")
+            {
+                query = "EXEC spExecuteSQL '" + query + "','500000'";// parsing the query against harmful sql commands
+            }
             try
             {
                 if(format.Equals(""))
