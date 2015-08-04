@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.ToolsSearch
 {
     public class Validation
     {
         
-        private string band;        
-       
-        private String[] searchtypes = new String[] { "equitorial", "galactic" };
+        private string band;
+
+        private String[] searchtypes = new String[] { "equitorial", "galactic", "equatorial" };
 
         public String whichquery = "imaging";
         public double ra { get; set; }
@@ -36,7 +37,7 @@ namespace Sciserver_webService.ToolsSearch
         public int zmin { get; set; }
         public int zmax { get; set; }
                 
-        public int limit = 10;
+        public Int64 limit = 10;
         public string searchtype { get; set; }
 
         private string returnType = "json"; // default search type
@@ -65,16 +66,36 @@ namespace Sciserver_webService.ToolsSearch
            catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-           try { this.uband_s = requestDir["uband"]; }catch (Exception e) { }                       
+           Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
+           Utilities.ValueCheckOrFail("ra", this.ra_max, 0.0, 360.0);
+           Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
+           Utilities.ValueCheckOrFail("dec", this.dec_max, -90.0, 90.0);
+
+           try { this.uband_s = requestDir["uband"];}catch (Exception e) { }                       
            try { this.gband_s = requestDir["gband"];}catch (Exception e) { }
            try { this.rband_s = requestDir["rband"];}catch (Exception e) { }
            try { this.iband_s = requestDir["iband"];}catch (Exception e) { }
            try { this.zband_s = requestDir["zband"];}catch (Exception e) { }
-           try { this.searchtype = requestDir["searchtype"]; } catch (Exception e) { }
            try { this.returntype_s = requestDir["returntype"]; } catch (Exception e) { }
            try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
            try { this.whichquery = requestDir["whichquery"]; }catch (Exception e) { this.whichquery = "imaging"; }
            //try { this.option = requestDir["option"]; } catch (Exception e) { this.option = "imaging"; } 
+           try
+           {
+               this.searchtype = requestDir["whichway"];
+               if (this.searchtype == "galactic")
+               {
+                   double RA = Utilities.glon2ra(this.ra, this.dec);
+                   double DEC = Utilities.glat2dec(this.ra, this.dec);
+                   this.ra = RA;
+                   this.dec = DEC;
+                   RA = Utilities.glon2ra(this.ra_max, this.dec_max);
+                   DEC = Utilities.glat2dec(this.ra_max, this.dec_max);
+                   this.ra_max = RA;
+                   this.dec_max = DEC;
+               }
+           }
+           catch (Exception e) { this.searchtype = ""; }
         }
 
         public Validation(Dictionary<string, string> requestDir, String r)
@@ -95,6 +116,10 @@ namespace Sciserver_webService.ToolsSearch
             catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
+            Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
+            Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
+            Utilities.ValueCheckOrFail("radius", this.radius, 0.0, 60.0);
+
             try { this.uband_s = requestDir["uband"]; }
             catch (Exception e) { }
             try { this.gband_s = requestDir["gband"]; }
@@ -105,12 +130,22 @@ namespace Sciserver_webService.ToolsSearch
             catch (Exception e) { }
             try { this.zband_s = requestDir["zband"]; }
             catch (Exception e) { }
-            try { this.searchtype = requestDir["searchtype"]; }
-            catch (Exception e) { }
             try { this.format = requestDir["format"]; }
             catch (Exception e) { }
             try { this.limit_s = requestDir["limit"]; }
             catch (Exception e) { }
+            try
+            {
+                this.searchtype = requestDir["whichway"];
+                if (this.searchtype == "galactic")
+                {
+                    double RA = Utilities.glon2ra(this.ra, this.dec);
+                    double DEC = Utilities.glat2dec(this.ra, this.dec);
+                    this.ra = RA;
+                    this.dec = DEC;
+                }
+            }
+            catch (Exception e) { this.searchtype = ""; }
         }
 
         public bool ValidateInput(string ra, string dec, string sr)
@@ -134,7 +169,7 @@ namespace Sciserver_webService.ToolsSearch
             try {
                 
                 this.gband = false; this.uband = false; this.rband = false; this.iband = false; this.zband = false;
-                this.searchtype = "equitorial"; // default search type
+                //this.searchtype = "equitorial"; // default search type
 
                 string[] values;
                 if (gband != null)
@@ -207,22 +242,28 @@ namespace Sciserver_webService.ToolsSearch
                     }
                     this.uband = true;
                 }
-                if (searchtype != null) {
+                if (this.uband == true) Utilities.RangeCheckOrFail("u", umin, umax, 0, 35);
+                if (this.gband == true) Utilities.RangeCheckOrFail("g", gmin, gmax, 0, 35);
+                if (this.rband == true) Utilities.RangeCheckOrFail("r", rmin, rmax, 0, 35);
+                if (this.iband == true) Utilities.RangeCheckOrFail("i", imin, imax, 0, 35);
+                if (this.zband == true) Utilities.RangeCheckOrFail("z", zmin, zmax, 0, 35);
 
-                    if (searchtypes.Contains(searchtype))
-                    {
-                        this.searchtype = searchtype;
-                    } else {
-                        this.searchtype = searchtypes[0];
-                    }                    
-                }
+                //if (searchtype != null) {
+                //
+                //    if (searchtypes.Contains(searchtype))
+                //    {
+                //        this.searchtype = searchtype;
+                //    } else {
+                //        this.searchtype = searchtypes[0];
+                //    }                    
+                //}
                 if (returntype != null)
                 {
                     this.returnType = returntype;
                 }
                 if (limit != null)
                 {
-                    this.limit = Int32.Parse(limit);
+                    try { this.limit = Int64.Parse(limit); } catch { }
                 }
                 return true;
             }

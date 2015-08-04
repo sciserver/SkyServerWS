@@ -43,9 +43,23 @@ namespace Sciserver_webService.Common
         /// <summary>
         /// 
         /// </summary>
-        public static string ConeSelect = ConfigurationSettings.AppSettings["ConeSelect"];
+        public static string ConeSelect = ConfigurationManager.AppSettings["ConeSelect"];
         
-        
+        ///Maximum number of rows returned by SQExecuteSQL
+        public static string MaxRows = ConfigurationManager.AppSettings["MaxRows"];
+
+        ///Data Release
+        public static string DataRelease = ConfigurationManager.AppSettings["Release"];
+
+        ///dasUrlBase URL
+        public static string dasUrlBase = ConfigurationManager.AppSettings["dasUrlBase"];
+
+        ///dasUrlBase URL
+        public static string defaultSpRerun = ConfigurationManager.AppSettings["defaultSpRerun"];
+
+
+
+
         ///Casjob messages for VOServices
         public static string ConeSearch = "FOR CONE SEARCH";
         public static string SIAPMessage = "FOR SIAP";

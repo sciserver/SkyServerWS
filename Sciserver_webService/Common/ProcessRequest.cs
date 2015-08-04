@@ -37,6 +37,12 @@ namespace Sciserver_webService.Common
             // get data release number
             string drnumber = datarelease.ToUpper().Replace("DR","");
 
+            // This dict stores extra info needed for running and rendering the query results.
+            Dictionary<string, string> ExtraInfo = new Dictionary<string,string>();
+            ExtraInfo.Add("fp", "");
+            ExtraInfo.Add("syntax", "");
+            ExtraInfo.Add("QueryForUserDisplay", "");
+
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
@@ -93,17 +99,25 @@ namespace Sciserver_webService.Common
 
             switch (queryType)
             {
-                case "SqlSearch": query = dictionary["cmd"];                     
+                //case "SqlSearch": query = dictionary["cmd"];                     
+                //    break;
+
+                case "SqlSearch":
+                    SqlSearch sqlsearch = new SqlSearch(ref dictionary);
+                    query = sqlsearch.query; // here the query is wrapped inside SpExecuteSQL
+                    ExtraInfo["syntax"] = sqlsearch.syntax;
+                    ExtraInfo["QueryForUserDisplay"] = sqlsearch.QueryForUserDisplay;
                     break;
 
-                case "RectangularSearch" :
+                case "RectangularSearch":
                     RectangularSearch rs = new RectangularSearch(dictionary);                  
                     query = rs.query;
                     break;
 
                 case "RadialSearch":
                     RadialSearch radial = new RadialSearch(dictionary);                  
-                    query = radial.query;                    
+                    query = radial.query;
+                    ExtraInfo["fp"] = radial.fp;
                     break;
 
                 case "ConeSearch":
@@ -149,10 +163,6 @@ namespace Sciserver_webService.Common
             query = Regex.Replace(query, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
             query = Regex.Replace(query, @"[ \t\f\v]+", " ");				                        // replace multiple whitespace with single space
             query = Regex.Replace(query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines          
-            if (queryType == "SqlSearch")
-            {
-                query = "EXEC spExecuteSQL '" + query + "','500000'";// parsing the query against harmful sql commands
-            }
             try
             {
                 if(format.Equals(""))
@@ -161,38 +171,51 @@ namespace Sciserver_webService.Common
                 switch (format)
                 {
 
-                    case "csv": format = KeyWords.contentCSV; break;
-                    case "xml": format = KeyWords.contentXML; break;
-                    case "votable": format = KeyWords.contentVOTable; break;
-                    case "json": format = KeyWords.contentJson; break;
-                    case "fits": format = KeyWords.contentFITS; break;
-                    case "dataset": format = KeyWords.contentDataset; break;
+                    case "csv": format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser",format);  break;
+                    case "xml": format = KeyWords.contentXML; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "votable": format = KeyWords.contentVOTable; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "json": format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "fits": format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "dataset": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "html": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
                     
-                    default: format = KeyWords.contentJson; break;
+                    default: format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
                 }
             }
             catch (Exception exp)
             {
                 format = KeyWords.contentCSV;
+                ExtraInfo.Add("FormatFromUser", KeyWords.contentCSV);
             }            
            
-            return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
+            //return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
+            //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, DoReturnHtml);
+            return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
         }
        
 
         /// Upload table        
         public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
+            // This dict stores extra info needed for running and rendering the query results.
+            Dictionary<string, string> ExtraInfo = new Dictionary<string, string>();
+            ExtraInfo.Add("fp", "");
+            ExtraInfo.Add("syntax", "");
+            ExtraInfo.Add("QueryForUserDisplay", "");
+
+
             try
             {
                 string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
-                                                                                                                        /// 
+
+                /// 
                 HttpResponseMessage resp = new HttpResponseMessage();
                 Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
                 String query = "";
                 Dictionary<String, String> dictionary = api.Request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
                 string token = "";   
                 IEnumerable<string> values;
+
                 string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
                 if (api.ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
                 {
@@ -234,9 +257,29 @@ namespace Sciserver_webService.Common
                 task.Wait();
                 Stream stream = task.Result;
 
+                bool HasFile = false;
+                bool HasRaDecText = false;
                 using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
                 {
-                    query += up.UploadTo(queryType, dictionary["searchNearBy"]);
+                    if (stream.Length > 0)
+                    {
+                        query += up.UploadTo(queryType, dictionary["searchNearBy"]);
+                        HasFile = true;
+                    }
+                    else 
+                    {
+                        try
+                        {
+                            query += up.UploadTo(dictionary["radecTextarea"], queryType, dictionary["searchNearBy"]);
+                            if (dictionary["radecTextarea"].Length > 0)
+                                HasRaDecText = true;
+                        }
+                        catch{}
+                    }
+                    if (!HasRaDecText && !HasFile)
+                    {
+                        query = "SELECT 'ERROR: Neither upload file nor list specified for Proximity search.'--";
+                    }
                 }
 
                 
@@ -253,22 +296,25 @@ namespace Sciserver_webService.Common
                     switch (format)
                     {
 
-                        case "csv": format = KeyWords.contentCSV; break;
-                        case "xml": format = KeyWords.contentXML; break;
-                        case "votable": format = KeyWords.contentVOTable; break;
-                        case "json": format = KeyWords.contentJson; break;
-                        case "fits": format = KeyWords.contentFITS; break;
-                        case "dataset": format = KeyWords.contentDataset; break;
+                        case "csv": format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "xml": format = KeyWords.contentXML; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "votable": format = KeyWords.contentVOTable; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "json": format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "fits": format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "dataset": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
+                        case "html": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
 
-                        default: format = KeyWords.contentJson; break;
+                        default: format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
                     }
                 }
                 catch (Exception exp)
                 {
                     format = KeyWords.contentCSV;
+                    ExtraInfo.Add("FormatFromUser", KeyWords.contentCSV);
                 }            
 
-                return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
+                //return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
+                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
             }
             catch (Exception exp)
             {

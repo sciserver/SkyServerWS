@@ -20,5 +20,15 @@ namespace Sciserver_webService.Controllers
             ProcessRequest request = new ProcessRequest();
             return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
         }
+
+        [ExceptionHandleAttribute]
+        public IHttpActionResult get()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
+        }
+
+
+
     }
 }

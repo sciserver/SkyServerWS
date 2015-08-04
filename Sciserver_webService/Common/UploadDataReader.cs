@@ -36,17 +36,19 @@ namespace Sciserver_webService.Common
         }
 
 
-        public string UploadTo(string radecText,string type, string nearBy)
+        public string UploadTo(string radecText, string type, string nearBy)
         {
             this.type = type;
             this.nearBy = nearBy;
-            string CommandText = createUploadTable();
+            //string CommandText = createUploadTable();
+            string CommandText = ""; 
             CommandText += loadUpload(radecText);
             CommandText += createXtable();
             return CommandText;
         }
 
-        public string UploadTo(string type, string nearBy) {
+        public string UploadTo(string type, string nearBy)
+        {
             this.type = type;
             this.nearBy = nearBy;
             ///string CommandText = createUploadTable();
@@ -54,25 +56,6 @@ namespace Sciserver_webService.Common
             CommandText += loadUpload();
             CommandText += createXtable();
             return CommandText;
-        }
-        
-
-        private string createUploadTable() {
-
-            string qry = "create table #upload ( up_id int, ";
-            for (int i = 0; i < columnNames.Length; i++)
-            {
-                qry += " up_" + columnNames[i] + " ";
-                //qry += " " + GetSqlType(i);
-                //if (GetSqlType(i) == SqlDbType.VarChar)
-                //    qry += "(MAX)";
-
-                qry += " " + SqlDbType.Float;
-                qry += ",";
-            }
-            qry = qry.Trim(',');
-            qry += ")";
-            return qry;            
         }
 
         private string loadUpload()
@@ -100,20 +83,45 @@ namespace Sciserver_webService.Common
             
         }
 
+      
         private string loadUpload(string radecText)
         {
+            string[] lines = radecText.Split(new string[] { "\n", "\r\n", "\\n", "\\r\\n" }, StringSplitOptions.None);
+            columnNames = lines[0].Split(','); 
+
             string cmdQuery = "";
+            cmdQuery = createUploadTable();
             cmdQuery += " Insert into #upload values ";
-            string[] lines = radecText.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
 
             for (int i = 1; i < lines.Length; i++) {
-                cmdQuery += "( " + i + "," + lines[i] + " ),";
+                if(lines[i] != "")
+                    cmdQuery += "( " + i + "," + lines[i] + " ),";
             }
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
         }
 
-        private string createXtable() {
+        private string createUploadTable()
+        {
+
+            string qry = "create table #upload ( up_id int, ";
+            for (int i = 0; i < columnNames.Length; i++)
+            {
+                qry += " up_" + columnNames[i] + " ";
+                //qry += " " + GetSqlType(i);
+                //if (GetSqlType(i) == SqlDbType.VarChar)
+                //    qry += "(MAX)";
+
+                qry += " " + SqlDbType.Float;
+                qry += ",";
+            }
+            qry = qry.Trim(',');
+            qry += ")";
+            return qry;
+        }
+
+        private string createXtable()
+        {
             string cmd = "";
             if (type == "spec")
             {

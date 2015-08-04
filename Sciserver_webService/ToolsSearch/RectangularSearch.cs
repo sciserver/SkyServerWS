@@ -54,12 +54,14 @@ namespace Sciserver_webService.ToolsSearch
         {
             string sql;
 
+            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
+
             sql = "SELECT ";
-            sql += (val.limit <= 0) ? "" : " TOP " + val.limit;
+            sql += " TOP " + limit;
 
             if (val.returnFormat == "html")
             {
-                sql += " ''<a target=INFO href=" + skyserverUrl + "/en/tools/explore/obj.aspx?id='' + cast(p.objId as varchar(20)) + ''>'' + cast(p.objId as varchar(20)) + ''</a>'' as objID,\n";
+                sql += " '<a target=INFO href=" + skyserverUrl + "/en/tools/explore/summary.aspx?id=' + cast(p.objId as varchar(20)) +'>' + cast(p.objId as varchar(20)) + '</a>' as objID,\n";
             }
             else
             {
@@ -83,12 +85,14 @@ namespace Sciserver_webService.ToolsSearch
         {
             string sql;
 
-            sql = "SELECT ";
-            sql += (val.limit <= 0) ? "" : " TOP " + val.limit;
+            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
 
-            if (val.returnFormat == "html"){
-          
-                sql += " ''<a target=INFO href=" + skyserverUrl + "/en/tools/explore/summary.aspx?apid='' + cast(p.apstar_id as varchar(40)) + ''>'' + cast(p.apstar_id as varchar(40)) + ''</a>'' as apstar_id,\n";
+            sql = "SELECT ";
+            sql += " TOP " + limit;
+
+            if (val.returnFormat == "html")
+            {
+                sql += " '<a target=INFO href=" + skyserverUrl + "/en/tools/explore/summary.aspx?apid=' + cast(p.apstar_id as varchar(100)) + '>' + cast(p.apstar_id as varchar(100)) + '</a>' as apstar_id,\n";
             }
             else
             {
