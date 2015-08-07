@@ -67,7 +67,7 @@ namespace Sciserver_webService.Common
             cmdQuery = createUploadTable();
             
             
-            cmdQuery += " Insert into #upload values ";
+            cmdQuery += " \nINSERT INTO #upload values ";
             
             int cnt = 0;
             line = origReader.ReadLine();
@@ -91,7 +91,7 @@ namespace Sciserver_webService.Common
 
             string cmdQuery = "";
             cmdQuery = createUploadTable();
-            cmdQuery += " Insert into #upload values ";
+            cmdQuery += " \nINSERT INTO #upload values ";
 
             for (int i = 1; i < lines.Length; i++) {
                 if(lines[i] != "")
@@ -104,7 +104,7 @@ namespace Sciserver_webService.Common
         private string createUploadTable()
         {
 
-            string qry = "create table #upload ( up_id int, ";
+            string qry = "\nCREATE TABLE #upload ( up_id int, ";
             for (int i = 0; i < columnNames.Length; i++)
             {
                 qry += " up_" + columnNames[i] + " ";
@@ -128,21 +128,21 @@ namespace Sciserver_webService.Common
                 if (nearBy == "nearby")
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select SpecObjid from " + fun + ") S ";
+                    cmd += " \nINSERT INTO #x \nSELECT U.up_id, S.* \nFROM #upLoad U CROSS APPLY (SELECT SpecObjid from " + fun + ") S ";
                 }
                 else
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as SpecobjId ";
-                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    cmd += " \nINSERT INTO #x \nSELECT up_id," + fun + "as SpecobjId ";
+                    cmd += " \nFROM #upload \nWHERE" + fun + "IS NOT NULL ";
                 }
             }
             else
@@ -150,20 +150,20 @@ namespace Sciserver_webService.Common
                 if (nearBy == "nearby")
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,objID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,objID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearbyObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select Objid from " + fun + ") S ";
+                    cmd += " \nINSERT INTO #x \nSELECT U.up_id, S.* \nFROM #upLoad U CROSS APPLY (SELECT Objid FROM " + fun + ") S ";
                 }
                 else
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,objID bigint) ";                    
+                    cmd += " \nCREATE TABLE #x (up_id int,objID bigint) ";                    
                     var fun = " ";
                     fun += " dbo.fGetNearestObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as objId ";
-                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    cmd += " \nINSERT INTO #x \nSELECT up_id," + fun + "as objId ";
+                    cmd += " \nFROM #upload \nWHERE" + fun + "IS NOT NULL ";
                 }
             }
             return cmd;
@@ -177,7 +177,7 @@ namespace Sciserver_webService.Common
         /// <param name="tableName"></param>
         /// <returns></returns>
         private string GetCreateTableQry(string tableName) {
-            string qry = "create table " + tableName + " (\n";
+            string qry = "\nCREATE TABLE " + tableName + " (\n";
             for (int i = 0; i < columnNames.Length; i++) {
                 qry += "\n[" + columnNames[i] + "]";
                 qry += " " + GetSqlType(i);
