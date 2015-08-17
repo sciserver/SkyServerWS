@@ -25,13 +25,15 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
+            //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
+            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery);
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
+            //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
+            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery);
         }     
     }
 }

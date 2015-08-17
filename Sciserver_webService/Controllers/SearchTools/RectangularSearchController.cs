@@ -41,14 +41,16 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, KeyWords.RectangularQuery);
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult Post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, KeyWords.RectangularQuery);
         }
     }
 }

@@ -59,7 +59,7 @@ namespace Sciserver_webService.ToolsSearch
             sql = "SELECT ";
             sql += " TOP " + limit;
 
-            if (val.returnFormat == "html")
+            if (val.format == "html")
             {
                 sql += " '<a target=INFO href=" + skyserverUrl + "/en/tools/explore/summary.aspx?id=' + cast(p.objId as varchar(20)) +'>' + cast(p.objId as varchar(20)) + '</a>' as objID,\n";
             }

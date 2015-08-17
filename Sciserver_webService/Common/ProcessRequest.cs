@@ -99,7 +99,7 @@ namespace Sciserver_webService.Common
 
             switch (queryType)
             {
-                //case "SqlSearch": query = dictionary["cmd"];                     
+                //case "SqlSearch": query = dictionary["cmd"];
                 //    break;
 
                 case "SqlSearch":
@@ -110,7 +110,7 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "RectangularSearch":
-                    RectangularSearch rs = new RectangularSearch(dictionary);                  
+                    RectangularSearch rs = new RectangularSearch(dictionary);
                     query = rs.query;
                     break;
 
@@ -154,7 +154,9 @@ namespace Sciserver_webService.Common
                     break;
 
                 default: 
-                    query = QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
+                    QueryTools.BuildQuery.buildQueryMaster(queryType, dictionary, positionType);
+                    ExtraInfo["QueryForUserDisplay"] = QueryTools.BuildQuery.QueryForUserDisplay;
+                    query = QueryTools.BuildQuery.query;
                     break;
             }
 
@@ -283,7 +285,13 @@ namespace Sciserver_webService.Common
                 }
 
                 
-                query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
+                //query += QueryTools.BuildQuery.buildQuery(queryType, dictionary, positionType);
+
+                QueryTools.BuildQuery.buildQueryMaster(queryType, dictionary, positionType);
+                ExtraInfo["QueryForUserDisplay"] = query + QueryTools.BuildQuery.QueryForUserDisplay;
+                query += QueryTools.BuildQuery.query;
+
+
                 //RunCasjobs run = new RunCasjobs();
                 //resp.Content = new StringContent(run.postCasjobs(query, token, casjobsMessage).Content.ReadAsStringAsync().Result);
                 //return resp;

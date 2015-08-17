@@ -77,9 +77,12 @@ namespace Sciserver_webService.Common
         /// <summary>
         /// Imaging Query
         /// </summary>
-        public static string Database = ConfigurationManager.AppSettings["database"];
+        public static string Database = ""; // the reason of Database = "" is that there is no need of database context included in the query. The context is given to the CasJObsAPI in the URL /contextx/{context_name}/tables
+        //public static string Database = "BEST" + ConfigurationManager.AppSettings["Release"].ToString();
+        //public static string Database = ConfigurationManager.AppSettings["database"];
         public static string Release = DR;
         public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
+        public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
         
         /// <summary>
         /// For different web service type names 

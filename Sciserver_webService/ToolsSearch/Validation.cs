@@ -76,7 +76,13 @@ namespace Sciserver_webService.ToolsSearch
            try { this.rband_s = requestDir["rband"];}catch (Exception e) { }
            try { this.iband_s = requestDir["iband"];}catch (Exception e) { }
            try { this.zband_s = requestDir["zband"];}catch (Exception e) { }
-           try { this.returntype_s = requestDir["returntype"]; } catch (Exception e) { }
+           try { this.uband = requestDir["check_u"] == "u" ? true : false; }catch (Exception e) { }
+           try { this.gband = requestDir["check_g"] == "g" ? true : false; }catch (Exception e) { }
+           try { this.rband = requestDir["check_r"] == "r" ? true : false; }catch (Exception e) { }
+           try { this.iband = requestDir["check_i"] == "i" ? true : false; }catch (Exception e) { }
+           try { this.zband = requestDir["check_z"] == "z" ? true : false; }catch (Exception e) { }
+           try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
+           try { this.format = requestDir["format"]; } catch (Exception e) { }
            try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
            try { this.whichquery = requestDir["whichquery"]; }catch (Exception e) { this.whichquery = "imaging"; }
            //try { this.option = requestDir["option"]; } catch (Exception e) { this.option = "imaging"; } 
@@ -120,20 +126,19 @@ namespace Sciserver_webService.ToolsSearch
             Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
             Utilities.ValueCheckOrFail("radius", this.radius, 0.0, 60.0);
 
-            try { this.uband_s = requestDir["uband"]; }
-            catch (Exception e) { }
-            try { this.gband_s = requestDir["gband"]; }
-            catch (Exception e) { }
-            try { this.rband_s = requestDir["rband"]; }
-            catch (Exception e) { }
-            try { this.iband_s = requestDir["iband"]; }
-            catch (Exception e) { }
-            try { this.zband_s = requestDir["zband"]; }
-            catch (Exception e) { }
-            try { this.format = requestDir["format"]; }
-            catch (Exception e) { }
-            try { this.limit_s = requestDir["limit"]; }
-            catch (Exception e) { }
+            try { this.uband_s = requestDir["uband"]; }catch (Exception e) { }
+            try { this.gband_s = requestDir["gband"]; }catch (Exception e) { }
+            try { this.rband_s = requestDir["rband"]; }catch (Exception e) { }
+            try { this.iband_s = requestDir["iband"]; }catch (Exception e) { }
+            try { this.zband_s = requestDir["zband"]; }catch (Exception e) { }
+            try { this.uband = requestDir["check_u"] == "u" ? true : false; }catch (Exception e) { }
+            try { this.gband = requestDir["check_g"] == "g" ? true : false; }catch (Exception e) { }
+            try { this.rband = requestDir["check_r"] == "r" ? true : false; }catch (Exception e) { }
+            try { this.iband = requestDir["check_i"] == "i" ? true : false; }catch (Exception e) { }
+            try { this.zband = requestDir["check_z"] == "z" ? true : false; }catch (Exception e) { }
+            try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
+            try { this.format = requestDir["format"]; }catch (Exception e) { }
+            try { this.limit_s = requestDir["limit"]; }catch (Exception e) { }
             try
             {
                 this.searchtype = requestDir["whichway"];
@@ -168,11 +173,11 @@ namespace Sciserver_webService.ToolsSearch
         {
             try {
                 
-                this.gband = false; this.uband = false; this.rband = false; this.iband = false; this.zband = false;
+                //this.gband = false; this.uband = false; this.rband = false; this.iband = false; this.zband = false;
                 //this.searchtype = "equitorial"; // default search type
 
                 string[] values;
-                if (gband != null)
+                if (gband != null & this.gband == true)
                 {
                     try
                     {
@@ -184,10 +189,9 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         gmin = 0; gmax = 20;
                     }
-                    this.gband = true;
                 }
 
-                if (rband != null) {
+                if (rband != null & this.rband == true) {
                     try
                     {
                         values = rband.Split(',');
@@ -198,9 +202,9 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         rmin = 0; rmax = 20;
                     }
-                    this.rband = true;
                 }
-                if (iband != null) {
+                if (iband != null & this.iband == true)
+                {
                     try
                     {
                         values = iband.Split(',');
@@ -211,9 +215,9 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         imin = 0; imax = 20;
                     }
-                    this.iband = true;
                 }
-                if (zband != null) {
+                if (zband != null & this.zband == true)
+                {
 
                     try
                     {
@@ -225,9 +229,8 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         zmin = 0; zmax = 20;
                     }
-                    this.zband = true;
                 }
-                if (uband != null)
+                if (uband != null & this.uband == true)
                 {
 
                     try
@@ -240,7 +243,6 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         umin = 0; umax = 20;
                     }
-                    this.uband = true;
                 }
                 if (this.uband == true) Utilities.RangeCheckOrFail("u", umin, umax, 0, 35);
                 if (this.gband == true) Utilities.RangeCheckOrFail("g", gmin, gmax, 0, 35);

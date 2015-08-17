@@ -561,6 +561,25 @@ namespace Sciserver_webService.QueryTools
 
 
 
+        public static string query = "";
+        public static string QueryForUserDisplay = "";
+        public static void buildQueryMaster(string type, Dictionary<string, string> requestDictionary, string positionType)
+        {
+            Int64 limit;
+            QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
+            query = QueryForUserDisplay;
+            try
+            {
+                limit = Convert.ToInt64(requestDictionary["limit"]);
+                if (limit > Convert.ToInt64(KeyWords.MaxRows))
+                {
+                    query = "SELECT 'Query error in \"TOP "+ requestDictionary["limit"]+"\". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "' as [Error Message]";
+                }
+            }
+            catch (Exception e) { query = "SELECT 'Query error. Wrong input in \"TOP " + requestDictionary["limit"] + "\" (Invalid numerical value for maximum number of rows).' as [Error Message]"; }
+        }
+
+
         private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
         private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
         private static string specAlias = "s";
@@ -622,22 +641,20 @@ namespace Sciserver_webService.QueryTools
             //double calculatedRA = 0;
             //double calculatedDec = 0;
 
-            Int64 limit = 10;
+            
+            // This needs to go uncommented if the selectClause is not passed to CasJOBS inside SpExecuteSQL.
+            Int64 limit;
             try
             {
                 limit = Convert.ToInt64(dictionary["limit"]);
-                limit = (limit > Convert.ToInt64(KeyWords.MaxRows) || limit <= 0) ? Convert.ToInt64(KeyWords.MaxRows) : limit; 
+                limit = (limit <= 0) ? Convert.ToInt64(KeyWords.MaxRows) : limit;
+                selectClause += "TOP " + limit.ToString() + " \n";
             }
-            catch (Exception e) { }
+            catch (Exception e) { selectClause += "TOP " + dictionary["limit"] + " \n"; }
             
 
 
 
-            selectClause += "TOP " +  limit.ToString() + " \n";
-            
-
-
-            
             //KeyValuePair<string, string> entry in dictionary
             foreach (string s in dictionary.Keys)
             {
@@ -647,7 +664,7 @@ namespace Sciserver_webService.QueryTools
 
                 switch (name)
                 {
-                    
+
                     case "imgparams":
                         options = getOptions(val);
                         ignoreImg = readImgFields(imgFields, options);
@@ -1128,11 +1145,11 @@ namespace Sciserver_webService.QueryTools
                 {
                     if (specFields[i] == "ra")
                     {
-                        selectClause += "str(s." + specFields[i] + ",13,8) as ra";
+                        selectClause += "cast(str(s." + specFields[i] + ",13,8) as float) as ra";
                     }
                     else if (specFields[i] == "[dec]")
                     {
-                        selectClause += "str(s." + specFields[i] + ",13,8) as dec";
+                        selectClause += "cast(str(s." + specFields[i] + ",13,8) as float) as dec";
                     }
                     else
                     {
@@ -1183,11 +1200,11 @@ namespace Sciserver_webService.QueryTools
                     {
                         if (specFields[i] == "ra")
                         {
-                            selectClause += ",ISNULL(str(s." + specFields[i] + ",13,8),0) as ra";
+                            selectClause += ",ISNULL(cast(str(s." + specFields[i] + ",13,8) as float),0) as ra";
                         }
                         else if (specFields[i] == "[dec]")
                         {
-                            selectClause += ",ISNULL(str(s." + specFields[i] + ",13,8),0) as dec";
+                            selectClause += ",ISNULL(cast(str(s." + specFields[i] + ",13,8) as float),0) as dec";
                         }
                         else
                         {
@@ -1240,7 +1257,7 @@ namespace Sciserver_webService.QueryTools
                 }
                 else if (theFields[i] == "glon" | theFields[i] == "glat")
                 {
-                    selectClause += addImgSelect(theFields[i] + ",9,5) " + theFields[i], "str(a");
+                    selectClause += addImgSelect(theFields[i] + ",9,5) as float) " + theFields[i], "cast(str(a");
                 }
                 else { selectClause += addImgSelect(theFields[i], "a"); }
                 if (i < (theFields.Count - 1))
@@ -1282,28 +1299,28 @@ namespace Sciserver_webService.QueryTools
             switch (imgField)
             {
                 case "ra":
-                    selectClause += "str(" + table + "." + imgField + ",13,8) as ra";
+                    selectClause += "cast(str(" + table + "." + imgField + ",13,8) as float) as ra";
                     break;
                 case "[dec]":
-                    selectClause += "str(" + table + "." + imgField + ",13,8) as dec";
+                    selectClause += "cast(str(" + table + "." + imgField + ",13,8) as float) as dec";
                     break;
                 case "model_colors":
-                    selectClause += "str(" + table + ".u - " + table + ".g,11,8) as ugModelColor,";
-                    selectClause += "str(" + table + ".g - " + table + ".r,11,8) as grModelColor,";
-                    selectClause += "str(" + table + ".r - " + table + ".i,11,8) as riModelColor,";
-                    selectClause += "str(" + table + ".i - " + table + ".z,11,8) as izModelColor";
+                    selectClause += "cast(str(" + table + ".u - " + table + ".g,11,8) as float) as ugModelColor,";
+                    selectClause += "cast(str(" + table + ".g - " + table + ".r,11,8) as float) as grModelColor,";
+                    selectClause += "cast(str(" + table + ".r - " + table + ".i,11,8) as float) as riModelColor,";
+                    selectClause += "cast(str(" + table + ".i - " + table + ".z,11,8) as float) as izModelColor";
                     break;
                 case "ugModelColor":
-                    selectClause += "str(" + table + ".u - " + table + ".g,11,8) as ugModelColor";
+                    selectClause += "cast(str(" + table + ".u - " + table + ".g,11,8) as float) as ugModelColor";
                     break;
                 case "grModelColor":
-                    selectClause += "str(" + table + ".g - " + table + ".r,11,8) as grModelColor";
+                    selectClause += "cast(str(" + table + ".g - " + table + ".r,11,8) as float) as grModelColor";
                     break;
                 case "riModelColor":
-                    selectClause += "str(" + table + ".r - " + table + ".i,11,8) as riModelColor";
+                    selectClause += "cast(str(" + table + ".r - " + table + ".i,11,8) as float) as riModelColor";
                     break;
                 case "izModelColor":
-                    selectClause += "str(" + table + ".i - " + table + ".z,11,8) as izModelColor";
+                    selectClause += "cast(str(" + table + ".i - " + table + ".z,11,8) as float) as izModelColor";
                     break;
                 case "SDSSname":
                     selectClause += "dbo.fIAUFromEq(" + table + ".ra," + table + ".[dec]) as SDSSname";

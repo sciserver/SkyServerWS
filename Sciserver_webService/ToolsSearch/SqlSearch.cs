@@ -75,12 +75,12 @@ namespace Sciserver_webService.UseCasjobs
                    }
                }
                this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
-               QueryForUserDisplay = c;
            }
            else
            {
                this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
            }
+           QueryForUserDisplay = c;
         }
 
         

@@ -69,7 +69,7 @@ namespace Sciserver_webService.UseCasjobs
             content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
 
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
-
+            client.Timeout = new TimeSpan(0,0,0,KeyWords.TimeoutCASJobs);// default is 100000ms
             System.IO.Stream stream = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
 
             return processCasjobsResults(stream);
@@ -143,7 +143,7 @@ namespace Sciserver_webService.UseCasjobs
         {
             BinaryFormatter formatter = new BinaryFormatter();
             //string syntax = ExtraInfo.ContainsKey("syntax") ? ExtraInfo["syntax"] : "NoSyntax";
-
+            this.query = ExtraInfo["QueryForUserDisplay"] == "" ? this.query : ExtraInfo["QueryForUserDisplay"];
             try
             {
                 DataSet ds = (DataSet)formatter.Deserialize(stream);
@@ -204,16 +204,24 @@ namespace Sciserver_webService.UseCasjobs
         {
             StreamContent content = new StreamContent(stream);
             string ErrorMessage = content.ReadAsStringAsync().Result;// e.g.: ",\"Error Type\":\"InternalServerError\",\"Error Message\":\"Failed to execute a query: Incorrect syntax near 'Frame'.\",\"LogMessageID\":\"3c152f69-5042-45de-b3aa-d40795e7953e\"}"
-            Regex regex = new Regex(",\"Error Message\":\"(.*?)\"");
-            var v = regex.Match(ErrorMessage);
-            ErrorMessage = v.Groups[1].ToString();
+
+            string message = "";
+            string[] Expressions = new string[] { "\"Error Message\":\"(.*?)\"", "\"Error Message\": \"(.*?)\"", "\"Error Message\" :\"(.*?)\"", "\"Error Message\" : \"(.*?)\"" };
+            foreach (string expresion in Expressions)
+            {
+                Regex regex = new Regex(expresion);
+                var v = regex.Match(ErrorMessage);
+                message = v.Groups[1].ToString();
+                if (message != "")
+                    break;
+            }
 
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("<html><head>\n");
             sb.AppendFormat("<title>SDSS Query Syntax Check</title>\n");
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SQL Syntax Check</h2>");
-            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage +"</font></H3>");
+            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + message + "</font></H3>");
             sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
@@ -235,18 +243,13 @@ namespace Sciserver_webService.UseCasjobs
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SDSS error message</h2>");
             sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + this.query + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
 
         }
 
 
-        private string getErrorMessageHTMLresult(ref Stream stream)
-        {
-            return "Error";
-        }
-        
         private string getTableHTMLresult(ref DataSet ds)
         {
 
@@ -263,6 +266,13 @@ namespace Sciserver_webService.UseCasjobs
             sb.AppendFormat("<title>SDSS Query Results</title>\n");
             sb.AppendFormat("</head><body bgcolor=white>\n");
             int NumTables = ds.Tables.Count;
+            string [] QueryTitle = new string[NumTables];
+            if ((this.casjobsTaskName.Contains(KeyWords.RadialQuery) || this.casjobsTaskName.Contains(KeyWords.RectangularQuery)) && NumTables == 2)
+            {
+                    QueryTitle[0] = "Imaging";
+                    QueryTitle[1] = "Infrared Spectra";
+            }
+
             for (int t = 0; t < NumTables; t++)
             {
                 string[] runs = null, reruns = null, camcols = null, fields = null, plates = null, mjds = null, spreruns = null, fibers = null;
@@ -272,6 +282,7 @@ namespace Sciserver_webService.UseCasjobs
                 int plateI = -1, mjdI = -1, sprerunI = -1, fiberI = -1;
                 int DefaultSpRerun = int.Parse(KeyWords.defaultSpRerun);
 
+                sb.AppendFormat("<h1>"+QueryTitle[t]+"</h1>");
                 sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + Queries[t] + "</pre></h3>"); // writes command
                 int NumRows = ds.Tables[t].Rows.Count;
                 if (NumRows == 0)
@@ -407,6 +418,7 @@ namespace Sciserver_webService.UseCasjobs
 
                     sb.AppendFormat("</TABLE>");
                 }
+                sb.AppendFormat("<hr>");
             }
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
@@ -456,6 +468,7 @@ namespace Sciserver_webService.UseCasjobs
                 request.Method = "POST";
                 request.ContentType = "application/json";
                 request.Accept = this.returnType;//"application/x-dataset";
+                request.Timeout = KeyWords.TimeoutCASJobs;//timeout in milliseconds
 
                 if (!token.Equals("") && token != null)
                     request.Headers.Add("X-Auth-Token", token);
@@ -474,6 +487,8 @@ namespace Sciserver_webService.UseCasjobs
                 streamWriter.Close();
 
                 DataSet ds = null;
+                //var getresponse = request.GetResponse();
+                //HttpWebResponse response = (HttpWebResponse)getresponse;
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
                     BinaryFormatter fmt = new BinaryFormatter();
@@ -481,24 +496,24 @@ namespace Sciserver_webService.UseCasjobs
                 }
                 return ds;
             }
-            //catch (Exception e)
-            //{
-            //    throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
-            //
-            //}
-            catch (WebException e)
+            catch (System.Exception e)
+            {
+                throw new Exception("There is an error while running Query:\n Query:" + this.query + " " + e.Message + " ");
+            }
+            /*catch (System.Net.WebException e)
             {
                 //throw new Exception("There is an error while running Query:\n Query:" + this.query + " ");
+                string text = "";
                 WebResponse errResp = e.Response;
-                string text="";
                 using (Stream respStream = errResp.GetResponseStream())
                 {
                     StreamReader reader = new StreamReader(respStream);
                     text = reader.ReadToEnd();
                 }
                 throw new Exception("There is an error while running Query:\n Query:" + this.query + " " + text + " ");
-            }
+            }*/
         }
+              
      
 
        
@@ -591,5 +606,110 @@ namespace Sciserver_webService.UseCasjobs
         //        throw new ApplicationException("Query did not return results successfully, check input and try again later.");
 
         //}
+
+/*
+        public HttpResponseMessage GetTagStream(HttpRequestMessage request)
+        {
+
+            request.Headers.AcceptEncoding.Clear();
+            HttpResponseMessage response = request.CreateResponse();
+            response.Content = new PushStreamContent(OnStreamAvailable, "text/plain");
+            return response;
+        }
+
+        private void OnStreamAvailable(Stream stream, HttpContent content, TransportContext context)
+        {
+            ConcurrentDictionary<StreamWriter, StreamWriter> outputs = new ConcurrentDictionary<StreamWriter, StreamWriter>();
+            StreamWriter sWriter = new StreamWriter(stream);
+            outputs.TryAdd(sWriter, sWriter);
+
+            while (true)
+            {
+                try
+                {
+                    if (File.Exists("c:\\TagStream.xml"))
+                    {
+                        using (FileStream fileStream = File.Open("c:\\TagStream.xml", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            try
+                            {
+                                using (var file = new StreamReader(fileStream))
+                                {
+                                    try
+                                    {
+                                        while (true)
+                                        {
+                                            string pushValue;
+
+                                            if (!file.EndOfStream)
+                                                pushValue = file.ReadToEnd();
+                                            else
+                                                pushValue = QUERY_ALIVE;
+
+                                            foreach (var kvp in outputs.ToArray())
+                                            {
+                                                try
+                                                {
+                                                    kvp.Value.Write(pushValue);
+                                                    kvp.Value.Flush();
+                                                }
+                                                catch (Exception e)
+                                                {
+                                                    StreamWriter sWriterOut;
+                                                    outputs.TryRemove(kvp.Value, out sWriterOut);
+                                                    if (e is HttpException)
+                                                        if (((HttpException)e).ErrorCode == -2147023667) //The remote host closed the connection.
+                                                            throw;
+                                                }
+                                            }
+                                            Thread.Sleep(10000);
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        file.Close();
+                                        file.Dispose();
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                fileStream.Close();
+                                fileStream.Dispose();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var kvp in outputs.ToArray())
+                        {
+                            try
+                            {
+                                kvp.Value.Write(QUERY_ALIVE);
+                                kvp.Value.Flush();
+                            }
+                            catch (Exception e)
+                            {
+                                StreamWriter sWriterOut2;
+                                outputs.TryRemove(kvp.Value, out sWriterOut2);
+                                if (e is HttpException)
+                                    if (((HttpException)e).ErrorCode == -2147023667) //The remote host closed the connection.
+                                        throw;
+                            }
+                        }
+                        Thread.Sleep(10000);
+                    }
+                }
+                catch (HttpException ex)
+                {
+                    if (ex.ErrorCode == -2147023667) // The remote host closed the connection.
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        */
     }
 }
