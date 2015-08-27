@@ -33,6 +33,7 @@ namespace Sciserver_webService.UseCasjobs
         String returnType = "";
         String token ="";
         String casjobsTarget = "";
+        bool IsSuccessStatusCode = false;
         Dictionary<string, string> ExtraInfo = null;
 
 
@@ -70,76 +71,104 @@ namespace Sciserver_webService.UseCasjobs
 
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(returnType));//"application/json"));
             client.Timeout = new TimeSpan(0,0,0,KeyWords.TimeoutCASJobs);// default is 100000ms
-            System.IO.Stream stream = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
-
+            var result = client.PostAsync(client.BaseAddress, content).Result;
+            if (result.IsSuccessStatusCode)
+                this.IsSuccessStatusCode = true;
+            else
+                this.IsSuccessStatusCode = false;
+            System.IO.Stream stream = await result.Content.ReadAsStreamAsync();
             return processCasjobsResults(stream);
         }
-
 
         private HttpResponseMessage processCasjobsResults(Stream stream) {
 
             var response = new HttpResponseMessage();
-            DataSet ds;
-            if (returnType.Equals(KeyWords.contentDataset) && this.ExtraInfo["FormatFromUser"] != "html")
+            if (this.IsSuccessStatusCode)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                ds = (DataSet)formatter.Deserialize(stream);
-                NewSDSSFields sf = new NewSDSSFields();
-                switch (casjobsTaskName)
+                DataSet ds;
+
+                if (returnType.Equals(KeyWords.contentDataset) && this.ExtraInfo["FormatFromUser"] != "html")
                 {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    ds = (DataSet)formatter.Deserialize(stream);
+                    NewSDSSFields sf = new NewSDSSFields();
+                    switch (casjobsTaskName)
+                    {
 
-                    case "FOR CONE SEARCH":
-                        DefaultCone cstest = new DefaultCone();
-                        vot = cstest.ConeSearch(ds);
-                        response.Content = new StringContent(ToXML(vot), Encoding.UTF8, "application/xml");
-                        break;
+                        case "FOR CONE SEARCH":
+                            DefaultCone cstest = new DefaultCone();
+                            vot = cstest.ConeSearch(ds);
+                            response.Content = new StringContent(ToXML(vot), Encoding.UTF8, "application/xml");
+                            break;
 
-                    case "SDSSFields:FieldArray":
+                        case "SDSSFields:FieldArray":
 
-                        response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, "application/xml");
-                        break;
+                            response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, "application/xml");
+                            break;
 
-                    case "SDSSFields:FieldArrayRect":
+                        case "SDSSFields:FieldArrayRect":
 
-                        response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, "application/xml");
-                        break;
+                            response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, "application/xml");
+                            break;
 
-                    case "SDSSFields:ListOfFields":
+                        case "SDSSFields:ListOfFields":
 
-                        response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, "application/xml");
-                        break;
+                            response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, "application/xml");
+                            break;
 
-                    case "SDSSFields:UrlsOfFields":
+                        case "SDSSFields:UrlsOfFields":
 
-                        response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, "application/xml");
-                        break;
+                            response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, "application/xml");
+                            break;
 
-                    default:
-                        response.Content = new StreamContent(stream);
-                        break;
+                        default:
+                            response.Content = new StreamContent(stream);
+                            break;
+                    }
+
                 }
+                else
+                {
+                    if (ExtraInfo["FormatFromUser"] == "html")
+                    {
+                        response.Content = new StringContent(getHtmlContent(stream));
+                    }
+                    else
+                    {
+                        response.Content = new StreamContent(stream);
+                    }
 
+                }
             }
-            else
+            else // not IsSuccessStatusCode
             {
                 if (ExtraInfo["FormatFromUser"] == "html")
                 {
-                    response.Content = new StringContent(getHtmlContent(ref stream));
+                    response.Content = new StringContent(getHtmlError(stream));
                 }
                 else
                 {
                     response.Content = new StreamContent(stream);
                 }
-            
-            }            
+            }
             return response;
         }
 
 
+        private String getHtmlError(Stream stream)
+        {
+            if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
+            {
+                return getINCORRECTsyntaxHTMLresult(stream);
+            }
+            else // in case we want to run que sql command and retrrieve the resultset:
+            {
+                return getGenericHTMLerror(stream);
+            }
+        }
 
 
-
-        private String getHtmlContent(ref Stream stream)
+        private String getHtmlContent(Stream stream)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             //string syntax = ExtraInfo.ContainsKey("syntax") ? ExtraInfo["syntax"] : "NoSyntax";
@@ -149,31 +178,24 @@ namespace Sciserver_webService.UseCasjobs
                 DataSet ds = (DataSet)formatter.Deserialize(stream);
                 if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
                 {
-                    return getOKsyntaxHTMLresult(ref ds);
+                    return getOKsyntaxHTMLresult(ds);
                 }
                 else if (ExtraInfo["fp"] == "only") // in case user want to run the "is in footprint?" query
                 {
-                    return getFootprintTableHTMLresult(ref ds);
+                    return getFootprintTableHTMLresult(ds);
                 }
                 else // in case we want to run que sql command and retrrieve the resultset:
                 {
-                    return getTableHTMLresult(ref ds);
+                    return getTableHTMLresult(ds);
                 }
             }
-            catch // if the stream (s results table) is not deserialized and casted properly, means that it is really an error message.
+            catch(Exception e) // if the stream (s results table) is not deserialized and casted properly, means that it is really an error message.
             {
-                if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
-                {
-                    return getINCORRECTsyntaxHTMLresult(ref stream);
-                }
-                else // in case we want to run que sql command and retrrieve the resultset:
-                {
-                    return getGenericHTMLerror(ref stream);
-                }
+                return e.Message;
             }
         }
 
-        private string getFootprintTableHTMLresult(ref DataSet ds)
+        private string getFootprintTableHTMLresult(DataSet ds)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("<html><head>\n");
@@ -187,7 +209,7 @@ namespace Sciserver_webService.UseCasjobs
         
 
 
-        private string getOKsyntaxHTMLresult(ref DataSet ds)
+        private string getOKsyntaxHTMLresult(DataSet ds)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("<html><head>\n");
@@ -200,28 +222,46 @@ namespace Sciserver_webService.UseCasjobs
             return sb.ToString();
         }
 
-        private string getINCORRECTsyntaxHTMLresult(ref Stream stream)
+        private string getINCORRECTsyntaxHTMLresult(Stream stream)
         {
-            StreamContent content = new StreamContent(stream);
-            string ErrorMessage = content.ReadAsStringAsync().Result;// e.g.: ",\"Error Type\":\"InternalServerError\",\"Error Message\":\"Failed to execute a query: Incorrect syntax near 'Frame'.\",\"LogMessageID\":\"3c152f69-5042-45de-b3aa-d40795e7953e\"}"
-
-            string message = "";
-            string[] Expressions = new string[] { "\"Error Message\":\"(.*?)\"", "\"Error Message\": \"(.*?)\"", "\"Error Message\" :\"(.*?)\"", "\"Error Message\" : \"(.*?)\"" };
-            foreach (string expresion in Expressions)
+            //StreamContent content = new StreamContent(stream);
+            //stream.Seek(0,SeekOrigin.Begin);
+            StreamReader reader = new StreamReader(stream);
+            
+            //string ErrorMessage = content.ReadAsStringAsync().Result;// e.g.: ",\"Error Type\":\"InternalServerError\",\"Error Message\":\"Failed to execute a query: Incorrect syntax near 'Frame'.\",\"LogMessageID\":\"3c152f69-5042-45de-b3aa-d40795e7953e\"}"
+            string ErrorMessage = reader.ReadToEnd();
+            JObject jarr = JObject.Parse(ErrorMessage);
+            foreach (KeyValuePair<String, JToken> property in jarr)
             {
-                Regex regex = new Regex(expresion);
-                var v = regex.Match(ErrorMessage);
-                message = v.Groups[1].ToString();
-                if (message != "")
+                string propertyName = property.Key.ToString();
+                if (propertyName == "Error Message")
+                {
+                    ErrorMessage = property.Value.ToString();
                     break;
+                }
             }
-
+/*
+            if (message == "")
+            {
+                string[] Expressions = new string[] { "\"Error Message\":\"(.*?)\"", "\"Error Message\": \"(.*?)\"", "\"Error Message\" :\"(.*?)\"", "\"Error Message\" : \"(.*?)\"" };
+                foreach (string expresion in Expressions)
+                {
+                    Regex regex = new Regex(expresion);
+                    var v = regex.Match(ErrorMessage);
+                    message = v.Groups[1].ToString();
+                    if (message != "")
+                    {
+                        message += "REGEX"; break;
+                    }
+                }
+            }
+*/
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("<html><head>\n");
             sb.AppendFormat("<title>SDSS Query Syntax Check</title>\n");
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SQL Syntax Check</h2>");
-            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + message + "</font></H3>");
+            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
             sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
@@ -229,14 +269,30 @@ namespace Sciserver_webService.UseCasjobs
         }
 
 
-        private string getGenericHTMLerror(ref Stream stream)
+        private string getGenericHTMLerror(Stream stream)
         {
+/*
             StreamContent content = new StreamContent(stream);
             string ErrorMessage = content.ReadAsStringAsync().Result;// e.g.: ",\"Error Type\":\"InternalServerError\",\"Error Message\":\"Failed to execute a query: Incorrect syntax near 'Frame'.\",\"LogMessageID\":\"3c152f69-5042-45de-b3aa-d40795e7953e\"}"
             Regex regex = new Regex(",\"Error Message\":\"(.*?)\"");
             var v = regex.Match(ErrorMessage);
             ErrorMessage = v.Groups[1].ToString();
+*/
 
+            string ErrorMessage = "";
+            StreamReader reader = new StreamReader(stream);
+            ErrorMessage = reader.ReadToEnd();
+            JObject jarr = JObject.Parse(ErrorMessage);
+            foreach (KeyValuePair<String, JToken> property in jarr)
+            {
+                string propertyName = property.Key.ToString();
+                if (propertyName == "Error Message")
+                {
+                    ErrorMessage = property.Value.ToString();
+                    break;
+                }
+            }
+            
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("<html><head>\n");
             sb.AppendFormat("<title>SDSS error message</title>\n");
@@ -250,7 +306,7 @@ namespace Sciserver_webService.UseCasjobs
         }
 
 
-        private string getTableHTMLresult(ref DataSet ds)
+        private string getTableHTMLresult(DataSet ds)
         {
 
             string ColumnName = "";
@@ -273,7 +329,7 @@ namespace Sciserver_webService.UseCasjobs
                     QueryTitle[1] = "Infrared Spectra";
             }
 
-            for (int t = 0; t < NumTables; t++)
+            for (int t = 0; t < Math.Min(NumTables,Queries.Length); t++)
             {
                 string[] runs = null, reruns = null, camcols = null, fields = null, plates = null, mjds = null, spreruns = null, fibers = null;
                 bool run = false, rerun = false, camcol = false, field = false, dasFields = false;

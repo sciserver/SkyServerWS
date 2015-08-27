@@ -112,12 +112,14 @@ namespace Sciserver_webService.Common
                 case "RectangularSearch":
                     RectangularSearch rs = new RectangularSearch(dictionary);
                     query = rs.query;
+                    ExtraInfo["QueryForUserDisplay"] = rs.QueryForUserDisplay;
                     break;
 
                 case "RadialSearch":
                     RadialSearch radial = new RadialSearch(dictionary);                  
                     query = radial.query;
                     ExtraInfo["fp"] = radial.fp;
+                    ExtraInfo["QueryForUserDisplay"] = radial.QueryForUserDisplay;
                     break;
 
                 case "ConeSearch":

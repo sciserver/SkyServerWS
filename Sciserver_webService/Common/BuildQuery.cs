@@ -568,6 +568,7 @@ namespace Sciserver_webService.QueryTools
             Int64 limit;
             QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
             query = QueryForUserDisplay;
+            query = "EXEC spExecuteSQL2 '" + query + "'";
             try
             {
                 limit = Convert.ToInt64(requestDictionary["limit"]);

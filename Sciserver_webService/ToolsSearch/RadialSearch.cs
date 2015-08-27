@@ -12,25 +12,43 @@ namespace Sciserver_webService.ToolsSearch
         String skyserverUrl = "";
         int datarelease = 1; // SDSS data release number
         public string fp = "";
+        Dictionary<string, string> requestDir = null;
+        public string QueryForUserDisplay = "";
 
         public RadialSearch(Dictionary<string,string> requestDir) 
         {
+            this.requestDir = requestDir;
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease =Convert.ToInt32( requestDir["datarelease"]);
+
+
+
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
             fp = val.fp;
             if (val.fp != "only")// Want to just run the query, and do not want to know if RA,DEC,Radius fall inside footprint
             {
-                query = this.buildImageQuery(val) + " ; ";
+                QueryForUserDisplay = this.buildImageQuery(val) + " ; ";
                 if (datarelease > 9)
-                    query += this.buildIRQuery(val);
+                    QueryForUserDisplay += this.buildIRQuery(val);
+
+                bool IsGoodLimit = true;
+                try
+                {
+                    if (Convert.ToInt64(requestDir["limit"]) > Convert.ToInt64(KeyWords.MaxRows))
+                    {
+                        query = "SELECT 'Query error in \"TOP " + requestDir["limit"] + "\". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "' as [Error Message]";
+                        IsGoodLimit = false;
+                    }
+                }
+                catch (Exception e) { IsGoodLimit = false; query = "SELECT 'Query error. Wrong input in \"TOP " + requestDir["limit"] + "\" (Invalid numerical value for maximum number of rows).' as [Error Message]"; }
+                if (IsGoodLimit)
+                    query = QueryForUserDisplay;
             }
             else //if only want to know if RA,DEC,Radius fall inside footprint
             {
                 query = this.buildFootPrintQuery(val);
             }
-            
 
             //if (val.whichquery.Equals("imaging"))
             //{
@@ -83,10 +101,11 @@ namespace Sciserver_webService.ToolsSearch
         
         private string buildImageQuery(Validation val)
         {
-            string sql = "";
-            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
 
-            sql = "SELECT ";
+            string sql = ""; 
+            string limit = ( Int64.Parse(val.limit_s)  <= 0) ? KeyWords.MaxRows : (val.limit_s).ToString();
+
+            sql = "SELECT "; 
             sql += " TOP " + limit;
 
             if (val.format == "html")
@@ -110,9 +129,8 @@ namespace Sciserver_webService.ToolsSearch
 
         private string buildIRQuery(Validation val)
         {
-            string sql;
-
-            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
+            string sql = "";
+            string limit = (Int64.Parse(val.limit_s) <= 0) ? KeyWords.MaxRows : (val.limit_s).ToString();
 
             sql = "SELECT ";
             sql += " TOP " + limit;

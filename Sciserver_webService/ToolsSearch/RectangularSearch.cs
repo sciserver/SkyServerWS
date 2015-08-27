@@ -16,10 +16,12 @@ namespace Sciserver_webService.ToolsSearch
     {        
         string imagingQuery = "", irQuery = "", skyserverUrl="";
         public string query = "";
+        Dictionary<string, string> requestDir = null;
+        public string QueryForUserDisplay = "";
 
         public RectangularSearch() { }
 
-        int datarelease = 1; 
+        int datarelease = 1;
 
         public RectangularSearch(Dictionary<string,string> requestDir) 
         {
@@ -27,11 +29,25 @@ namespace Sciserver_webService.ToolsSearch
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease = Convert.ToInt32(requestDir["datarelease"]);
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
+
+            bool IsGoodLimit = true;
+            try
+            {
+                if (Convert.ToInt64(requestDir["limit"]) > Convert.ToInt64(KeyWords.MaxRows))
+                {
+                    query = "SELECT 'Query error in \"TOP " + requestDir["limit"] + "\". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "' as [Error Message]";
+                    IsGoodLimit = false;
+                }
+            }
+            catch (Exception e) { IsGoodLimit = false; query = "SELECT 'Query error. Wrong input in \"TOP " + requestDir["limit"] + "\" (Invalid numerical value for maximum number of rows).' as [Error Message]"; }
+            
             if (temp)
             {
-                query = this.buildImageQuery(val) + " ; ";
+                QueryForUserDisplay = this.buildImageQuery(val) + " ; ";
                 if (datarelease > 9)
-                    query += this.buildIRQuery(val);
+                    QueryForUserDisplay += this.buildIRQuery(val);
+                if (IsGoodLimit)
+                    query = QueryForUserDisplay;
             }
             
         }
@@ -52,9 +68,8 @@ namespace Sciserver_webService.ToolsSearch
 
         private string buildImageQuery(Validation val)
         {
-            string sql;
-
-            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
+            string sql = "";
+            string limit = (Int64.Parse(val.limit_s) <= 0) ? KeyWords.MaxRows : (val.limit_s).ToString();
 
             sql = "SELECT ";
             sql += " TOP " + limit;
@@ -83,9 +98,8 @@ namespace Sciserver_webService.ToolsSearch
 
         private string buildIRQuery(Validation val)
         {
-            string sql;
-
-            string limit = (val.limit > Convert.ToInt64(KeyWords.MaxRows) || val.limit <= 0) ? KeyWords.MaxRows : (val.limit).ToString();
+            string sql = "";
+            string limit = (Int64.Parse(val.limit_s) <= 0) ? KeyWords.MaxRows : (val.limit_s).ToString();
 
             sql = "SELECT ";
             sql += " TOP " + limit;
