@@ -22,13 +22,16 @@ namespace Sciserver_webService.ToolsSearch
         public RectangularSearch() { }
 
         int datarelease = 1;
+        public string WhichPhotometry = "";
 
         public RectangularSearch(Dictionary<string,string> requestDir) 
         {
             Validation val = new Validation(requestDir);
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease = Convert.ToInt32(requestDir["datarelease"]);
-            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
+            WhichPhotometry = requestDir["whichphotometry"];
+
+            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.searchtype, val.returntype_s, val.limit_s);
 
             bool IsGoodLimit = true;
             try
@@ -44,8 +47,11 @@ namespace Sciserver_webService.ToolsSearch
             if (temp)
             {
                 QueryForUserDisplay = this.buildImageQuery(val) + " ; ";
-                if (datarelease > 9)
-                    QueryForUserDisplay += this.buildIRQuery(val);
+                if (datarelease > 9 && WhichPhotometry == "infrared")
+                {
+                    //QueryForUserDisplay += this.buildIRQuery(val);
+                    QueryForUserDisplay = this.buildIRQuery(val);
+                }
                 if (IsGoodLimit)
                     query = QueryForUserDisplay;
             }
@@ -119,10 +125,12 @@ namespace Sciserver_webService.ToolsSearch
             else sql += " a.metals\n";
             sql += "   FROM apogeeStar p\n";
             sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
-            sql += "   WHERE ra BETWEEN " + val.ra + " AND " + val.ra_max + "\n";
-            sql += "   AND dec BETWEEN " + val.dec + " AND " + val.dec_max + "\n";            
-            //this.irQuery = addWhereClause(sql,val);
-            this.irQuery = sql;
+            if (datarelease > 9) 
+                sql += "   JOIN apogeeObject as o ON a.apogee_id=o.apogee_id\n";
+            sql += "   WHERE p.ra BETWEEN " + val.ra + " AND " + val.ra_max + "\n";
+            sql += "   AND p.dec BETWEEN " + val.dec + " AND " + val.dec_max + "\n";
+            this.irQuery = this.addInfraredWhereClause(sql, val);
+            //this.irQuery = sql;
             return this.irQuery;
         }
 
@@ -163,12 +171,21 @@ namespace Sciserver_webService.ToolsSearch
 
         private string addWhereClause(string queryString, Validation val)
         {
-
             if (val.uband) { queryString += " AND p.u between " + val.umin + " AND " + val.umax; }
             if (val.gband) { queryString += " AND p.g between " + val.gmin + " AND " + val.gmax; }
             if (val.iband) { queryString += " AND p.i between " + val.imin + " AND " + val.imax; }
             if (val.rband) { queryString += " AND p.r between " + val.rmin + " AND " + val.rmax; }
             if (val.zband) { queryString += " AND p.z between " + val.zmin + " AND " + val.zmax; }
+
+            return queryString;
+        }
+
+        private string addInfraredWhereClause(string queryString, Validation val)
+        {
+
+            if (val.jband) { queryString += " AND o.j between " + val.jmin + " AND " + val.jmax; }
+            if (val.hband) { queryString += " AND o.h between " + val.hmin + " AND " + val.hmax; }
+            if (val.kband) { queryString += " AND o.k between " + val.kmin + " AND " + val.kmax; }
 
             return queryString;
         }

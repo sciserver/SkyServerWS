@@ -14,6 +14,7 @@ namespace Sciserver_webService.ToolsSearch
         public string fp = "";
         Dictionary<string, string> requestDir = null;
         public string QueryForUserDisplay = "";
+        public string WhichPhotometry = "";
 
         public RadialSearch(Dictionary<string,string> requestDir) 
         {
@@ -21,16 +22,19 @@ namespace Sciserver_webService.ToolsSearch
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease =Convert.ToInt32( requestDir["datarelease"]);
+            WhichPhotometry = requestDir["whichphotometry"];
 
 
-
-            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.searchtype, val.returntype_s, val.limit_s);
+            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.searchtype, val.returntype_s, val.limit_s);
             fp = val.fp;
             if (val.fp != "only")// Want to just run the query, and do not want to know if RA,DEC,Radius fall inside footprint
             {
                 QueryForUserDisplay = this.buildImageQuery(val) + " ; ";
-                if (datarelease > 9)
-                    QueryForUserDisplay += this.buildIRQuery(val);
+                if (datarelease > 9 && WhichPhotometry == "infrared")
+                {
+                    //QueryForUserDisplay += this.buildIRQuery(val);
+                    QueryForUserDisplay = this.buildIRQuery(val);
+                }
 
                 bool IsGoodLimit = true;
                 try
@@ -150,12 +154,13 @@ namespace Sciserver_webService.ToolsSearch
             else sql += " a.metals\n";
             sql += "   FROM apogeeStar p\n";
             sql += "   JOIN fGetNearbyApogeeStarEq(" + val.ra + "," + val.dec + "," + val.radius + ") n on p.apstar_id=n.apstar_id\n";
-            sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id";
+            sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
+            sql += "   JOIN apogeeObject as o ON a.apogee_id=o.apogee_id"; 
 
             int ccount = 0;
 
-            //this.irQuery = this.addWhereClause(sql, val);
-            this.irQuery = sql;
+            this.irQuery = this.addInfraredWhereClause(sql, val);
+            //this.irQuery = sql;
             return this.irQuery;
         }
 
@@ -167,6 +172,16 @@ namespace Sciserver_webService.ToolsSearch
             if (val.iband) { queryString += " AND p.i between " + val.imin + " AND " + val.imax; }
             if (val.rband) { queryString += " AND p.r between " + val.rmin + " AND " + val.rmax; }
             if (val.zband) { queryString += " AND p.z between " + val.zmin + " AND " + val.zmax; }
+
+            return queryString;
+        }
+
+        private string addInfraredWhereClause(string queryString, Validation val)
+        {
+
+            if (val.jband) { queryString += " AND o.j between " + val.jmin + " AND " + val.jmax; }
+            if (val.hband) { queryString += " AND o.h between " + val.hmin + " AND " + val.hmax; }
+            if (val.kband) { queryString += " AND o.k between " + val.kmin + " AND " + val.kmax; }
 
             return queryString;
         }

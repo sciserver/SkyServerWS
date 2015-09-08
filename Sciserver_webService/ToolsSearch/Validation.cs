@@ -25,17 +25,26 @@ namespace Sciserver_webService.ToolsSearch
         public Boolean rband { get; set; }
         public Boolean iband { get; set; }
         public Boolean zband { get; set; }
-        
-        public int umin { get; set; }
-        public int umax { get; set; }
-        public int gmin { get; set; }
-        public int gmax { get; set; }
-        public int imin { get; set; }
-        public int imax { get; set; }
-        public int rmin { get; set; }
-        public int rmax { get; set; }
-        public int zmin { get; set; }
-        public int zmax { get; set; }
+        public Boolean jband { get; set; }
+        public Boolean hband { get; set; }
+        public Boolean kband { get; set; }
+
+        public double umin { get; set; }
+        public double umax { get; set; }
+        public double gmin { get; set; }
+        public double gmax { get; set; }
+        public double imin { get; set; }
+        public double imax { get; set; }
+        public double rmin { get; set; }
+        public double rmax { get; set; }
+        public double zmin { get; set; }
+        public double zmax { get; set; }
+        public double jmin { get; set; }
+        public double jmax { get; set; }
+        public double hmin { get; set; }
+        public double hmax { get; set; }
+        public double kmin { get; set; }
+        public double kmax { get; set; }
                 
         public Int64 limit = 10;
         public string searchtype { get; set; }
@@ -46,7 +55,7 @@ namespace Sciserver_webService.ToolsSearch
         public double dec_max { get; set; }
 
         public String uband_s =null,  gband_s=null,  rband_s=null,  iband_s=null,  zband_s=null,  limit_s=null, returntype_s=null;
-
+        public String jband_s = null, hband_s = null, kband_s = null;
         //public string option = "imaging";
 
         public string returnFormat {
@@ -63,7 +72,7 @@ namespace Sciserver_webService.ToolsSearch
                this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
                this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
            }
-           catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
+           catch (FormatException fx) { throw new ArgumentException("Error: Input ra and dec should be valid numerical values."); }
            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
            Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
@@ -71,16 +80,23 @@ namespace Sciserver_webService.ToolsSearch
            Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
            Utilities.ValueCheckOrFail("dec", this.dec_max, -90.0, 90.0);
 
-           try { this.uband_s = requestDir["uband"];}catch (Exception e) { }                       
+           try { this.uband_s = requestDir["uband"];}catch (Exception e) { }                     
            try { this.gband_s = requestDir["gband"];}catch (Exception e) { }
            try { this.rband_s = requestDir["rband"];}catch (Exception e) { }
            try { this.iband_s = requestDir["iband"];}catch (Exception e) { }
            try { this.zband_s = requestDir["zband"];}catch (Exception e) { }
+           try { this.jband_s = requestDir["jband"]; }catch (Exception e) { }
+           try { this.hband_s = requestDir["hband"]; }catch (Exception e) { }
+           try { this.kband_s = requestDir["kband"]; }catch (Exception e) { }
            try { this.uband = requestDir["check_u"] == "u" ? true : false; }catch (Exception e) { }
            try { this.gband = requestDir["check_g"] == "g" ? true : false; }catch (Exception e) { }
            try { this.rband = requestDir["check_r"] == "r" ? true : false; }catch (Exception e) { }
            try { this.iband = requestDir["check_i"] == "i" ? true : false; }catch (Exception e) { }
            try { this.zband = requestDir["check_z"] == "z" ? true : false; }catch (Exception e) { }
+           try { this.jband = requestDir["check_j"] == "j" ? true : false; }catch (Exception e) { }
+           try { this.hband = requestDir["check_h"] == "h" ? true : false; }catch (Exception e) { }
+           try { this.kband = requestDir["check_k"] == "k" ? true : false; }catch (Exception e) { }
+
            try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
            try { this.format = requestDir["format"]; } catch (Exception e) { }
            try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
@@ -119,7 +135,7 @@ namespace Sciserver_webService.ToolsSearch
                     this.fp = "none";
                 }
             }
-            catch (FormatException fx) { throw new ArgumentException("InputParameters are not in proper format."); }
+            catch (FormatException fx) { throw new ArgumentException("Error: Input ra, dec and radius should be valid numerical values."); }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
             Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
@@ -131,11 +147,17 @@ namespace Sciserver_webService.ToolsSearch
             try { this.rband_s = requestDir["rband"]; }catch (Exception e) { }
             try { this.iband_s = requestDir["iband"]; }catch (Exception e) { }
             try { this.zband_s = requestDir["zband"]; }catch (Exception e) { }
+            try { this.jband_s = requestDir["jband"]; }catch (Exception e) { }
+            try { this.hband_s = requestDir["hband"]; }catch (Exception e) { }
+            try { this.kband_s = requestDir["kband"]; }catch (Exception e) { }
             try { this.uband = requestDir["check_u"] == "u" ? true : false; }catch (Exception e) { }
             try { this.gband = requestDir["check_g"] == "g" ? true : false; }catch (Exception e) { }
             try { this.rband = requestDir["check_r"] == "r" ? true : false; }catch (Exception e) { }
             try { this.iband = requestDir["check_i"] == "i" ? true : false; }catch (Exception e) { }
             try { this.zband = requestDir["check_z"] == "z" ? true : false; }catch (Exception e) { }
+            try { this.jband = requestDir["check_j"] == "j" ? true : false; }catch (Exception e) { }
+            try { this.hband = requestDir["check_h"] == "h" ? true : false; }catch (Exception e) { }
+            try { this.kband = requestDir["check_k"] == "k" ? true : false; }catch (Exception e) { }
             try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
             try { this.format = requestDir["format"]; }catch (Exception e) { }
             try { this.limit_s = requestDir["limit"]; }catch (Exception e) { }
@@ -164,11 +186,11 @@ namespace Sciserver_webService.ToolsSearch
             }
             catch (Exception e)
             {
-                throw new Exception("The input values are not in correct format. ra,dec,radius all need real numbers.");
+                throw new Exception("The input values are not in correct format. ra, dec and radius all need to be real numbers.");
             }
         }
 
-        public bool ValidateOtherParameters(String uband, String gband, String rband, String iband, String zband,
+        public bool ValidateOtherParameters(String uband, String gband, String rband, String iband, String zband, String jband, String hband, String kband,
                          String searchtype , String returntype, String limit )
         {
             try {
@@ -182,12 +204,13 @@ namespace Sciserver_webService.ToolsSearch
                     try
                     {
                         values = gband.Split(',');
-                        gmin = Int32.Parse(values[0]);
-                        gmax = Int32.Parse(values[1]);
+                        gmin = Double.Parse(values[0]);
+                        gmax = Double.Parse(values[1]);
                     }
                     catch (Exception e)
                     {
                         gmin = 0; gmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
                     }
                 }
 
@@ -195,12 +218,13 @@ namespace Sciserver_webService.ToolsSearch
                     try
                     {
                         values = rband.Split(',');
-                        rmin = Int32.Parse(values[0]);
-                        rmax = Int32.Parse(values[1]);
+                        rmin = Double.Parse(values[0]);
+                        rmax = Double.Parse(values[1]);
                     }
                     catch (Exception e)
                     {
                         rmin = 0; rmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
                     }
                 }
                 if (iband != null & this.iband == true)
@@ -208,12 +232,13 @@ namespace Sciserver_webService.ToolsSearch
                     try
                     {
                         values = iband.Split(',');
-                        imin = Int32.Parse(values[0]);
-                        imax = Int32.Parse(values[1]);
+                        imin = Double.Parse(values[0]);
+                        imax = Double.Parse(values[1]);
                     }
                     catch (Exception e)
                     {
                         imin = 0; imax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
                     }
                 }
                 if (zband != null & this.zband == true)
@@ -222,12 +247,13 @@ namespace Sciserver_webService.ToolsSearch
                     try
                     {
                         values = zband.Split(',');
-                        zmin = Int32.Parse(values[0]);
-                        zmax = Int32.Parse(values[1]);
+                        zmin = Double.Parse(values[0]);
+                        zmax = Double.Parse(values[1]);
                     }
                     catch (Exception e)
                     {
                         zmin = 0; zmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
                     }
                 }
                 if (uband != null & this.uband == true)
@@ -236,19 +262,68 @@ namespace Sciserver_webService.ToolsSearch
                     try
                     {
                         values = uband.Split(',');
-                        umin = Int32.Parse(values[0]);
-                        umax = Int32.Parse(values[1]);
+                        umin = Double.Parse(values[0]);
+                        umax = Double.Parse(values[1]);
                     }
                     catch (Exception e)
                     {
                         umin = 0; umax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
                     }
                 }
+                if (jband != null & this.jband == true)
+                {
+
+                    try
+                    {
+                        values = jband.Split(',');
+                        jmin = Double.Parse(values[0]);
+                        jmax = Double.Parse(values[1]);
+                    }
+                    catch (Exception e)
+                    {
+                        jmin = 0; jmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
+                    }
+                }
+                if (hband != null & this.hband == true)
+                {
+
+                    try
+                    {
+                        values = hband.Split(',');
+                        hmin = Double.Parse(values[0]);
+                        hmax = Double.Parse(values[1]);
+                    }
+                    catch (Exception e)
+                    {
+                        hmin = 0; hmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
+                    }
+                }
+                if (kband != null & this.kband == true)
+                {
+
+                    try
+                    {
+                        values = kband.Split(',');
+                        kmin = Double.Parse(values[0]);
+                        kmax = Double.Parse(values[1]);
+                    }
+                    catch (Exception e)
+                    {
+                        kmin = 0; kmax = 20;
+                        throw new Exception("Please enter numerical values for the magnitude limits.");
+                    }
+                } 
                 if (this.uband == true) Utilities.RangeCheckOrFail("u", umin, umax, 0, 35);
                 if (this.gband == true) Utilities.RangeCheckOrFail("g", gmin, gmax, 0, 35);
                 if (this.rband == true) Utilities.RangeCheckOrFail("r", rmin, rmax, 0, 35);
                 if (this.iband == true) Utilities.RangeCheckOrFail("i", imin, imax, 0, 35);
                 if (this.zband == true) Utilities.RangeCheckOrFail("z", zmin, zmax, 0, 35);
+                if (this.jband == true) Utilities.RangeCheckOrFail("j", jmin, jmax, 0, 35);
+                if (this.hband == true) Utilities.RangeCheckOrFail("h", hmin, hmax, 0, 35);
+                if (this.kband == true) Utilities.RangeCheckOrFail("k", kmin, kmax, 0, 35);
 
                 //if (searchtype != null) {
                 //
@@ -265,12 +340,14 @@ namespace Sciserver_webService.ToolsSearch
                 }
                 if (limit != null)
                 {
-                    try { this.limit = Int64.Parse(limit); } catch { }
+                    try { this.limit = Int64.Parse(limit); }
+                    catch { throw new Exception("Row limit should be a valid numerical value."); }
                 }
                 return true;
             }
             catch (Exception ex) {
-                throw new Exception("Input Parameters Validation Exception:"+ex.Message);
+                //throw new Exception("Input Parameters Validation Exception:"+ex.Message);
+                throw new Exception("Error: " + ex.Message);
             }
         }
 
@@ -286,7 +363,7 @@ namespace Sciserver_webService.ToolsSearch
             }
             catch (Exception e)
             {
-                throw new Exception("The input values are not in correct format. ra,dec,radius all need real numbers.");
+                throw new Exception("The input values are not in correct format: all need to be real numbers.");
             }
         }
     }
