@@ -22,14 +22,14 @@ namespace Sciserver_webService.ToolsSearch
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease =Convert.ToInt32( requestDir["datarelease"]);
-            WhichPhotometry = requestDir["whichphotometry"];
+            try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
 
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.searchtype, val.returntype_s, val.limit_s);
             fp = val.fp;
             if (val.fp != "only")// Want to just run the query, and do not want to know if RA,DEC,Radius fall inside footprint
             {
-                QueryForUserDisplay = this.buildImageQuery(val) + " ; ";
+                QueryForUserDisplay = this.buildImageQuery(val);
                 if (datarelease > 9 && WhichPhotometry == "infrared")
                 {
                     //QueryForUserDisplay += this.buildIRQuery(val);

@@ -25,7 +25,7 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
         }
 
 

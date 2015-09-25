@@ -19,21 +19,21 @@ using Sciserver_webService.Models;
 
 namespace Sciserver_webService.Controllers
 {
-    public class SqlSearchController : ApiController
+    public class DatabaseSearchController : ApiController
     {
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery);
+            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery);
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery);
+            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery);
         }
     }
 }

@@ -610,7 +610,7 @@ namespace Sciserver_webService.ImgCutout
 
             for (int i = 0; i < opt_.Length; i++)
             {
-                char c = opt_[i];
+                char c = opt_.ToUpper()[i];
                 switch (c)
                 {
                     case 'B': drawBoundingBox = true;

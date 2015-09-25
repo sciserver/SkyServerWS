@@ -74,11 +74,11 @@ namespace Sciserver_webService.UseCasjobs
                            c += "<i>" + (i + 1) + ".</i> " + clines[i];
                    }
                }
-               this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL3 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
            }
            else
            {
-               this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL3 '" + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
            }
            QueryForUserDisplay = c;
         }

@@ -72,13 +72,19 @@ namespace Sciserver_webService.ToolsSearch
                this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
                this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
            }
-           catch (FormatException fx) { throw new ArgumentException("Error: Input ra and dec should be valid numerical values."); }
+           catch (FormatException fx) { throw new ArgumentException("Error: Input RA and Dec should be valid numerical values."); }
            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-           Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
-           Utilities.ValueCheckOrFail("ra", this.ra_max, 0.0, 360.0);
-           Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
-           Utilities.ValueCheckOrFail("dec", this.dec_max, -90.0, 90.0);
+           if (this.ra_max < this.ra)
+           { throw new ArgumentException("Error: lower RA limit should be less than upper RA limit."); }
+
+           if (this.dec_max < this.dec)
+           { throw new ArgumentException("Error: lower Dec limit should be less than upper Dec limit."); }
+
+           Utilities.ValueCheckOrFail("RA", this.ra, 0.0, 360.0);
+           Utilities.ValueCheckOrFail("RA", this.ra_max, 0.0, 360.0);
+           Utilities.ValueCheckOrFail("Dec", this.dec, -90.0, 90.0);
+           Utilities.ValueCheckOrFail("Dec", this.dec_max, -90.0, 90.0);
 
            try { this.uband_s = requestDir["uband"];}catch (Exception e) { }                     
            try { this.gband_s = requestDir["gband"];}catch (Exception e) { }
@@ -135,11 +141,11 @@ namespace Sciserver_webService.ToolsSearch
                     this.fp = "none";
                 }
             }
-            catch (FormatException fx) { throw new ArgumentException("Error: Input ra, dec and radius should be valid numerical values."); }
+            catch (FormatException fx) { throw new ArgumentException("Error: Input RA, Dec and radius should be valid numerical values."); }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-            Utilities.ValueCheckOrFail("ra", this.ra, 0.0, 360.0);
-            Utilities.ValueCheckOrFail("dec", this.dec, -90.0, 90.0);
+            Utilities.ValueCheckOrFail("RA", this.ra, 0.0, 360.0);
+            Utilities.ValueCheckOrFail("Dec", this.dec, -90.0, 90.0);
             Utilities.ValueCheckOrFail("radius", this.radius, 0.0, 60.0);
 
             try { this.uband_s = requestDir["uband"]; }catch (Exception e) { }
@@ -186,7 +192,7 @@ namespace Sciserver_webService.ToolsSearch
             }
             catch (Exception e)
             {
-                throw new Exception("The input values are not in correct format. ra, dec and radius all need to be real numbers.");
+                throw new Exception("The input values are not in correct format. RA, Dec and radius need to be real numbers.");
             }
         }
 

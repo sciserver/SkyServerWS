@@ -28,11 +28,13 @@ namespace Sciserver_webService.Common
         string[] columnNames;
         string type;
         string nearBy;
+        string radiusDefault = "1";// in arcminutes
 
-        public UploadDataReader() { }
-        public UploadDataReader(TextReader s)
+        public UploadDataReader(string RadiusDefault) { this.radiusDefault = RadiusDefault; }
+        public UploadDataReader(TextReader s, string RadiusDefault)
         {
             origReader = s;
+            this.radiusDefault = RadiusDefault;
         }
 
 
@@ -71,13 +73,27 @@ namespace Sciserver_webService.Common
             
             int cnt = 0;
             line = origReader.ReadLine();
-            while (line != null)
+            if (columnNames.Length == 2)
             {
-                cnt++;
-                //string[] data = line.Split(',');
-                cmdQuery += "( " + cnt + "," + line + " ),";
-                line = origReader.ReadLine();
+                while (line != null)
+                {
+                    cnt++;
+                    //string[] data = line.Split(',');
+                    cmdQuery += "( " + cnt + "," + line + "," + radiusDefault  + " ),";
+                    line = origReader.ReadLine();
+                }
             }
+            else
+            {
+                while (line != null)
+                {
+                    cnt++;
+                    //string[] data = line.Split(',');
+                    cmdQuery += "( " + cnt + "," + line + " ),";
+                    line = origReader.ReadLine();
+                }
+            }
+
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
             
@@ -93,9 +109,27 @@ namespace Sciserver_webService.Common
             cmdQuery = createUploadTable();
             cmdQuery += " \nINSERT INTO #upload values ";
 
-            for (int i = 1; i < lines.Length; i++) {
-                if(lines[i] != "")
-                    cmdQuery += "( " + i + "," + lines[i] + " ),";
+            if (columnNames.Length == 2)
+            {
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (lines[i] != "")
+                    {
+                        cmdQuery += "( " + i + "," + lines[i] + "," + radiusDefault + " ),";
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (lines[i] != "")
+                    {
+                        cmdQuery += "( " + i + "," + lines[i] + " ),";
+                    }
+                }
+
+
             }
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
@@ -112,6 +146,12 @@ namespace Sciserver_webService.Common
                 //if (GetSqlType(i) == SqlDbType.VarChar)
                 //    qry += "(MAX)";
 
+                qry += " " + SqlDbType.Float;
+                qry += ",";
+            }
+            if(columnNames.Length == 2)
+            {
+                qry += " up_sep ";
                 qry += " " + SqlDbType.Float;
                 qry += ",";
             }

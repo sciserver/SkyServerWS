@@ -33,6 +33,7 @@ namespace Sciserver_webService.UseCasjobs
         String returnType = "";
         String token ="";
         String casjobsTarget = "";
+        String ClientIP = "";
         bool IsSuccessStatusCode = false;
         Dictionary<string, string> ExtraInfo = null;
 
@@ -45,9 +46,10 @@ namespace Sciserver_webService.UseCasjobs
             this.casjobsTaskName = casjobsTaskName;
             this.returnType = returnType;
             this.casjobsTarget = target;
+            this.ClientIP = "unknown";
         }
 
-        public RunCasjobs(string query, String token, string casjobsTaskName, string returnType, string target, Dictionary<string, string> ExtraInfo)
+        public RunCasjobs(string query, String token, string casjobsTaskName, string returnType, string target, Dictionary<string, string> ExtraInfo, string clientIP)
         {
             this.query = query;
             this.token = token;
@@ -55,6 +57,7 @@ namespace Sciserver_webService.UseCasjobs
             this.returnType = returnType;
             this.casjobsTarget = target;
             this.ExtraInfo = ExtraInfo;
+            this.ClientIP = clientIP;
         }
 
 
@@ -64,7 +67,7 @@ namespace Sciserver_webService.UseCasjobs
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(KeyWords.casjobsREST + "contexts/" + casjobsTarget + "/query");
 
-            StringContent content = new StringContent(this.getJsonContent(query, casjobsTaskName));
+            StringContent content = new StringContent(this.getJsonContent(query, casjobsTaskName, ClientIP));
             if (!(token == null || token == String.Empty))
                 content.Headers.Add(KeyWords.xauth, token);
             content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
@@ -299,6 +302,7 @@ namespace Sciserver_webService.UseCasjobs
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SDSS error message</h2>");
             sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
+            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
             sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
@@ -347,132 +351,138 @@ namespace Sciserver_webService.UseCasjobs
                 }
                 else
                 {
-                    for (int r = 0; r < NumRows; r++)
+                    if (ds.Tables[0].Rows[0][0].ToString().StartsWith("error: limit is") || ds.Tables[0].Rows[0][0].ToString().Contains("Maximum number of rows allowed"))
                     {
-                        int NumColumns = ds.Tables[t].Columns.Count;
-                        if (r == 0)// filling the first row with the names of the columns
+                        sb.AppendFormat("<h3><br><font color=red> Error: Maximum number of rows is " + (Int64.Parse(KeyWords.MaxRows)).ToString("c0").Remove(0, 1) + ". Try using 'TOP " + KeyWords.MaxRows + "' in the SQL command.</font> </h3>");
+                    }
+                    else
+                    {
+
+                        sb.AppendFormat("<h3>Your query output (max " + (Int64.Parse(KeyWords.MaxRows)).ToString("c0").Remove(0, 1) + " rows): <br></h3>"); // writes command
+                        for (int r = 0; r < NumRows; r++)
                         {
-                            sb.AppendFormat("<table border='1' BGCOLOR=cornsilk>\n");
-                            sb.AppendFormat("<tr align=center>");
-                            for (int c = 0; c < NumColumns; c++)
+                            int NumColumns = ds.Tables[t].Columns.Count;
+                            if (r == 0)// filling the first row with the names of the columns
                             {
-                                ColumnName = ds.Tables[t].Columns[c].ColumnName;
-                                sb.AppendFormat("<td><font size=-1>{0}</font></td>", ColumnName);
-                                switch (ColumnName.ToLower())
+                                sb.AppendFormat("<table border='1' BGCOLOR=cornsilk>\n");
+                                sb.AppendFormat("<tr align=center>");
+                                for (int c = 0; c < NumColumns; c++)
                                 {
-                                    case "run":
-                                        run = true;
-                                        runI = c;
-                                        break;
-                                    case "rerun":
-                                        rerun = true;
-                                        rerunI = c;
-                                        break;
-                                    case "camcol":
-                                        camcol = true;
-                                        camcolI = c;
-                                        break;
-                                    case "field":
-                                        field = true;
-                                        fieldI = c;
-                                        break;
-                                    case "plate":
-                                        plate = true;
-                                        plateI = c;
-                                        break;
-                                    case "mjd":
-                                        mjd = true;
-                                        mjdI = c;
-                                        break;
-                                    case "sprerun":
-                                        sprerun = true;
-                                        sprerunI = c;
-                                        break;
-                                    case "fiberid":
-                                        fiber = true;
-                                        fiberI = c;
-                                        break;
-                                    default:
-                                        break;
+                                    ColumnName = ds.Tables[t].Columns[c].ColumnName;
+                                    sb.AppendFormat("<td><font size=-1>{0}</font></td>", ColumnName);
+                                    switch (ColumnName.ToLower())
+                                    {
+                                        case "run":
+                                            run = true;
+                                            runI = c;
+                                            break;
+                                        case "rerun":
+                                            rerun = true;
+                                            rerunI = c;
+                                            break;
+                                        case "camcol":
+                                            camcol = true;
+                                            camcolI = c;
+                                            break;
+                                        case "field":
+                                            field = true;
+                                            fieldI = c;
+                                            break;
+                                        case "plate":
+                                            plate = true;
+                                            plateI = c;
+                                            break;
+                                        case "mjd":
+                                            mjd = true;
+                                            mjdI = c;
+                                            break;
+                                        case "sprerun":
+                                            sprerun = true;
+                                            sprerunI = c;
+                                            break;
+                                        case "fiberid":
+                                            fiber = true;
+                                            fiberI = c;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                sb.AppendFormat("</tr>");
+                                if (run == true && camcol == true && field == true)
+                                {
+                                    dasFields = true;
+                                    runs = new string[NumRows];
+                                    reruns = new string[NumRows];
+                                    camcols = new string[NumRows];
+                                    fields = new string[NumRows];
+                                }
+                                if (plate == true && mjd == true && fiber == true)
+                                {
+                                    dasSpectra = true;
+                                    plates = new string[NumRows];
+                                    mjds = new string[NumRows];
+                                    spreruns = new string[NumRows];
+                                    fibers = new string[NumRows];
                                 }
                             }
+
+                            sb.AppendFormat("<tr align=center BGCOLOR=#eeeeff>");
+                            for (int c = 0; c < NumColumns; c++)
+                                sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
                             sb.AppendFormat("</tr>");
-                            if (run == true && camcol == true && field == true)
+
+                            if (dasFields == true)
                             {
-                                dasFields = true;
-                                runs = new string[NumRows];
-                                reruns = new string[NumRows];
-                                camcols = new string[NumRows];
-                                fields = new string[NumRows];
+                                runs[r] = ds.Tables[t].Rows[r][runI].ToString();
+                                if (rerunI > -1) reruns[r] = ds.Tables[t].Rows[r][rerunI].ToString();
+                                camcols[r] = ds.Tables[t].Rows[r][camcolI].ToString();
+                                fields[r] = ds.Tables[t].Rows[r][fieldI].ToString();
                             }
-                            if (plate == true && mjd == true && fiber == true)
+                            if (dasSpectra == true)
                             {
-                                dasSpectra = true;
-                                plates = new string[NumRows];
-                                mjds = new string[NumRows];
-                                spreruns = new string[NumRows];
-                                fibers = new string[NumRows];
+                                plates[r] = ds.Tables[t].Rows[r][plateI].ToString();
+                                if (sprerun == true)
+                                    spreruns[r] = ds.Tables[t].Columns[sprerunI].ColumnName;
+                                else
+                                    spreruns[r] = "" + DefaultSpRerun;
+                                mjds[r] = ds.Tables[t].Rows[r][mjdI].ToString();
+                                fibers[r] = ds.Tables[t].Rows[r][fiberI].ToString();
                             }
+
                         }
-
-                        sb.AppendFormat("<tr align=center BGCOLOR=#eeeeff>");
-                        for (int c = 0; c < NumColumns; c++)
-                            sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
-                        sb.AppendFormat("</tr>");
-
-                        if (dasFields == true)
+                        if (KeyWords.dasUrlBase.Length > 1 && (dasFields == true || dasSpectra == true))
                         {
-                            runs[r] = ds.Tables[t].Rows[r][runI].ToString();
-                            if (rerunI > -1) reruns[r] = ds.Tables[t].Rows[r][rerunI].ToString();
-                            camcols[r] = ds.Tables[t].Rows[r][camcolI].ToString();
-                            fields[r] = ds.Tables[t].Rows[r][fieldI].ToString();
+                            sb.AppendFormat("<p><table><tr>\n");
+                            var str = "";
+                            if (dasFields == true && dasSpectra == true)
+                                str = "(s)";
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
+                            if (dasFields == true)
+                            {
+                                sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkFields/runCamcolFields'/>\n");
+                                //				Response.Write( "<input type='hidden' name='search' value ='runcamcolfield'/>\n" );
+                                sb.AppendFormat("<input type='hidden' name='runcamcolfields' value='");
+                                for (int i = 0; i < NumRows; i++)
+                                    sb.AppendFormat(runs[i] + "," + camcols[i] + "," + fields[i] + "\n");
+                                sb.AppendFormat("'/>\n");
+                                sb.AppendFormat("<input type='submit' name='submit' value='Submit'/>Upload list of fields to SAS\n");
+                                sb.AppendFormat("</form></td>");
+                            }
+                            if (dasSpectra == true)
+                            {
+                                sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkSpectra/plateMJDFiber'/>\n");
+                                sb.AppendFormat("<input type='hidden' name='platemjdfibers' value='");
+                                for (int i = 0; i < NumRows; i++)
+                                    sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
+                                sb.AppendFormat("'/>\n");
+                                sb.AppendFormat("<input type='submit' name='submitPMF' value='Submit'/>Upload list of spectra to SAS\n");
+                                sb.AppendFormat("</form></td>");
+                            }
+                            sb.AppendFormat("</tr></table>");
                         }
-                        if (dasSpectra == true)
-                        {
-                            plates[r] = ds.Tables[t].Rows[r][plateI].ToString();
-                            if (sprerun == true)
-                                spreruns[r] = ds.Tables[t].Columns[sprerunI].ColumnName;
-                            else
-                                spreruns[r] = "" + DefaultSpRerun;
-                            mjds[r] = ds.Tables[t].Rows[r][mjdI].ToString();
-                            fibers[r] = ds.Tables[t].Rows[r][fiberI].ToString();
-                        }
-
+                        sb.AppendFormat("</TABLE>");
                     }
-                    if (KeyWords.dasUrlBase.Length > 1 && (dasFields == true || dasSpectra == true))
-                    {
-                        sb.AppendFormat("<p><table><tr>\n");
-                        var str = "";
-                        if (dasFields == true && dasSpectra == true)
-                            str = "(s)";
-                        sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
-                        if (dasFields == true)
-                        {
-                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkFields/runCamcolFields'/>\n");
-                            //				Response.Write( "<input type='hidden' name='search' value ='runcamcolfield'/>\n" );
-                            sb.AppendFormat("<input type='hidden' name='runcamcolfields' value='");
-                            for (int i = 0; i < NumRows; i++)
-                                sb.AppendFormat(runs[i] + "," + camcols[i] + "," + fields[i] + "\n");
-                            sb.AppendFormat("'/>\n");
-                            sb.AppendFormat("<input type='submit' name='submit' value='Submit'/>Upload list of fields to SAS\n");
-                            sb.AppendFormat("</form></td>");
-                        }
-                        if (dasSpectra == true)
-                        {
-                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkSpectra/plateMJDFiber'/>\n");
-                            sb.AppendFormat("<input type='hidden' name='platemjdfibers' value='");
-                            for (int i = 0; i < NumRows; i++)
-                                sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
-                            sb.AppendFormat("'/>\n");
-                            sb.AppendFormat("<input type='submit' name='submitPMF' value='Submit'/>Upload list of spectra to SAS\n");
-                            sb.AppendFormat("</form></td>");
-                        }
-                        sb.AppendFormat("</tr></table>");
-                    }
-
-
-
-                    sb.AppendFormat("</TABLE>");
                 }
                 sb.AppendFormat("<hr>");
             }
@@ -483,7 +493,7 @@ namespace Sciserver_webService.UseCasjobs
         }
         
         
-        private String getJsonContent(String query, String casjobsTaskName)
+        private String getJsonContent(String query, String casjobsTaskName, String ClientIP)
         {
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
@@ -495,6 +505,8 @@ namespace Sciserver_webService.UseCasjobs
                 writer.WriteValue(query);
                 writer.WritePropertyName("TaskName");
                 writer.WriteValue(casjobsTaskName);
+                writer.WritePropertyName("ClientIP");
+                writer.WriteValue(ClientIP);
                 writer.WriteEndObject();
             }
             return sb.ToString();

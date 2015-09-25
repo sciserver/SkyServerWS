@@ -24,7 +24,7 @@ namespace Sciserver_webService.ExceptionFilter
             {
                 jsonString += (int)HttpStatusCode.NotImplemented;
                 errorCode =  HttpStatusCode.NotImplemented;
-                reasonPhrase = "This method is not implemented";     
+                reasonPhrase = "This method is not implemented";
             }
             else if(context.Exception is NotSupportedException)
             {
@@ -58,7 +58,7 @@ namespace Sciserver_webService.ExceptionFilter
 
             //// to do
             //// There should be some logging code here
-
+            
             HttpResponseMessage resp = new HttpResponseMessage(errorCode)
             {
                 Content = new StringContent(jsonString, tCode, responseType),

@@ -12,7 +12,7 @@ using Sciserver_webService.SDSSFields;
 using Sciserver_webService.sdssSIAP;
 using Sciserver_webService.ToolsSearch;
 using Sciserver_webService.UseCasjobs;
-
+using Sciserver_webService.DoDatabaseQuery;
 
 namespace Sciserver_webService.Common
 {
@@ -27,10 +27,18 @@ namespace Sciserver_webService.Common
         /// <param name="positionType"></param>
         /// <param name="casjobsMessage"></param>
         /// <returns></returns>
+        /// 
+
+        public bool IsDirectUserConnection = true;
+        public string ClientIP = "";
+
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
+
             string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
             
+
+
             /// this is temporary read from the web.config
             string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"]+datarelease;
 
@@ -97,6 +105,13 @@ namespace Sciserver_webService.Common
             dictionary.Add("skyserverUrl", skyserverUrl);
             dictionary.Add("datarelease", drnumber);
 
+
+            string server_name = "";
+            try { server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
+            catch { server_name = "UnknownServer"; }
+            string Format = "";
+            this.ClientIP = GetClientIP(ref dictionary);
+
             switch (queryType)
             {
                 //case "SqlSearch": query = dictionary["cmd"];
@@ -109,6 +124,12 @@ namespace Sciserver_webService.Common
                     ExtraInfo["QueryForUserDisplay"] = sqlsearch.QueryForUserDisplay;
                     break;
 
+                case "DatabaseSearch":// this one goes directly to a DB server instead to CasJobs
+                    DatabaseSearch dbsearch = new DatabaseSearch(ref dictionary, ClientIP, IsDirectUserConnection, server_name);
+                    query = dbsearch.query; // here the query is wrapped inside SpExecuteSQL
+                    Format = dbsearch.Format;
+                    break;
+
                 case "RectangularSearch":
                     RectangularSearch rs = new RectangularSearch(dictionary);
                     query = rs.query;
@@ -116,7 +137,7 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "RadialSearch":
-                    RadialSearch radial = new RadialSearch(dictionary);                  
+                    RadialSearch radial = new RadialSearch(dictionary);
                     query = radial.query;
                     ExtraInfo["fp"] = radial.fp;
                     ExtraInfo["QueryForUserDisplay"] = radial.QueryForUserDisplay;
@@ -155,7 +176,7 @@ namespace Sciserver_webService.Common
                     return new ReturnSIAPresults(casjobsMessage, "VOTable", datarelease, dictionary); // this is tricky code
                     break;
 
-                default: 
+                default:
                     QueryTools.BuildQuery.buildQueryMaster(queryType, dictionary, positionType);
                     ExtraInfo["QueryForUserDisplay"] = QueryTools.BuildQuery.QueryForUserDisplay;
                     query = QueryTools.BuildQuery.query;
@@ -190,13 +211,60 @@ namespace Sciserver_webService.Common
             {
                 format = KeyWords.contentCSV;
                 ExtraInfo.Add("FormatFromUser", KeyWords.contentCSV);
-            }            
-           
+            }
+
             //return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
             //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, DoReturnHtml);
-            return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
+            //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
+
+            if (queryType == "DatabaseSearch")// queries are sent directly to Database Server and executed there.
+            {
+                return new RunDBquery(query, Format);
+            }
+            else// queries are sent to CasJobs instead
+            {
+                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo, GetClientIP(ref dictionary));
+            }
         }
-       
+
+
+        public string GetClientIP(ref Dictionary<String, String> requestDir)
+        {
+            string clientIP = "unknown";
+            try
+            {
+                if (HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] != null)
+                {
+                    clientIP = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                }
+                else
+                {
+                    if (HttpContext.Current.Request.UserHostAddress != null)
+                    {
+                        clientIP = HttpContext.Current.Request.UserHostAddress;
+                    }
+                    else
+                    {
+                        clientIP = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+                    }
+                }
+                if (KeyWords.IPClientServers.Contains(clientIP))
+                {
+                    this.IsDirectUserConnection = false;
+                    try { clientIP = requestDir["clientIP"]; }
+                    catch { clientIP = "unkownByAgent"; }
+                    if (clientIP == "")
+                        clientIP = "unkownByAgent";
+                }
+                if (clientIP == "")
+                    clientIP = "unspecified";
+            }
+            catch { }
+            return clientIP;
+        }
+
+
+
 
         /// Upload table        
         public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
@@ -263,7 +331,12 @@ namespace Sciserver_webService.Common
 
                 bool HasFile = false;
                 bool HasRaDecText = false;
-                using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
+
+                string radiusDefault = "1";// in arcminutes
+                try { radiusDefault = float.Parse(dictionary["radiusDefault"]).ToString(); }
+                catch { }
+
+                using (UploadDataReader up = new UploadDataReader(new StreamReader(stream), radiusDefault))
                 {
                     if (stream.Length > 0)
                     {
@@ -324,7 +397,7 @@ namespace Sciserver_webService.Common
                 }            
 
                 //return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
-                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
+                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo, GetClientIP(ref dictionary));
             }
             catch (Exception exp)
             {
@@ -348,8 +421,12 @@ namespace Sciserver_webService.Common
                 Dictionary<String, String> dictionary = api.Request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
                 String query = "";
 
+                string radiusDefault = "1";// in arcminutes
+                try { radiusDefault = float.Parse(dictionary["radiusDefault"]).ToString(); }
+                catch { }
+
                 if (dictionary["radecTextarea"] != null) {
-                    UploadDataReader up = new UploadDataReader();
+                    UploadDataReader up = new UploadDataReader(radiusDefault);
                     query += up.UploadTo(dictionary["radecTextarea"],queryType, dictionary["nearBy"]);
                 }
                 else
@@ -358,7 +435,7 @@ namespace Sciserver_webService.Common
                     task.Wait();
                     Stream stream = task.Result;
                  
-                    using (UploadDataReader up = new UploadDataReader(new StreamReader(stream)))
+                    using (UploadDataReader up = new UploadDataReader(new StreamReader(stream), radiusDefault))
                     {
                         query += up.UploadTo(queryType, dictionary["nearBy"]);
                     }

@@ -41,6 +41,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Jhu.Graywulf.Components">
@@ -149,12 +150,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\HexEncoding.cs" />
     <Compile Include="Common\ImpTypes\FloatImpTypes.cs" />
     <Compile Include="Common\ImpTypes\ImpType.cs" />
     <Compile Include="Common\ImpTypes\IntegerImpTypes.cs" />
     <Compile Include="Common\ImpTypes\MiscImpTypes.cs" />
     <Compile Include="Common\KeyWords.cs" />
     <Compile Include="Common\ProcessRequest.cs" />
+    <Compile Include="Common\RunDBquery.cs" />
+    <Compile Include="Controllers\SearchTools\DatabaseSearchController.cs" />
     <Compile Include="SIAP\ReturnSIAPresults.cs" />
     <Compile Include="Common\UploadDataReader.cs" />
     <Compile Include="ConeSearch\ConeSearch.cs" />
@@ -199,6 +203,7 @@
     <Compile Include="Models\XMLStreamResponse.cs" />
     <Compile Include="SDSSFields\FieldQueries.cs" />
     <Compile Include="SDSSFields\NewSDSSFields.cs" />
+    <Compile Include="ToolsSearch\DatabaseSearch.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
     <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />

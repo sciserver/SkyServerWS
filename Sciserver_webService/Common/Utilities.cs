@@ -293,16 +293,16 @@ namespace Sciserver_webService.Common
             if (val > hi)
             {
                 //throw new Exception(name + " must be less than " + hi);
-                throw new Exception(name + " magnitude value must be between " + lo.ToString() + " and " + hi.ToString());
+                throw new Exception(name + " must be between " + lo.ToString() + " and " + hi.ToString() + ".");
             }
             if (val < lo)
             {
                 //throw new Exception(name + " must be more than " + lo);
-                throw new Exception(name + " magnitude value must be between " + lo.ToString() + " and " + hi.ToString());
+                throw new Exception(name + " must be between " + lo.ToString() + " and " + hi.ToString() + ".");
             }
             if (double.IsNaN(val))
             {
-                throw new Exception("Please enter numerical values for " + name + " magnitude.");
+                throw new Exception("Please enter numerical values for " + name + ".");
             }
         }
 
@@ -310,21 +310,21 @@ namespace Sciserver_webService.Common
         {
             if (min > max)
             {
-                throw new Exception("Minimum " + name + " magnitude value must be less than maximum magnitude value.");
+                throw new Exception("Minimum " + name + " magnitude must be less than maximum "+name+" magnitude.");
             }
             if (max > hi)
             {
                 //throw new Exception("Max " + name + " must be less than " + hi);
-                throw new Exception(name + " magnitude value must be between " + lo.ToString() + " and " + hi.ToString());
+                throw new Exception(name + " magnitude must be between " + lo.ToString() + " and " + hi.ToString());
             }
             if (min < lo)
             {
                 //throw new Exception("Min " + name + " must be more than " + lo);
-                throw new Exception(name + " magnitude value must be between " + lo.ToString() + " and " + hi.ToString());
+                throw new Exception(name + " magnitude must be between " + lo.ToString() + " and " + hi.ToString());
             }
             if (double.IsNaN(min) || double.IsNaN(max))
             {
-                throw new Exception("Please enter numerical values for minimum and maximum " + name + " magnitudes.");
+                throw new Exception("Please enter numerical values for minimum and maximum " + name + " magnitude.");
             }
         }
     }

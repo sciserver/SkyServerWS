@@ -57,7 +57,9 @@ namespace Sciserver_webService.Common
         ///dasUrlBase URL
         public static string defaultSpRerun = ConfigurationManager.AppSettings["defaultSpRerun"];
 
+        public static string[] IPClientServers = ConfigurationManager.AppSettings["IPClientServers"].ToString().Split(',');
 
+        public static string DBconnectionString = ConfigurationManager.AppSettings["DBconnectionString"];
 
 
         ///Casjob messages for VOServices
@@ -84,6 +86,8 @@ namespace Sciserver_webService.Common
         public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
         public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
         
+
+
         /// <summary>
         /// For different web service type names 
         /// </summary>
@@ -91,6 +95,7 @@ namespace Sciserver_webService.Common
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
         public static string sqlSearchQuery = "SqlSearch";
+        public static string databaseSearchQuery = "DatabaseSearch";
         public static string RectangularQuery = "RectangularSearch";
         public static string RadialQuery = "RadialSearch";
         public static string ConeSearchQuery = "ConeSearch";
