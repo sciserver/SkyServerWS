@@ -130,59 +130,61 @@ namespace Sciserver_webService.ImgCutout
         public SDSSGraphicsEnv canvas = null;
         //-------------------------------------
 
-        ////-------------------------------------
-        //// DataBase properties
-        ////-------------------------------------
-        //private string sConnect = null;
-        //private string sDataRelease = null;
-        //private int sDR = -1;  /// Added for releases after dr7
-        //private SqlConnection SqlConn = null;
-        //private SqlDataReader reader = null;
-        ////-------------------------------------
+        //-------------------------------------
+        // DataBase properties
+        //-------------------------------------
+        private string sConnect = null;
+        private string sDataRelease = null;
+        private int sDR = -1;  /// Added for releases after dr7
+        private SqlConnection SqlConn = null;
+        private SqlDataReader reader = null;
+        //-------------------------------------
 
-        ////----------------------------------------------------
-        //// DataBase properties for new database only for Image
-        //// Added after discussions for DR9/10
-        ////----------------------------------------------------
-        //private string sConnectImage = null;
-        //private SqlConnection SqlConnImage = null;
-        //private SqlDataReader readerImage = null;
-        ////----------------------------------------------------
+        //----------------------------------------------------
+        // DataBase properties for new database only for Image
+        // Added after discussions for DR9/10
+        //----------------------------------------------------
+        private string sConnectImage = null;
+        private SqlConnection SqlConnImage = null;
+        private SqlDataReader readerImage = null;
+        //----------------------------------------------------
 
-        ////----------------------------------------------------
-        //// DataBase properties for new database only for 2Mass Images
-        ////----------------------------------------------------
-        //private string sConnectImage2Mass = null;
-        //private SqlConnection SqlConnImage2Mass = null;
-        ////private SqlDataReader readerImage2Mass = null;
+        //----------------------------------------------------
+        // DataBase properties for new database only for 2Mass Images
+        //----------------------------------------------------
+        private string sConnectImage2Mass = null;
+        private SqlConnection SqlConnImage2Mass = null;
+        private SqlDataReader readerImage2Mass = null;
         ////----------------------------------------------------
         // Authentication token
         private string token = "";
         private string datarelease = "";
 
+        //Client ip logging
+        private string clientIP = "";
         /// <summary>
         /// Constructor and getting connection strings for databases
         /// </summary> 
         public ImgCutout()
         {
-            
-            //sDataRelease = SdssConstants.sDataRelease;
-            //if (sDataRelease == null)
-            //    throw new System.Exception("DataRelease keyword not found or invalid.\n" +
-            //    "Please check AppSettings in the Web.config file!");
-            //sDR = SdssConstants.sDR;
 
-            //sConnect = ConfigurationManager.AppSettings["SkyServer"];
-            //sConnectImage = ConfigurationManager.AppSettings["SkyServerImage"];
+            sDataRelease = SdssConstants.sDataRelease;
+            if (sDataRelease == null)
+                throw new System.Exception("DataRelease keyword not found or invalid.\n" +
+                "Please check AppSettings in the Web.config file!");
+            sDR = SdssConstants.sDR;
 
-            //if (sConnect == null || sDataRelease == null || sConnectImage == null)
-            //    throw new System.Exception("SkyServer keyword not found or invalid. \n" +
-            //    "Please check AppSettings in the Web.config file!");
+            sConnect = ConfigurationManager.AppSettings["SkyServer"];
+            sConnectImage = ConfigurationManager.AppSettings["SkyServerImage"];
 
-            //sConnectImage2Mass = ConfigurationManager.AppSettings["SkyServer2Mass"];
-            //if (sConnectImage2Mass == null || sDataRelease == null)
-            //    throw new System.Exception("SkyServer2Mass keyword not found or invalid. \n" +
-            //     "Please check AppSettings in the Web.config file!");
+            if (sConnect == null || sDataRelease == null || sConnectImage == null)
+                throw new System.Exception("SkyServer keyword not found or invalid. \n" +
+                "Please check AppSettings in the Web.config file!");
+
+            sConnectImage2Mass = ConfigurationManager.AppSettings["SkyServer2Mass"];
+            if (sConnectImage2Mass == null || sDataRelease == null)
+                throw new System.Exception("SkyServer2Mass keyword not found or invalid. \n" +
+                 "Please check AppSettings in the Web.config file!");
             
         }
 
@@ -229,10 +231,11 @@ namespace Sciserver_webService.ImgCutout
             string query_,
             string imgtype_,
             string imgfield_,
-            string token_
+            string token_,
+            string ip_
             )
         {
-            return GetJpegQuery(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_);
+            return GetJpegQuery(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_, ip_);
         }
 
 
@@ -247,12 +250,13 @@ namespace Sciserver_webService.ImgCutout
             string query_,						// mark objects selected by a query, or Region list
             string imgtype_,
             string imgfield_,
-            string token_
+            string token_,
+            string ip_
             )
         {
             try{
 
-                getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_);
+                getImageCutout(ra_, dec_, scale_, width_, height_, opt_, query_, imgtype_, imgfield_, token_,ip_);
             }
             catch (Exception e)
             {
@@ -302,18 +306,22 @@ namespace Sciserver_webService.ImgCutout
             string query_,						// mark objects selected by a query, or Region list
             string imgtype_,
             string imgfield_,
-            string token_
+            string token_,
+            string ip_
             ) {
 
                 try
                 {
                     // to get datarelease
                     datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
-                                                                                                                     
+                    
+                    //To get client IP
+                    if (!ip_.Equals("")) clientIP = ip_;
+                    else clientIP = getIPAddress();                                  
                     //-------------------------------------
                     // validate ranges and values of input
                     //-------------------------------------
-                    validateInput(ra_, dec_, scale_, height_, width_, opt_, query_, imgtype_, imgfield_);
+                    validateInput(ra_, dec_, scale_, height_, width_, opt_, query_, imgtype_, imgfield_, ip_);
                     token = token_;
                     if (draw2Mass) SdssConstants.isSdss = false;
                     else SdssConstants.isSdss = true;
@@ -327,7 +335,7 @@ namespace Sciserver_webService.ImgCutout
                     while (zoom < SdssConstants.MaxZoom & imageScale <= .5)
                     {
                         zoom++;											    // go higher in the pyramid
-                        imageScale *= 2;								        // change the scaling accordingly
+                        imageScale *= 2;								    // change the scaling accordingly
                     }
                     zoomScale = (float)Math.Pow(2, zoom);				    // set the scale according to the real zoom
                     size = (float)((zoom > 3) ? 6 : 12 * imageScale);
@@ -343,7 +351,7 @@ namespace Sciserver_webService.ImgCutout
 
                     canvas = new SDSSGraphicsEnv(width, height, imageScale, ppd, debug, imgtype);
                     
-                    //connectToDataBase();
+                    connectToDataBase();
 
                     byte oflag = 0;
                     if (drawPhotoObjs) oflag |= SdssConstants.pflag;
@@ -382,11 +390,12 @@ namespace Sciserver_webService.ImgCutout
                     {
                         canvas.Invert();
                     }
-                    if (debug)
-                    {
+                    //if (debug)
+                   // {
+                        dbgMsg.Append(clientIP);
                         canvas.addDebugMessage(dbgMsg.ToString());
                         canvas.drawDebugMessage(width,height);
-                    }
+                   // }
                 }
                 catch (Exception e) { throw e; }
                 finally { 
@@ -412,18 +421,19 @@ namespace Sciserver_webService.ImgCutout
                     try{
 
                         
-                        //connectToDataBaseImage2Mass();
+                        connectToDataBaseImage2Mass();
+                       
                         sQ.Append ("SELECT  f.img, f.CRVAL1,f.CRVAL2, f.CRPIX1,f.CRPIX2, f.CDELT1, f.CDELT2,f.fieldid \n");
                         sQ.AppendFormat (" From dbo.fTwoMassGetNearbyFrameEq({0}, {1}, {2}) as n  \n",ra,dec, fradius);
                         sQ.Append(" join  dbo.TwoMassImageFrame as f  on f.fieldid=n.fieldid  \n");
 
-                        RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
-                        DataSet ds = run.runQuery();
+                        
+                        //SqlCommand spExec = new SqlCommand("spExecuteSql",SqlConnImage2Mass);
+                        //spExec.Parameters.Add("cmd",sQ.ToString());
 
-                        //SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
-                        //readerImage2Mass = cmd1.ExecuteReader();
-                        using (DataTableReader readerImage2Mass = ds.Tables[0].CreateDataReader())
-                        {
+                       SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
+                       readerImage2Mass = cmd1.ExecuteReader();
+                       
                             if (!readerImage2Mass.HasRows)
                             {//throw new Exception("Requested (ra, dec) is outside the 2MASS footprint. \n");
                                 canvas.addDebugMessage("Requested (ra, dec) is outside the 2MASS footprint. \n");
@@ -464,7 +474,7 @@ namespace Sciserver_webService.ImgCutout
                             if (readerImage2Mass != null) readerImage2Mass.Close();
                             //canvas.drawWarning(" Two MASS Image !");
 
-                        }
+                      
                        
                     }
                     catch(Exception e){
@@ -479,22 +489,18 @@ namespace Sciserver_webService.ImgCutout
                 {
                     try
                     {
-                        //connectToDataBaseImage();
+                        connectToDataBaseImage();
                         sQ.Append("SELECT img , f.a, f.b, f.c, f.d, f.e, f.f, f.node, f.incl, f.ra, f.dec, f.fieldID, \n");
                         sQ.Append(" dbo.fSDSS(f.fieldID) , f.run, f.camcol, f.rerun,f.field \n");
                         sQ.AppendFormat("FROM dbo.fGetNearbyFrameEq({0}, {1}, {2}, {3}) as n JOIN Frame f \n", ra, dec, fradius, zoom10x);
                         sQ.AppendFormat("ON f.fieldID = n.fieldID  and f.zoom =  {0} \n", zoom10x);
                         sQ.Append(" and f.iflag = 1  and f.ifieldflag=1 order by f.iorder");
 
-                        RunCasjobs run = new RunCasjobs(sQ.ToString(), token, "ImgCutout:SDSS", KeyWords.contentDataset, "sdssimgdb");
-                        DataSet ds = run.runQuery();
-
-                        using (DataTableReader reader = ds.Tables[0].CreateDataReader())
-                        {
+                        
                             IntPtr imageFromBytedata = IntPtr.Zero;
                             cTable = new Hashtable();
-                            // SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
-                            //reader = cmd.ExecuteReader();
+                            SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
+                            reader = cmd.ExecuteReader();
 
                             if (!reader.HasRows)
                             {
@@ -553,7 +559,7 @@ namespace Sciserver_webService.ImgCutout
                             }
                             if (reader != null) reader.Close();
                         }
-                    }
+                    
                     catch (Exception exp)
                     {
                         showException("Exception in getFrame()",sQ.ToString(),exp);
@@ -575,11 +581,12 @@ namespace Sciserver_webService.ImgCutout
         ///</summary>		
         private void validateInput(double ra_, double dec_, double scale_,
                                    int height_, int width_, string opt_,
-                                   string query_, string imgtype_, string imgfield_)
+                                   string query_, string imgtype_, string imgfield_, string ip_)
         {
             // Normalize ra and dec
             ra = ra_;
             dec = dec_;
+/*
             dec = dec % 180;					// bring dec within the circle
             if (Math.Abs(dec) > 90)				// if it is "over the pole",
             {
@@ -588,6 +595,23 @@ namespace Sciserver_webService.ImgCutout
             }
             ra = ra % 360;					// bring ra into [0..360]
             if (ra < 0) ra += 360;
+*/
+            // modified by Manuchehr Taghizadeh-Popp on 08/31/2015
+            dec = dec % 360;					// brings dec into [0..360]
+            if (dec < 0)
+            {
+                dec = dec + 360;     // only allows positive dec values
+            }
+            else if (dec > 90 && dec < 270) // if dec is at the other side of the poles
+            {
+                ra = ra + 180;// go 1/2 way around the globe
+                dec = 180 - dec;
+            }
+            else if (dec >= 270)  // if dec is at this side from the south pole
+            { 
+                dec = dec - 360;
+            }
+            ra = ra % 360;// brings ra into [0..360]
 
 
             for (int i = 0; i < opt_.Length; i++)
@@ -679,14 +703,10 @@ namespace Sciserver_webService.ImgCutout
                 string cmdStr = "SELECT img FROM Frame WHERE zoom=" + zoom + " AND run="
                               + run + " AND camCol=" + camcol + " AND field=" + field;
 
-                //connectToDataBaseImage();
-                //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                //reader = cmd.ExecuteReader();
-                RunCasjobs runcas = new RunCasjobs(cmdStr, token, "ImgCutout:GetJPGImg", KeyWords.contentDataset, "sdssimgdb");
-                        DataSet ds = runcas.runQuery();
-
-               using (DataTableReader reader = ds.Tables[0].CreateDataReader())
-               {
+               connectToDataBaseImage();
+               SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
+               reader = cmd.ExecuteReader();
+               
                 while (reader.Read())       // read the next record in the dataset
                 {
                     MemoryStream theJpeg = new MemoryStream();
@@ -700,7 +720,7 @@ namespace Sciserver_webService.ImgCutout
                     bytes = theJpeg.ToArray();
                 }
                 if (reader != null) reader.Close();    // close the reader.  
-               }
+               
             }
             catch (Exception e)
             {
@@ -745,10 +765,10 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                 //set up the data adapter to get our data...
-                
-                RunCasjobs runcas = new RunCasjobs(query.ToString(), token, "ImgCutout:GetJPGImg", KeyWords.contentDataset, datarelease);
-                DataSet ds = runcas.runQuery();
-                
+
+                DataSet ds = new DataSet();
+                SqlDataAdapter da = new SqlDataAdapter(query.ToString(), SqlConn);
+                da.Fill(ds, "MarkedObjects");
                 if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
                 {
                     throw new Exception("");
@@ -1003,108 +1023,108 @@ namespace Sciserver_webService.ImgCutout
         }
 
 
-        ///// <summary>
-        ///// Disconnect from Database.
-        ///// </summary>
-        //private void disconnectFromDataBase()
-        //{
-        //    if (reader != null) reader.Close();	// deallocate the SQL connection
-        //    if (SqlConn != null)				// close the SQL connection
-        //    {
-        //        SqlConn.Close();
-        //        SqlConn.Dispose();
-        //    }
-        //}
-        ///// <summary>
-        ///// Connect to Database.
-        ///// </summary>
-        //private void connectToDataBase()
-        //{
-        //    SqlConn = new SqlConnection(sConnect);
-        //    try { SqlConn.Open(); }
-        //    catch (Exception e)
-        //    {
-        //        StringBuilder msg = new StringBuilder();
-        //        msg.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-        //                          SqlConn.Database, SqlConn.DataSource);
-        //        throw new Exception(msg.ToString() + e.Message);
-        //    }
-        //}
-        ////All this is added if we use two different souces of data one specifically for images
         /// <summary>
         /// Disconnect from Database.
         /// </summary>
-        //private void disconnectFromDataBaseImage()
-        //{
-        //    if (readerImage != null) readerImage.Close();	// deallocate the SQL connection
-        //    if (SqlConnImage != null)				// close the SQL connection
-        //    {
-        //        SqlConnImage.Close();
-        //        SqlConnImage.Dispose();
-        //    }
-        //}
+        private void disconnectFromDataBase()
+        {
+            if (reader != null) reader.Close();	// deallocate the SQL connection
+            if (SqlConn != null)				// close the SQL connection
+            {
+                SqlConn.Close();
+                SqlConn.Dispose();
+            }
+        }
+        /// <summary>
+        /// Connect to Database.
+        /// </summary>
+        private void connectToDataBase()
+        {
+            SqlConn = new SqlConnection(sConnect);
+            try { SqlConn.Open(); }
+            catch (Exception e)
+            {
+                StringBuilder msg = new StringBuilder();
+                msg.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+                                  SqlConn.Database, SqlConn.DataSource);
+                throw new Exception(msg.ToString() + e.Message);
+            }
+        }
+        //All this is added if we use two different souces of data one specifically for images
+         //<summary>
+         //Disconnect from Database.
+         //</summary>
+        private void disconnectFromDataBaseImage()
+        {
+            if (readerImage != null) readerImage.Close();	// deallocate the SQL connection
+            if (SqlConnImage != null)				// close the SQL connection
+            {
+                SqlConnImage.Close();
+                SqlConnImage.Dispose();
+            }
+        }
 
-        ///// <summary>
-        ///// Connect to Database.
-        ///// </summary>
-        //private void connectToDataBaseImage()
-        //{
-        //    SqlConnImage = new SqlConnection(sConnectImage);
-        //    try { SqlConnImage.Open(); }
-        //    catch (Exception e)
-        //    {
-        //        StringBuilder msgImage = new StringBuilder();
-        //        msgImage.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-        //                          SqlConnImage.Database, SqlConnImage.DataSource);
-        //        throw new Exception(msgImage.ToString() + e.Message);
-        //    }
-        //}
+        /// <summary>
+        /// Connect to Database.
+        /// </summary>
+        private void connectToDataBaseImage()
+        {
+            SqlConnImage = new SqlConnection(sConnectImage);
+            try { SqlConnImage.Open(); }
+            catch (Exception e)
+            {
+                StringBuilder msgImage = new StringBuilder();
+                msgImage.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+                                  SqlConnImage.Database, SqlConnImage.DataSource);
+                throw new Exception(msgImage.ToString() + e.Message);
+            }
+        }
 
 
-        //private void connectToAllDatabases() {
-        //    connectToDataBase(); //Main SDSS
-        //    connectToDataBaseImage(); // only for images db
-        //    connectToDataBaseImage2Mass(); // To get only 2mass data         
-        //}
+        private void connectToAllDatabases() {
+            connectToDataBase(); //Main SDSS
+            connectToDataBaseImage(); // only for images db
+            connectToDataBaseImage2Mass(); // To get only 2mass data         
+        }
 
-        //private void disconnectAllDatabases() {
-        //    disconnectFromDataBase();
-        //    disconnectFromDataBaseImage();
-        //    disconnectFromDataBaseImage2Mass();            
-        //}
+        private void disconnectAllDatabases() {
+            disconnectFromDataBase();
+            disconnectFromDataBaseImage();
+            disconnectFromDataBaseImage2Mass();            
+        }
 
-        ////*******************************************************************************************
-        //// This is for Two Mass Images access   
-        ////*******************************************************************************************     
-        ///// <summary>
-        ///// Disconnect from Database.
-        ///// </summary>
-        //private void disconnectFromDataBaseImage2Mass()
-        //{
-        //    if (readerImage2Mass != null) readerImage2Mass.Close();	// deallocate the SQL connection
-        //    if (SqlConnImage2Mass != null)				// close the SQL connection
-        //    {
-        //        SqlConnImage2Mass.Close();
-        //        SqlConnImage2Mass.Dispose();
-        //    }
-        //}
+        //*******************************************************************************************
+        // This is for Two Mass Images access   
+        //*******************************************************************************************     
+        /// <summary>
+        /// Disconnect from Database.
+        /// </summary>
+        private void disconnectFromDataBaseImage2Mass()
+        {
+            if (readerImage2Mass != null) readerImage2Mass.Close();	// deallocate the SQL connection
+            if (SqlConnImage2Mass != null)				// close the SQL connection
+            {
+                SqlConnImage2Mass.Close();
+                SqlConnImage2Mass.Dispose();
+            }
+        }
 
 
-        ///// <summary>
-        ///// Connect to Database.
-        ///// </summary>
-        //private void connectToDataBaseImage2Mass()
-        //{
-        //    SqlConnImage2Mass = new SqlConnection(sConnectImage2Mass);
-        //    try { SqlConnImage2Mass.Open(); }
-        //    catch (Exception e)
-        //    {
-        //        StringBuilder msgImage2Mass = new StringBuilder();
-        //        msgImage2Mass.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
-        //                          SqlConnImage2Mass.Database, SqlConnImage2Mass.DataSource);
-        //        throw new Exception(msgImage2Mass.ToString() + e.Message);
-        //    }
-        //}
+        /// <summary>
+        /// Connect to Database.
+        /// </summary>
+        private void connectToDataBaseImage2Mass()
+        {
+            SqlConnImage2Mass = new SqlConnection(sConnectImage2Mass);
+            try { SqlConnImage2Mass.Open(); }
+            catch (Exception e)
+            {
+                StringBuilder msgImage2Mass = new StringBuilder();
+                msgImage2Mass.AppendFormat("Cannot connect to Database: {0}, Source Data: {1}\n",
+                                  SqlConnImage2Mass.Database, SqlConnImage2Mass.DataSource);
+                throw new Exception(msgImage2Mass.ToString() + e.Message);
+            }
+        }
         
         /// <summary>
         /// 
@@ -1126,11 +1146,11 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                 string cmdStr = "SELECT img FROM Frame2Mass WHERE zoom=" + zoom + " AND id=" + id;
-
-                RunCasjobs run = new RunCasjobs(cmdStr, token, "ImgCutout:2MASS", KeyWords.contentDataset, "TWOMASSDb");
-                DataSet ds = run.runQuery(); 
-                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
-                {
+                connectToDataBaseImage();
+                //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
+                SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
+                reader = cmd.ExecuteReader();
+                
                     while (reader.Read())       // read the next record in the dataset
                     {
                         MemoryStream theJpeg = new MemoryStream();
@@ -1139,7 +1159,7 @@ namespace Sciserver_webService.ImgCutout
                         bytes = theJpeg.ToArray();
                     }
                     if (reader != null) reader.Close();    // close the reader.  
-                }
+                
             }
             catch (Exception e)
             {
@@ -1150,6 +1170,23 @@ namespace Sciserver_webService.ImgCutout
                 //disconnectFromDataBaseImage();
             }
             return bytes;
+        }
+
+        protected string getIPAddress()
+        {
+            System.Web.HttpContext context = System.Web.HttpContext.Current;
+            string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+            if (!string.IsNullOrEmpty(ipAddress))
+            {
+                string[] addresses = ipAddress.Split(',');
+                if (addresses.Length != 0)
+                {
+                    return addresses[0];
+                }
+            }
+
+            return context.Request.ServerVariables["REMOTE_ADDR"];
         }
 
 
