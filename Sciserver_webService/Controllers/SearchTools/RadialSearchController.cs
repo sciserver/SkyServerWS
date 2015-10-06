@@ -16,14 +16,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch");
+            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "SkyserverWS.SearchTools.RadialSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult Post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "RadialSearch");
+            return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "SkyserverWS.SearchTools.RadialSearch");
         }
     }
 }

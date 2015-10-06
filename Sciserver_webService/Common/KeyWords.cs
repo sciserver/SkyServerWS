@@ -60,6 +60,7 @@ namespace Sciserver_webService.Common
         public static string[] IPClientServers = ConfigurationManager.AppSettings["IPClientServers"].ToString().Split(',');
 
         public static string DBconnectionString = ConfigurationManager.AppSettings["DBconnectionString"];
+        public static string DatabaseSearchTimeout = ConfigurationManager.AppSettings["DatabaseSearchTimeout"];
 
 
         ///Casjob messages for VOServices

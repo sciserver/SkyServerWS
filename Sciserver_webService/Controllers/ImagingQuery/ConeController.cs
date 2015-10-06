@@ -17,14 +17,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get() 
         {   
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone,"ImagingQuery:ConeSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "ImagingQuery:ConeSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
     }
 }

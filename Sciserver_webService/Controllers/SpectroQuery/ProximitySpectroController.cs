@@ -18,7 +18,7 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
 
         [ExceptionHandleAttribute]
@@ -26,7 +26,7 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
     }
 }

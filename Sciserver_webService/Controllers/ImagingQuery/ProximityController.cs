@@ -18,14 +18,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post() 
         {       
             ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "SkyserverWS.ImagingQuery.ProximitySearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "ImagingQuery:ProximitySearch");
+            return request.proximityQuery(this, KeyWords.imagingQuery, KeyWords.proximity, "SkyserverWS.ImagingQuery.ProximitySearch");
         }
 
 

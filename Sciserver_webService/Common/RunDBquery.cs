@@ -39,41 +39,48 @@ namespace Sciserver_webService.DoDatabaseQuery
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-
-            SqlConnection Conn = new SqlConnection(KeyWords.DBconnectionString);
-            await Conn.OpenAsync();
-            SqlCommand Cmd = Conn.CreateCommand();
-            Cmd.CommandText = this.query;
-            //SqlDataReader reader = await Cmd.ExecuteReaderAsync();
-            DataSet ds = new DataSet();
-            var Adapter = new SqlDataAdapter(Cmd);
-            Adapter.Fill(ds);
-            Conn.Close();
-            BinaryFormatter fmt = new BinaryFormatter();
-            Action<Stream, HttpContent, TransportContext> WriteToStream = null;
             var response = new HttpResponseMessage();
-            switch(Format.ToLower())
+            try
             {
-                case "xml":
-                    ds.RemotingFormat = SerializationFormat.Xml;
-                    WriteToStream = (stream, foo, bar) => { WriteXml(ds, stream); };
-                    response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentXML)));
-                    break;
-                case "json":
-                    ds.RemotingFormat = SerializationFormat.Xml;
-                    WriteToStream = (stream, foo, bar) => { WriteJson(ds, stream); stream.Close(); };
-                    response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
-                    break;
-                default:
-                    ds.RemotingFormat = SerializationFormat.Binary;
-                    WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ds); stream.Close(); };
-                    response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(("application/x-dataset")));
-                    break;
+                SqlConnection Conn = new SqlConnection(KeyWords.DBconnectionString);
+                await Conn.OpenAsync();
+                SqlCommand Cmd = Conn.CreateCommand();
+                Cmd.CommandText = this.query;
+                Cmd.CommandTimeout = KeyWords.DatabaseSearchTimeout == null || KeyWords.DatabaseSearchTimeout == "" ? 600 : Int32.Parse(KeyWords.DatabaseSearchTimeout);
+                //SqlDataReader reader = await Cmd.ExecuteReaderAsync();
+                DataSet ds = new DataSet();
+                var Adapter = new SqlDataAdapter(Cmd);
+                Adapter.Fill(ds);
+                Conn.Close();
+                BinaryFormatter fmt = new BinaryFormatter();
+                Action<Stream, HttpContent, TransportContext> WriteToStream = null;
+                switch (Format.ToLower())
+                {
+                    case "xml":
+                        ds.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { WriteXml(ds, stream); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentXML)));
+                        break;
+                    case "json":
+                        ds.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { WriteJson(ds, stream); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
+                        break;
+                    default:
+                        ds.RemotingFormat = SerializationFormat.Binary;
+                        WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ds); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(("application/x-dataset")));
+                        break;
+                }
+                //reader.Close();
+                //response.Content = new StringContent(ClientIP);
+                return response;
+                //return processDBqueryResults(stream);
             }
-            //reader.Close();
-            //response.Content = new StringContent(ClientIP);
-            return response;
-            //return processDBqueryResults(stream);
+            catch (Exception e)
+            {
+                throw new Exception("There is an error running this Query.\n Query:" + query + "\n" + "Extra information:\n" + e.Message);
+            }
 
 
         }

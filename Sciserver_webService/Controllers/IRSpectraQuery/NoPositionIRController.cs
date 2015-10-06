@@ -16,14 +16,14 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get(){
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "IRSpectroQuery:NoPositionSearch");
+            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "IRSpectroQuery:NoPositionSearch");
+            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
         }
     }
 }

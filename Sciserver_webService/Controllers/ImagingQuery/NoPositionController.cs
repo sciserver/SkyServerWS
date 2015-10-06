@@ -16,14 +16,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get() 
         {           
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.noposition, "ImagingQuery:NoPositionSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.noposition, "SkyserverWS.ImagingQuery.NoPositionSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.noposition, "ImagingQuery:NoPositionSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.noposition, "SkyserverWS.ImagingQuery.NoPositionSearch");
         }
     }
 }

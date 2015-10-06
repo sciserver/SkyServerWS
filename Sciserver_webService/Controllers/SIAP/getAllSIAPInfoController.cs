@@ -22,7 +22,7 @@ namespace Sciserver_webService.Controllers
         {
 
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SIAP:getAllSIAPInfo");
+            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SkyserverWS.SIAP.getAllSIAPInfo");
         }
       
     }

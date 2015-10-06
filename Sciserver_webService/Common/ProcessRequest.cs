@@ -248,13 +248,17 @@ namespace Sciserver_webService.Common
                         clientIP = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
                     }
                 }
-                if (KeyWords.IPClientServers.Contains(clientIP))
+                foreach (string ip in KeyWords.IPClientServers)
                 {
-                    this.IsDirectUserConnection = false;
-                    try { clientIP = requestDir["clientIP"]; }
-                    catch { clientIP = "unkownByAgent"; }
-                    if (clientIP == "")
-                        clientIP = "unkownByAgent";
+                    if (ip.Contains(clientIP))
+                    {
+                        this.IsDirectUserConnection = false;
+                        try { clientIP = requestDir["clientIP"]; }
+                        catch { clientIP = "unkownForAgent"; }
+                        if (clientIP == "")
+                            clientIP = "unkownForAgent";
+                        break;
+                    }
                 }
                 if (clientIP == "")
                     clientIP = "unspecified";

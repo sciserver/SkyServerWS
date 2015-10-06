@@ -17,14 +17,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.spectroQuery, KeyWords.rectangular, "SpectroQuery:RectangularSearch");
+            return request.runquery(this, KeyWords.spectroQuery, KeyWords.rectangular, "SkyserverWS.SpectroQuery.RectangularSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.spectroQuery, KeyWords.rectangular, "SpectroQuery:RectangularSearch");
+            return request.runquery(this, KeyWords.spectroQuery, KeyWords.rectangular, "SkyserverWS.SpectroQuery.RectangularSearch");
         }
     }
 }

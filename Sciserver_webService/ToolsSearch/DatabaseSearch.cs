@@ -41,7 +41,7 @@ namespace Sciserver_webService.UseCasjobs
                 else
                     this.Format = "";//which is the same as application/x-dataset
             }
-            this.TaskName = "DirectUserQuery";
+            this.TaskName = "SkyserverWS.SearchTools.DatabaseSearch.DirectUserQuery";
             if (!IsDirectUserConnection)
             {
                 try
@@ -50,7 +50,7 @@ namespace Sciserver_webService.UseCasjobs
                 }
                 catch {}
                 if (this.TaskName == "")
-                    this.TaskName = "UnknownTaskFromUserAgent";
+                    this.TaskName = "SkyserverWS.SearchTools.DatabaseSearch.UnknownTaskByUserAgent";
             }
             try 
             {

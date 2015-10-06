@@ -26,14 +26,14 @@ namespace Sciserver_webService.Controllers
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery);
+            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, "SkyserverWS.SearchTools.DatabaseSearch");
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery);
+            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, "SkyserverWS.SearchTools.DatabaseSearch");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Sciserver_webService.Controllers
         {
 
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfo, "SIAP:getSIAPInfo");
+            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfo, "SkyserverWS.SIAP.getSIAPInfo");
         }
         
     }

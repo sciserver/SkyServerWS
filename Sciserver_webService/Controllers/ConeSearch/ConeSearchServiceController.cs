@@ -21,14 +21,15 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);            
+            //return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");            
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
         //[ExceptionHandleAttribute]
         //public VOTABLE Get([FromUri] String ra = null, [FromUri] String dec = null, [FromUri] String sr = null)

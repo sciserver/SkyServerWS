@@ -23,7 +23,7 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SDSSFields:FieldArrayRect");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SkyserverWS.SDSSFields.FieldArrayRect");
         }
 
         [ExceptionHandleAttribute]
@@ -31,7 +31,7 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SDSSFields:FieldArrayRect");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SkyserverWS.SDSSFields.FieldArrayRect");
         }
         ////*** these are input parameters for FieldArrayRect
         //[FromUri] String ra, [FromUri] String dec, [FromUri] String dra, [FromUri] String ddec

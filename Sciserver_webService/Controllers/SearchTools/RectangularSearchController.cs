@@ -42,7 +42,7 @@ namespace Sciserver_webService.Controllers
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
-            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, KeyWords.RectangularQuery);
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.ReactangularSearch");
         }
 
         [ExceptionHandleAttribute]
@@ -50,7 +50,7 @@ namespace Sciserver_webService.Controllers
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
-            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, KeyWords.RectangularQuery);
+            return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.ReactangularSearch");
         }
     }
 }

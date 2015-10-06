@@ -590,20 +590,23 @@ namespace Sciserver_webService.ImgCutout
             ra = ra % 360;					// bring ra into [0..360]
             if (ra < 0) ra += 360;
 */
-            // modified by Manuchehr Taghizadeh-Popp on 08/31/2015
-            dec = dec % 360;					// brings dec into [0..360]
-            if (dec < 0)
+            // modified by Manuchehr Taghizadeh-Popp on 10/03/2015
+            if (dec > 90 || dec < -90)
             {
-                dec = dec + 360;     // only allows positive dec values
-            }
-            else if (dec > 90 && dec < 270) // if dec is at the other side of the poles
-            {
-                ra = ra + 180;// go 1/2 way around the globe
-                dec = 180 - dec;
-            }
-            else if (dec >= 270)  // if dec is at this side from the south pole
-            { 
-                dec = dec - 360;
+                dec = dec % 360;					// brings dec into [0..360]
+                if (dec < 0)
+                {
+                    dec = dec + 360;     // only allows positive dec values
+                }
+                if (dec > 90 && dec < 270) // if dec is at the other side of the poles
+                {
+                    ra = ra + 180;// go 1/2 way around the globe
+                    dec = 180 - dec;
+                }
+                if (dec >= 270)  // if dec is at this side from the south pole
+                {
+                    dec = dec - 360;
+                }
             }
             ra = ra % 360;// brings ra into [0..360]
 

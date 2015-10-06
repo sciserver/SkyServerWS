@@ -13,14 +13,14 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SDSSFields:FieldArray");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SkyserverWS.SDSSFields.FieldArray");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SDSSFields:FieldArray");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SkyserverWS.SDSSFields.FieldArray");
         }   
     }
 }
