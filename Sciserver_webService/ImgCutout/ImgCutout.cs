@@ -160,8 +160,10 @@ namespace Sciserver_webService.ImgCutout
         private string token = "";
         private string datarelease = "";
 
-        //Client ip logging
+        //For logging
         private string clientIP = "";
+        private string serverName = "";
+        private string httpHost = "";
         /// <summary>
         /// Constructor and getting connection strings for databases
         /// </summary> 
@@ -185,9 +187,14 @@ namespace Sciserver_webService.ImgCutout
             if (sConnectImage2Mass == null || sDataRelease == null)
                 throw new System.Exception("SkyServer2Mass keyword not found or invalid. \n" +
                  "Please check AppSettings in the Web.config file!");
-            
+
+           serverName = System.Web.HttpContext.Current.Request.ServerVariables["SERVER_NAME"];
+           httpHost   = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_HOST"];
+                      
+           
         }
 
+        
       
         /// <summary>
         /// GetJpeg retuns a Jpeg of the image around a point at the specified zoom.
@@ -392,7 +399,11 @@ namespace Sciserver_webService.ImgCutout
                     }
                     //if (debug)
                    // {
+                    string test = "\n"+System.Web.HttpContext.Current.Request.ServerVariables["SERVER_NAME"];
+                    string test2 = "\n"+ System.Web.HttpContext.Current.Request.ServerVariables["HTTP_HOST"];
                         dbgMsg.Append(clientIP);
+                        dbgMsg.Append(test);
+                        dbgMsg.Append(test2);
                         canvas.addDebugMessage(dbgMsg.ToString());
                         canvas.drawDebugMessage(width,height);
                    // }
@@ -428,12 +439,10 @@ namespace Sciserver_webService.ImgCutout
                         sQ.Append(" join  dbo.TwoMassImageFrame as f  on f.fieldid=n.fieldid  \n");
 
                         
-                        //SqlCommand spExec = new SqlCommand("spExecuteSql",SqlConnImage2Mass);
-                        //spExec.Parameters.Add("cmd",sQ.ToString());
-
-                       SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
-                       readerImage2Mass = cmd1.ExecuteReader();
-                       
+                        
+                       //SqlCommand cmd1 = new SqlCommand(sQ.ToString(), SqlConnImage2Mass);
+                       //readerImage2Mass = cmd1.ExecuteReader();
+                        readerImage2Mass = execSQL(sQ.ToString(), SqlConnImage2Mass);
                             if (!readerImage2Mass.HasRows)
                             {//throw new Exception("Requested (ra, dec) is outside the 2MASS footprint. \n");
                                 canvas.addDebugMessage("Requested (ra, dec) is outside the 2MASS footprint. \n");
@@ -499,8 +508,9 @@ namespace Sciserver_webService.ImgCutout
                         
                             IntPtr imageFromBytedata = IntPtr.Zero;
                             cTable = new Hashtable();
-                            SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
-                            reader = cmd.ExecuteReader();
+                            ////SqlCommand cmd = new SqlCommand(sQ.ToString(), SqlConnImage);
+                            //reader = cmd.ExecuteReader();
+                            reader = execSQL(sQ.ToString(), SqlConnImage);
 
                             if (!reader.HasRows)
                             {
@@ -575,6 +585,21 @@ namespace Sciserver_webService.ImgCutout
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         //%%%%%%%%%%%%%  utilities %%%%%%%%%%%%%%%
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+        //Execute Command to avoid repetation of all parameters passing to spExecSQL
+        public SqlDataReader execSQL(String  query, SqlConnection sqlConnect) {
+            SqlCommand cmd = new SqlCommand("spExecuteSql", sqlConnect);
+            cmd.Parameters.AddWithValue("@cmd", query);
+            cmd.Parameters.AddWithValue("@limit", 5000);
+            cmd.Parameters.AddWithValue("@winname",serverName);
+            cmd.Parameters.AddWithValue("@webserver", httpHost);
+            cmd.Parameters.AddWithValue("@clientIP", clientIP);
+            cmd.Parameters.AddWithValue("@System", 1);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            return cmd.ExecuteReader();
+        }
 
         ///<summary>
         /// validateInput(). Validate the range limits the input parameters.
@@ -704,9 +729,9 @@ namespace Sciserver_webService.ImgCutout
                               + run + " AND camCol=" + camcol + " AND field=" + field;
 
                connectToDataBaseImage();
-               SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-               reader = cmd.ExecuteReader();
-               
+               //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
+               //reader = cmd.ExecuteReader();
+               reader = execSQL(cmdStr, SqlConnImage);
                 while (reader.Read())       // read the next record in the dataset
                 {
                     MemoryStream theJpeg = new MemoryStream();
@@ -764,10 +789,21 @@ namespace Sciserver_webService.ImgCutout
         {
             try
             {
-                //set up the data adapter to get our data...
 
+                SqlCommand cmd = new SqlCommand("spExecuteSql", SqlConn);
+                cmd.Parameters.AddWithValue("@cmd", originalQ);
+                cmd.Parameters.AddWithValue("@limit", 5000);
+                cmd.Parameters.AddWithValue("@winname", serverName);
+                cmd.Parameters.AddWithValue("@webserver", httpHost);
+                cmd.Parameters.AddWithValue("@clientIP", clientIP);
+                cmd.Parameters.AddWithValue("@System", 1);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                //set up the data adapter to get our data...
+               
                 DataSet ds = new DataSet();
-                SqlDataAdapter da = new SqlDataAdapter(query.ToString(), SqlConn);
+                //SqlDataAdapter da = new SqlDataAdapter(query.ToString(), SqlConn);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(ds, "MarkedObjects");
                 if (ds.Tables["MarkedObjects"].Columns["error_message"] != null)
                 {
@@ -1148,9 +1184,8 @@ namespace Sciserver_webService.ImgCutout
                 string cmdStr = "SELECT img FROM Frame2Mass WHERE zoom=" + zoom + " AND id=" + id;
                 connectToDataBaseImage();
                 //SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                SqlCommand cmd = new SqlCommand(cmdStr, SqlConnImage);
-                reader = cmd.ExecuteReader();
-                
+                //reader = cmd.ExecuteReader();
+                reader = execSQL(cmdStr, SqlConnImage2Mass);
                     while (reader.Read())       // read the next record in the dataset
                     {
                         MemoryStream theJpeg = new MemoryStream();
@@ -1280,3 +1315,4 @@ namespace Sciserver_webService.ImgCutout
 ///						                         Commented some part of alex's code and put  back 'query' option related code
 ///						    2013-06-07: Deoyani:  Added 2mass related code for 2mass cutout service                       
 ///						    2014-2015: Deoyani : worked on converting everything in RESTful web services, removing direct connections to databases and running all queries through casjobs
+///                         2015: Deoyani: Updated code for Sciserver to run all queries through execSQL
