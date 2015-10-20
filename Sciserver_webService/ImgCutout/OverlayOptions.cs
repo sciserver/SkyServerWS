@@ -26,8 +26,9 @@ namespace Sciserver_webService.ImgCutout
         string datarelease;
         string token;
 
-        public OverlayOptions(SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token)
+        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token)
         {
+            this.SqlConn = sqlcon;
             this.canvas = canvas;
             this.ra = ra;
             this.dec = dec;
@@ -83,7 +84,7 @@ namespace Sciserver_webService.ImgCutout
             StringBuilder sQ = new StringBuilder(" select * ");
             sQ.AppendFormat(" from dbo.fGetObjectsEq({0},{1},{2},{3},{4}) ",
                 flag, ra, dec, radius, zoom);
-            //SqlDataReader reader = null;
+            SqlDataReader reader = null;
 
             try
             {
@@ -91,7 +92,7 @@ namespace Sciserver_webService.ImgCutout
                 double oRa, oDec;
                 byte oFlag;
                 //reader = cmd.ExecuteReader();					// invoke fGetObjectsEq()
-                SqlDataReader reader = imgCutout.execSQL(sQ.ToString(), this.SqlConn);
+                reader = imgCutout.execSQL(sQ.ToString(), this.SqlConn);
                 while (reader.Read())
                 {
                     oRa = Convert.ToDouble(reader[0]);		// get ra
@@ -111,7 +112,7 @@ namespace Sciserver_webService.ImgCutout
                 showException("getObjects() [Photo|Spec|Target]", sQ.ToString(), e);
             }
             finally { 
-                //try { if (reader != null) reader.Close(); } catch (Exception e) { } 
+                try { if (reader != null) reader.Close(); } catch (Exception e) { } 
             }
         }
 
