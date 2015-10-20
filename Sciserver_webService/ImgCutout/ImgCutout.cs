@@ -164,6 +164,8 @@ namespace Sciserver_webService.ImgCutout
         private string clientIP = "";
         private string serverName = "";
         private string httpHost = "";
+        private string remoteAdd = "";
+        private string localip = "";
         /// <summary>
         /// Constructor and getting connection strings for databases
         /// </summary> 
@@ -190,8 +192,8 @@ namespace Sciserver_webService.ImgCutout
 
            serverName = System.Web.HttpContext.Current.Request.ServerVariables["SERVER_NAME"];
            httpHost   = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_HOST"];
-                      
-           
+
+           localip = System.Web.HttpContext.Current.Request.ServerVariables["LOCAL_ADDR"];
         }
 
         
@@ -373,7 +375,7 @@ namespace Sciserver_webService.ImgCutout
                     if (drawFrames | drawField) getFrames();
                     if (drawQuery) getQueryObjects(query_);
                     
-                    OverlayOptions options = new OverlayOptions( canvas, size, ra, dec, radius, zoom, fradius,datarelease, token);
+                    OverlayOptions options = new OverlayOptions(SqlConn, canvas, size, ra, dec, radius, zoom, fradius,datarelease, token);
 
                     if (drawApogee) options.getApogeeObjects();
                     if (drawField) options.getFields(cTable);
@@ -397,16 +399,13 @@ namespace Sciserver_webService.ImgCutout
                     {
                         canvas.Invert();
                     }
-                    //if (debug)
-                   // {
-                    string test = "\n"+System.Web.HttpContext.Current.Request.ServerVariables["SERVER_NAME"];
-                    string test2 = "\n"+ System.Web.HttpContext.Current.Request.ServerVariables["HTTP_HOST"];
+                   //if (debug)
+                   //{
                         dbgMsg.Append(clientIP);
-                        dbgMsg.Append(test);
-                        dbgMsg.Append(test2);
+                        dbgMsg.Append(localip);
                         canvas.addDebugMessage(dbgMsg.ToString());
                         canvas.drawDebugMessage(width,height);
-                   // }
+                   //}
                 }
                 catch (Exception e) { throw e; }
                 finally { 
@@ -589,6 +588,7 @@ namespace Sciserver_webService.ImgCutout
 
         //Execute Command to avoid repetation of all parameters passing to spExecSQL
         public SqlDataReader execSQL(String  query, SqlConnection sqlConnect) {
+            
             SqlCommand cmd = new SqlCommand("spExecuteSql", sqlConnect);
             cmd.Parameters.AddWithValue("@cmd", query);
             cmd.Parameters.AddWithValue("@limit", 5000);
@@ -1221,7 +1221,7 @@ namespace Sciserver_webService.ImgCutout
                 }
             }
 
-            return context.Request.ServerVariables["REMOTE_ADDR"];
+            return context.Request.UserHostAddress; //.ServerVariables["REMOTE_ADDR"];
         }
 
 
