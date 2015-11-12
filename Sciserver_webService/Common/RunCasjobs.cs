@@ -80,10 +80,11 @@ namespace Sciserver_webService.UseCasjobs
             else
                 this.IsSuccessStatusCode = false;
             System.IO.Stream stream = await result.Content.ReadAsStreamAsync();
-            return processCasjobsResults(stream);
+            return processStream(stream);
         }
 
-        private HttpResponseMessage processCasjobsResults(Stream stream) {
+        private HttpResponseMessage processStream(Stream stream)
+        {
 
             var response = new HttpResponseMessage();
             if (this.IsSuccessStatusCode)
@@ -302,7 +303,7 @@ namespace Sciserver_webService.UseCasjobs
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SDSS error message</h2>");
             sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
-            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
+            //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
             sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();

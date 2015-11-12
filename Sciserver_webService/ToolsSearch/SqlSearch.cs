@@ -28,7 +28,12 @@ namespace Sciserver_webService.UseCasjobs
         //    this.query = query;
         //}
 
-        public SqlSearch(ref Dictionary<string, string> requestDir)
+        public string ClientIP = "";
+        public string TaskName = "";
+        public string server_name = "";
+        public string windows_name = "";
+
+        public SqlSearch(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo)
         {
 
            try
@@ -48,6 +53,15 @@ namespace Sciserver_webService.UseCasjobs
            c2 = c2.Replace("'", "''");		                                                
            // 'c' is query version that's printed on output page
            // 'c2' is the version that is sent to DB server 
+
+           try
+           {
+               ClientIP = ExtraInfo["ClientIP"];
+               TaskName = ExtraInfo["TaskName"];
+               server_name = ExtraInfo["server_name"];
+               windows_name = ExtraInfo["windows_name"];
+           }
+           catch(Exception e) { throw new Exception(e.Message);};
 
            try
            {
@@ -74,11 +88,14 @@ namespace Sciserver_webService.UseCasjobs
                            c += "<i>" + (i + 1) + ".</i> " + clines[i];
                    }
                }
-               this.query = "EXEC spExecuteSQL3 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
+               //this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";// parsing the query against harmful sql commands
+               // @cmd,@limit,@webserver,@winname,@clientIP,@access,@system,@maxQueries
+
            }
            else
            {
-               this.query = "EXEC spExecuteSQL3 '" + c2 + "','" + KeyWords.MaxRows + "'";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";// parsing the query against harmful sql commands
            }
            QueryForUserDisplay = c;
         }

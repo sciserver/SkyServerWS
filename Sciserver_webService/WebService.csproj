@@ -55,6 +55,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Jhu.Graywulf.Schema.dll</HintPath>
     </Reference>
+    <Reference Include="Jhu.SharpFitsIO, Version=1.0.5764.15643, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Jhu.SharpFitsIO.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
@@ -150,15 +154,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataWrapper\DataSetWrapper.cs" />
+    <Compile Include="DataWrapper\DataWrapper.cs" />
+    <Compile Include="Common\Functions.cs" />
     <Compile Include="Common\HexEncoding.cs" />
     <Compile Include="Common\ImpTypes\FloatImpTypes.cs" />
     <Compile Include="Common\ImpTypes\ImpType.cs" />
     <Compile Include="Common\ImpTypes\IntegerImpTypes.cs" />
     <Compile Include="Common\ImpTypes\MiscImpTypes.cs" />
     <Compile Include="Common\KeyWords.cs" />
+    <Compile Include="Common\ProcessDataSet.cs" />
     <Compile Include="Common\ProcessRequest.cs" />
+    <Compile Include="Common\OutputUtils.cs" />
     <Compile Include="Common\RunDBquery.cs" />
-    <Compile Include="Controllers\SearchTools\DatabaseSearchController.cs" />
+    <Compile Include="Common\SendTables.cs" />
+    <Compile Include="DataWrapper\VOTableWrapper.cs" />
+    <Compile Include="Controllers\SearchTools\ObjectSearchController.cs" />
+    <Compile Include="DataWrapper\HexEncoding.cs" />
     <Compile Include="SIAP\ReturnSIAPresults.cs" />
     <Compile Include="Common\UploadDataReader.cs" />
     <Compile Include="ConeSearch\ConeSearch.cs" />
@@ -176,9 +188,7 @@
     <Compile Include="Controllers\IRSpectraQuery\NoPositionIRController.cs" />
     <Compile Include="Controllers\IRSpectraQuery\GalacticIRController.cs" />
     <Compile Include="Controllers\KeystoneAuthController.cs" />
-    <Compile Include="Controllers\ObjectCrossId\ImgCrossIdController.cs" />
-    <Compile Include="Controllers\ObjectCrossId\IRSpectraCrossIdController.cs" />
-    <Compile Include="Controllers\ObjectCrossId\SpectraCrossIdController.cs" />
+    <Compile Include="Controllers\SearchTools\CrossIdSearchController.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayController.cs" />
     <Compile Include="Controllers\SDSSFields\UrlsOfFieldsController.cs" />
     <Compile Include="Controllers\SDSSFields\FieldArrayRectController.cs" />
@@ -203,7 +213,11 @@
     <Compile Include="Models\XMLStreamResponse.cs" />
     <Compile Include="SDSSFields\FieldQueries.cs" />
     <Compile Include="SDSSFields\NewSDSSFields.cs" />
+    <Compile Include="ToolsSearch\CrossIdSearch.cs" />
     <Compile Include="ToolsSearch\DatabaseSearch.cs" />
+    <Compile Include="ToolsSearch\ObjectQueries.cs" />
+    <Compile Include="ToolsSearch\ObjectInfo.cs" />
+    <Compile Include="ToolsSearch\ObjectSearch.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
     <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />

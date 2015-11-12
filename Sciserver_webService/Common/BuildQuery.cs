@@ -566,18 +566,19 @@ namespace Sciserver_webService.QueryTools
         public static void buildQueryMaster(string type, Dictionary<string, string> requestDictionary, string positionType)
         {
             Int64 limit;
-            QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
-            query = QueryForUserDisplay;
-            query = "EXEC spExecuteSQL2 '" + query + "'";
             try
             {
                 limit = Convert.ToInt64(requestDictionary["limit"]);
-                if (limit > Convert.ToInt64(KeyWords.MaxRows))
-                {
-                    query = "SELECT 'Query error in \"TOP "+ requestDictionary["limit"]+"\". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "' as [Error Message]";
-                }
             }
-            catch (Exception e) { query = "SELECT 'Query error. Wrong input in \"TOP " + requestDictionary["limit"] + "\" (Invalid numerical value for maximum number of rows).' as [Error Message]"; }
+            catch { throw (new Exception("Invalid numerical value for maximum number of rows in LIMIT=" + requestDictionary["limit"])); }
+            if (limit > Convert.ToInt64(KeyWords.MaxRows))
+            {
+                throw (new Exception("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDictionary["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
+            }
+            QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
+            query = QueryForUserDisplay;
+            query = query.Replace("'", "''");
+            query = "EXEC spExecuteSQL '" + query + "'";
         }
 
 
@@ -1206,6 +1207,14 @@ namespace Sciserver_webService.QueryTools
                         else if (specFields[i] == "[dec]")
                         {
                             selectClause += ",ISNULL(cast(str(s." + specFields[i] + ",13,8) as float),0) as dec";
+                        }
+                        else if (specFields[i] == "z")
+                        {
+                            selectClause += ",ISNULL(s." + specFields[i] + ",0) as redshift";
+                        }
+                        else if (specFields[i] == "zErr")
+                        {
+                            selectClause += ",ISNULL(s." + specFields[i] + ",0) as redshiftErr";
                         }
                         else
                         {

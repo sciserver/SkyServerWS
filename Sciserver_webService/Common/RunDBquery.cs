@@ -29,13 +29,26 @@ namespace Sciserver_webService.DoDatabaseQuery
     public class RunDBquery : IHttpActionResult
     {
         String query = "";
-        String Format = "";
-       
-        public RunDBquery(string query,  string Format)
+        String format = "";
+        String TaskName = "";
+        Dictionary<string, string> ExtraInfo = null;
+        string ErrorMessage = "There no errors.";
+        DataSet ResultsDataSet = new DataSet();
+        
+        public RunDBquery(string query,  string format)
         {
             this.query = query;
-            this.Format = Format;
+            this.format = format;
         }
+
+        public RunDBquery(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo)
+        {
+            this.query = query;
+            this.format = format;
+            this.TaskName = TaskName;
+            this.ExtraInfo = ExtraInfo;
+        }
+
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -46,30 +59,69 @@ namespace Sciserver_webService.DoDatabaseQuery
                 await Conn.OpenAsync();
                 SqlCommand Cmd = Conn.CreateCommand();
                 Cmd.CommandText = this.query;
-                Cmd.CommandTimeout = KeyWords.DatabaseSearchTimeout == null || KeyWords.DatabaseSearchTimeout == "" ? 600 : Int32.Parse(KeyWords.DatabaseSearchTimeout);
+                //Cmd.CommandTimeout = KeyWords.DatabaseSearchTimeout == null || KeyWords.DatabaseSearchTimeout == "" ? 600 : Int32.Parse(KeyWords.DatabaseSearchTimeout);
+                Cmd.CommandTimeout = Int32.Parse(KeyWords.DatabaseSearchTimeout);
                 //SqlDataReader reader = await Cmd.ExecuteReaderAsync();
-                DataSet ds = new DataSet();
                 var Adapter = new SqlDataAdapter(Cmd);
-                Adapter.Fill(ds);
+                Adapter.Fill(ResultsDataSet);
+
                 Conn.Close();
-                BinaryFormatter fmt = new BinaryFormatter();
+                //BinaryFormatter fmt = new BinaryFormatter();
                 Action<Stream, HttpContent, TransportContext> WriteToStream = null;
-                switch (Format.ToLower())
+                BinaryFormatter fmt;
+                if(format != "csv" && format != "txt" && format != "text/plain" && format != "fits" && format != "application/fits")
                 {
+                    AddQueryTable(ResultsDataSet);
+                }
+
+                switch (format)
+                {
+                    case "csv":
+                    case "txt":
+                    case "text/plain":
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { OutputUtils.writeCSV(ResultsDataSet, stream); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentCSV)));
+                        break;
+                    case "fits":
+                    case "application/fits":
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
+                        WriteToStream = (stream, foo, bar) => { OutputUtils.WriteFits(ResultsDataSet, stream); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentFITS)));
+                        break;
+                    case "votable":
+                    case "application/x-votable+xml":
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { OutputUtils.WriteVOTable(ResultsDataSet, stream); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentVOTable)));
+                        break;
                     case "xml":
-                        ds.RemotingFormat = SerializationFormat.Xml;
-                        WriteToStream = (stream, foo, bar) => { WriteXml(ds, stream); };
+                    case "application/xml":
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { OutputUtils.WriteXml(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentXML)));
                         break;
                     case "json":
-                        ds.RemotingFormat = SerializationFormat.Xml;
-                        WriteToStream = (stream, foo, bar) => { WriteJson(ds, stream); stream.Close(); };
+                    case "application/json":
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
+                        WriteToStream = (stream, foo, bar) => { OutputUtils.WriteJson(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
                         break;
+                    case "html":
+                    case "dataset":
+                    case "application/x-dataset":
+                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, true);
+                        response.Content = proc.GetContent(ResultsDataSet);
+                        //ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
+                        //fmt = new BinaryFormatter();
+                        //WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ResultsDataSet); stream.Close(); };
+                        //response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(KeyWords.contentDataset));
+                        break;
                     default:
-                        ds.RemotingFormat = SerializationFormat.Binary;
-                        WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ds); stream.Close(); };
-                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(("application/x-dataset")));
+                        ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
+                        fmt = new BinaryFormatter();
+                        WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ResultsDataSet); stream.Close(); };
+                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentDataset)));
                         break;
                 }
                 //reader.Close();
@@ -79,130 +131,42 @@ namespace Sciserver_webService.DoDatabaseQuery
             }
             catch (Exception e)
             {
-                throw new Exception("There is an error running this Query.\n Query:" + query + "\n" + "Extra information:\n" + e.Message);
-            }
-
-
-        }
-
-
-        public static string BytesToHex(byte[] bytes)
-        {
-            if (bytes == null) return null;
-            else
-                return "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
-        }
-
-        public static void WriteXml(DataSet dataSet, Stream stream)
-        {
-            using (StreamWriter writer = new StreamWriter(stream))
-            {
-
-                writer.Write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-                writer.Write("<!DOCTYPE root [\n");
-                writer.Write("<!ELEMENT root (Table*)>\n");
-                writer.Write("<!ELEMENT Table (Row*)>\n");
-                writer.Write("<!ELEMENT Row (Item*)>\n");
-                writer.Write("<!ELEMENT Item (#PCDATA)>\n");
-                writer.Write("<!ATTLIST Table name CDATA #REQUIRED>\n");
-                writer.Write("<!ATTLIST Item name CDATA #REQUIRED>\n");
-
-                writer.Write("]>\n");
-
-                writer.Write("<root>\n");
-
-                foreach (DataTable table in dataSet.Tables)
+                if (ExtraInfo["FormatFromUser"] == "html")
                 {
-                    writer.Write("<Table name=\"" + table.TableName + "\">\n");
-                    foreach (DataRow row in table.Rows)
-                    {
-                        writer.Write("<Row>\n");
-                        for (int i = 0; i < table.Columns.Count; i++)
-                        {
-                            writer.Write("<Item name=\"" + table.Columns[i].ColumnName + "\">");
-                            string str = "";
-                            object value = row.ItemArray[i];
-                            if (value is byte[])
-                            {
-                                str = BytesToHex((byte[])value);
-                            }
-                            else
-                            {
-                                str = value.ToString();
-                            }
-                            str = str.Replace("<", "&lt;");
-                            str = str.Replace(">", "&gt;");
-
-                            writer.Write(str);
-                            writer.Write("</Item>\n");
-                        }
-                        writer.Write("</Row>\n");
-                    }
-                    writer.Write("</Table>\n");
+                    ErrorMessage = e.Message;
+                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, false);
+                    response.Content = proc.GetContent(ResultsDataSet);
                 }
-                writer.Write("</root>\n");
-            }
-        }
-
-        public static void WriteJson(DataSet dataSet, Stream stream)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            using (JsonWriter json = new JsonTextWriter(new StringWriter(sb)))
-            {
-                json.Formatting = Formatting.Indented;
-                json.WriteStartArray();
-
-                foreach (DataTable table in dataSet.Tables)
+                else
                 {
-                    json.WriteStartObject();
-                    json.WritePropertyName("TableName");
-                    json.WriteValue(table.TableName);
-                    json.WritePropertyName("Rows");
-                    json.WriteStartArray();
-                    foreach (DataRow row in table.Rows)
-                    {
-                        json.WriteStartObject();
-                        for (int Index = 0; Index < (table.Columns.Count); Index++)
-                        {
-                            json.WritePropertyName(table.Columns[Index].ColumnName);
-                            string str = "";
-                            object value = row.ItemArray[Index];
-
-                            if (value is byte[])
-                            {
-                                str = BytesToHex((byte[])value);
-                            }
-                            else
-                            {
-                                str = value.ToString();
-                            }
-
-                            Type type = table.Columns[Index].DataType;
-                            if (type == typeof(string) || type == typeof(byte[]) || type == typeof(DateTime))
-                                json.WriteValue(str);
-                            else
-                            {
-                                if (type == typeof(bool)) str = str.ToLower();
-                                if (String.IsNullOrEmpty(str)) json.WriteNull();
-                                else json.WriteRawValue(str);
-                            }
-                        }
-                        json.WriteEndObject();
-                    }
-                    json.WriteEndArray();
-                    json.WriteEndObject();
+                    throw new Exception(e.Message);
+                    //response.Content = new StringContent("There is an error running this Query:\n" + query + "\n\n" + "Extra information:\n" + e.Message);
                 }
-
-                json.WriteEndArray();
+                return response;
             }
 
-            using (StreamWriter writer = new StreamWriter(stream))
-            {
-                writer.Write(sb.ToString());
-            }
+
         }
 
+
+        public void AddQueryTable(DataSet ResultsDataSet)
+        {
+            if (ExtraInfo["QueryForUserDisplay"] != null)
+            {
+                DataTable dt = new DataTable("SqlQuery");
+                dt.Columns.Add("query", typeof(string));
+
+                string Query = ExtraInfo["QueryForUserDisplay"];
+                Query = Regex.Replace(Query, @"\/\*(.*\n)*\*\/", "");	                                // remove all multi-line comments
+                Query = Regex.Replace(Query, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
+                Query = Regex.Replace(Query, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
+                Query = Regex.Replace(Query, @"[ \t\f\v]+", " ");				                        // replace multiple whitespace with single space
+                Query = Regex.Replace(Query, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines          
+
+                dt.Rows.Add(new object[] { Query });
+                ResultsDataSet.Merge(dt);
+            }
+        }
 
 
 

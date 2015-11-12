@@ -48,6 +48,10 @@ namespace Sciserver_webService.Common
         ///Maximum number of rows returned by SQExecuteSQL
         public static string MaxRows = ConfigurationManager.AppSettings["MaxRows"];
 
+        ///skyversion
+        public static string skyVersion = ConfigurationManager.AppSettings["skyVersion"];
+        
+
         ///Data Release
         public static string DataRelease = ConfigurationManager.AppSettings["Release"];
 
@@ -60,8 +64,9 @@ namespace Sciserver_webService.Common
         public static string[] IPClientServers = ConfigurationManager.AppSettings["IPClientServers"].ToString().Split(',');
 
         public static string DBconnectionString = ConfigurationManager.AppSettings["DBconnectionString"];
-        public static string DatabaseSearchTimeout = ConfigurationManager.AppSettings["DatabaseSearchTimeout"];
+        public static string DatabaseSearchTimeout = ConfigurationManager.AppSettings["DatabaseSearchTimeout"] ?? "600";//in seconds
 
+        public static string NameResolverURL = ConfigurationManager.AppSettings["nameResolverURL"];
 
         ///Casjob messages for VOServices
         public static string ConeSearch = "FOR CONE SEARCH";
@@ -102,6 +107,10 @@ namespace Sciserver_webService.Common
         public static string ConeSearchQuery = "ConeSearch";
         public static string SIAP = "SIAP";
         public static string SDSSFields = "SDSSFields";
+        public static string CrossIdQuery = "CrossIdSearch";
+        public static string ObjectQuery = "ObjectSearch";
+
+        public static float EqSearchRadius = float.Parse(ConfigurationManager.AppSettings["eqSearchRadius"] ?? "0.75");
         
 
         public static string limit = "limit";

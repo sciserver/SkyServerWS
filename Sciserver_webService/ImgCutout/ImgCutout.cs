@@ -620,21 +620,21 @@ namespace Sciserver_webService.ImgCutout
             if (ra < 0) ra += 360;
 */
             // modified by Manuchehr Taghizadeh-Popp on 10/03/2015
-            if (dec > 90 || dec < -90)
+            if (Math.Abs(dec) > 90)
             {
-                dec = dec % 360;					// brings dec into [0..360]
+                dec = dec % 360;					// brings dec into [-360..360]
                 if (dec < 0)
                 {
-                    dec = dec + 360;     // only allows positive dec values
+                    dec = dec + 360;// only allows positive dec values
                 }
                 if (dec > 90 && dec < 270) // if dec is at the other side of the poles
                 {
                     ra = ra + 180;// go 1/2 way around the globe
-                    dec = 180 - dec;
+                    dec = 180 - dec;//bring dec inside [-90..90]
                 }
-                if (dec >= 270)  // if dec is at this side from the south pole
+                else if (dec >= 270)  // if dec is at this side from the south pole
                 {
-                    dec = dec - 360;
+                    dec = dec - 360;//bring dec inside [-90..90]
                 }
             }
             ra = ra % 360;// brings ra into [0..360]
@@ -1316,4 +1316,5 @@ namespace Sciserver_webService.ImgCutout
 ///						                         Commented some part of alex's code and put  back 'query' option related code
 ///						    2013-06-07: Deoyani:  Added 2mass related code for 2mass cutout service                       
 ///						    2014-2015: Deoyani : worked on converting everything in RESTful web services, removing direct connections to databases and running all queries through casjobs
+///                         2015: Manu: fixed the way RA and Dec values are transformed in case their initial values are ouside the ranges [0..360] and [-90..90], respectively.
 ///                         2015: Deoyani: Updated code for Sciserver to run all queries through execSQL

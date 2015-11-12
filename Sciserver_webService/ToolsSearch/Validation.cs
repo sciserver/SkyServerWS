@@ -11,9 +11,7 @@ namespace Sciserver_webService.ToolsSearch
         
         private string band;
 
-        private String[] searchtypes = new String[] { "equitorial", "galactic", "equatorial" };
-
-        public String whichquery = "imaging";
+        public String whichway = "";
         public double ra { get; set; }
         public double dec { get; set; }
         public double radius { get; set; }
@@ -47,7 +45,7 @@ namespace Sciserver_webService.ToolsSearch
         public double kmax { get; set; }
                 
         public Int64 limit = 10;
-        public string searchtype { get; set; }
+        public string coordtype { get; set; }
 
         private string returnType = "json"; // default search type
 
@@ -66,68 +64,149 @@ namespace Sciserver_webService.ToolsSearch
 
         public Validation(Dictionary<string, string> requestDir)
         {
-           try {
-               this.ra = Convert.ToDouble(requestDir["min_ra"]);
-               this.dec = Convert.ToDouble(requestDir["min_dec"]);
-               this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
-               this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
-           }
-           catch (FormatException fx) { throw new ArgumentException("Error: Input RA and Dec should be valid numerical values."); }
-           catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-           if (this.ra_max < this.ra)
-           { throw new ArgumentException("Error: lower RA limit should be less than upper RA limit."); }
+            try { this.returntype_s = requestDir["returntype"]; }
+            catch (Exception e) { }
+            try { this.format = requestDir["format"]; }
+            catch (Exception e) { }
+            try { this.limit_s = requestDir["limit"]; }
+            catch (Exception e) { }
+            try { this.coordtype = requestDir["coordtype"]; }
+            catch (Exception e) { }
 
-           if (this.dec_max < this.dec)
-           { throw new ArgumentException("Error: lower Dec limit should be less than upper Dec limit."); }
+            string RAstring = "RA";
+            string DECstring = "Dec";
 
-           Utilities.ValueCheckOrFail("RA", this.ra, 0.0, 360.0);
-           Utilities.ValueCheckOrFail("RA", this.ra_max, 0.0, 360.0);
-           Utilities.ValueCheckOrFail("Dec", this.dec, -90.0, 90.0);
-           Utilities.ValueCheckOrFail("Dec", this.dec_max, -90.0, 90.0);
+            if (coordtype == "galactic")
+            {
+                RAstring = "'l'";
+                DECstring = "'b'";
+            }
 
-           try { this.uband_s = requestDir["uband"];}catch (Exception e) { }                     
-           try { this.gband_s = requestDir["gband"];}catch (Exception e) { }
-           try { this.rband_s = requestDir["rband"];}catch (Exception e) { }
-           try { this.iband_s = requestDir["iband"];}catch (Exception e) { }
-           try { this.zband_s = requestDir["zband"];}catch (Exception e) { }
-           try { this.jband_s = requestDir["jband"]; }catch (Exception e) { }
-           try { this.hband_s = requestDir["hband"]; }catch (Exception e) { }
-           try { this.kband_s = requestDir["kband"]; }catch (Exception e) { }
-           try { this.uband = requestDir["check_u"] == "u" ? true : false; }catch (Exception e) { }
-           try { this.gband = requestDir["check_g"] == "g" ? true : false; }catch (Exception e) { }
-           try { this.rband = requestDir["check_r"] == "r" ? true : false; }catch (Exception e) { }
-           try { this.iband = requestDir["check_i"] == "i" ? true : false; }catch (Exception e) { }
-           try { this.zband = requestDir["check_z"] == "z" ? true : false; }catch (Exception e) { }
-           try { this.jband = requestDir["check_j"] == "j" ? true : false; }catch (Exception e) { }
-           try { this.hband = requestDir["check_h"] == "h" ? true : false; }catch (Exception e) { }
-           try { this.kband = requestDir["check_k"] == "k" ? true : false; }catch (Exception e) { }
+            try
+            {
+                this.ra = Convert.ToDouble(requestDir["min_ra"]);
+                this.dec = Convert.ToDouble(requestDir["min_dec"]);
+                this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
+                this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
+            }
+            catch (FormatException fx) { throw new ArgumentException("Error: Input RA and Dec should be valid numerical values."); }
+            catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-           try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
-           try { this.format = requestDir["format"]; } catch (Exception e) { }
-           try { this.limit_s = requestDir["limit"]; } catch (Exception e) { }
-           try { this.whichquery = requestDir["whichquery"]; }catch (Exception e) { this.whichquery = "imaging"; }
-           //try { this.option = requestDir["option"]; } catch (Exception e) { this.option = "imaging"; } 
-           try
-           {
-               this.searchtype = requestDir["whichway"];
-               if (this.searchtype == "galactic")
-               {
-                   double RA = Utilities.glon2ra(this.ra, this.dec);
-                   double DEC = Utilities.glat2dec(this.ra, this.dec);
-                   this.ra = RA;
-                   this.dec = DEC;
-                   RA = Utilities.glon2ra(this.ra_max, this.dec_max);
-                   DEC = Utilities.glat2dec(this.ra_max, this.dec_max);
-                   this.ra_max = RA;
-                   this.dec_max = DEC;
-               }
-           }
-           catch (Exception e) { this.searchtype = ""; }
+
+
+
+            if (this.coordtype == "galactic")
+            {
+                if (this.ra_max < this.ra)
+                { throw new ArgumentException("Error: lower 'l' limit should be less than upper 'l' limit."); }
+
+                if (this.dec_max < this.dec)
+                { throw new ArgumentException("Error: lower 'b' limit should be less than upper 'b' limit."); }
+
+                Utilities.ValueCheckOrFail("'l'", this.ra, 0.0, 360.0);
+                Utilities.ValueCheckOrFail("'l'", this.ra_max, 0.0, 360.0);
+                Utilities.ValueCheckOrFail("'b'", this.dec, -90.0, 90.0);
+                Utilities.ValueCheckOrFail("'b'", this.dec_max, -90.0, 90.0);
+            }
+            else
+            {
+                if (this.ra_max < this.ra)
+                { throw new ArgumentException("Error: lower RA limit should be less than upper RA limit."); }
+
+                if (this.dec_max < this.dec)
+                { throw new ArgumentException("Error: lower Dec limit should be less than upper Dec limit."); }
+
+                Utilities.ValueCheckOrFail("RA", this.ra, 0.0, 360.0);
+                Utilities.ValueCheckOrFail("RA", this.ra_max, 0.0, 360.0);
+                Utilities.ValueCheckOrFail("Dec", this.dec, -90.0, 90.0);
+                Utilities.ValueCheckOrFail("Dec", this.dec_max, -90.0, 90.0);
+            }
+            try { this.uband_s = requestDir["uband"]; }
+            catch (Exception e) { }
+            try { this.gband_s = requestDir["gband"]; }
+            catch (Exception e) { }
+            try { this.rband_s = requestDir["rband"]; }
+            catch (Exception e) { }
+            try { this.iband_s = requestDir["iband"]; }
+            catch (Exception e) { }
+            try { this.zband_s = requestDir["zband"]; }
+            catch (Exception e) { }
+            try { this.jband_s = requestDir["jband"]; }
+            catch (Exception e) { }
+            try { this.hband_s = requestDir["hband"]; }
+            catch (Exception e) { }
+            try { this.kband_s = requestDir["kband"]; }
+            catch (Exception e) { }
+            try { this.uband = requestDir["check_u"] == "u" ? true : false; }
+            catch (Exception e) { }
+            try { this.gband = requestDir["check_g"] == "g" ? true : false; }
+            catch (Exception e) { }
+            try { this.rband = requestDir["check_r"] == "r" ? true : false; }
+            catch (Exception e) { }
+            try { this.iband = requestDir["check_i"] == "i" ? true : false; }
+            catch (Exception e) { }
+            try { this.zband = requestDir["check_z"] == "z" ? true : false; }
+            catch (Exception e) { }
+            try { this.jband = requestDir["check_j"] == "j" ? true : false; }
+            catch (Exception e) { }
+            try { this.hband = requestDir["check_h"] == "h" ? true : false; }
+            catch (Exception e) { }
+            try { this.kband = requestDir["check_k"] == "k" ? true : false; }
+            catch (Exception e) { }
+
+            try
+            {
+                if (this.coordtype == "galactic")
+                {
+                    double RA = Utilities.glon2ra(this.ra, this.dec);
+                    double DEC = Utilities.glat2dec(this.ra, this.dec);
+                    this.ra = RA;
+                    this.dec = DEC;
+                    RA = Utilities.glon2ra(this.ra_max, this.dec_max);
+                    DEC = Utilities.glat2dec(this.ra_max, this.dec_max);
+                    this.ra_max = RA;
+                    this.dec_max = DEC;
+                    double coord;
+                    if (this.ra > this.ra_max)
+                    {
+                        coord = this.ra_max;
+                        this.ra_max = this.ra;
+                        this.ra = coord;
+                    }
+                    if (this.dec > this.dec_max)
+                    {
+                        coord = this.dec_max;
+                        this.dec_max = this.dec;
+                        this.dec = coord;
+                    }
+                }
+            }
+            catch (Exception e) { this.coordtype = ""; }
         }
 
         public Validation(Dictionary<string, string> requestDir, String r)
         {
+
+            try { this.returntype_s = requestDir["returntype"]; }
+            catch (Exception e) { }
+            try { this.format = requestDir["format"]; }
+            catch (Exception e) { }
+            try { this.limit_s = requestDir["limit"]; }
+            catch (Exception e) { }
+            try { this.coordtype = requestDir["coordtype"]; }
+            catch (Exception e) { }
+
+            string RAstring = "RA";
+            string DECstring = "Dec";
+            
+            if (coordtype == "galactic")
+            {
+                RAstring = "'l'";
+                DECstring = "'b'";
+            }
+
+
             try
             {
                 this.ra = Convert.ToDouble(requestDir["ra"]);
@@ -141,11 +220,15 @@ namespace Sciserver_webService.ToolsSearch
                     this.fp = "none";
                 }
             }
-            catch (FormatException fx) { throw new ArgumentException("Error: Input RA, Dec and radius should be valid numerical values."); }
+            catch (FormatException fx) 
+            { 
+                throw new ArgumentException("Error: Input " + RAstring +", "+ DECstring + " and radius should be valid numerical values."); 
+            }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
 
-            Utilities.ValueCheckOrFail("RA", this.ra, 0.0, 360.0);
-            Utilities.ValueCheckOrFail("Dec", this.dec, -90.0, 90.0);
+
+            Utilities.ValueCheckOrFail(RAstring, this.ra, 0.0, 360.0);
+            Utilities.ValueCheckOrFail(DECstring, this.dec, -90.0, 90.0);
             Utilities.ValueCheckOrFail("radius", this.radius, 0.0, 60.0);
 
             try { this.uband_s = requestDir["uband"]; }catch (Exception e) { }
@@ -164,13 +247,10 @@ namespace Sciserver_webService.ToolsSearch
             try { this.jband = requestDir["check_j"] == "j" ? true : false; }catch (Exception e) { }
             try { this.hband = requestDir["check_h"] == "h" ? true : false; }catch (Exception e) { }
             try { this.kband = requestDir["check_k"] == "k" ? true : false; }catch (Exception e) { }
-            try { this.returntype_s = requestDir["returntype"]; }catch (Exception e) { }
-            try { this.format = requestDir["format"]; }catch (Exception e) { }
-            try { this.limit_s = requestDir["limit"]; }catch (Exception e) { }
             try
             {
-                this.searchtype = requestDir["whichway"];
-                if (this.searchtype == "galactic")
+                this.coordtype = requestDir["whichway"];
+                if (this.coordtype == "galactic")
                 {
                     double RA = Utilities.glon2ra(this.ra, this.dec);
                     double DEC = Utilities.glat2dec(this.ra, this.dec);
@@ -178,7 +258,7 @@ namespace Sciserver_webService.ToolsSearch
                     this.dec = DEC;
                 }
             }
-            catch (Exception e) { this.searchtype = ""; }
+            catch (Exception e) { this.coordtype = ""; }
         }
 
         public bool ValidateInput(string ra, string dec, string sr)

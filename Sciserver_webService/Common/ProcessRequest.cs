@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Data;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -31,13 +32,17 @@ namespace Sciserver_webService.Common
 
         public bool IsDirectUserConnection = true;
         public string ClientIP = "";
+        public string TaskName = "";
+        public string server_name = "";
+        public string windows_name = "";
+
 
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
 
             string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
-            
 
+            DataSet ResultsDataSet = new DataSet();
 
             /// this is temporary read from the web.config
             string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"]+datarelease;
@@ -50,11 +55,12 @@ namespace Sciserver_webService.Common
             ExtraInfo.Add("fp", "");
             ExtraInfo.Add("syntax", "");
             ExtraInfo.Add("QueryForUserDisplay", "");
+            ExtraInfo.Add("query", "");
 
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-            Dictionary<String, String> dictionary = null;                      
+            Dictionary<String, String> dictionary = null;
             IEnumerable<string> values;
             string token = "";
             string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
@@ -100,47 +106,60 @@ namespace Sciserver_webService.Common
                 throw new ArgumentException("Check input parameters properly.");
             }
 
-            String format = "";           
+            String format = "";        
             String query = "";
+
+            //string Format = "";
+
+            this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+            this.TaskName = GetTaskName(dictionary, casjobsMessage);// must be executed right after GetClientIP(ref dictionary);
+            try { this.server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }catch { }
+            try { this.windows_name = System.Environment.MachineName; }catch { };
+
             dictionary.Add("skyserverUrl", skyserverUrl);
             dictionary.Add("datarelease", drnumber);
-
-
-            string server_name = "";
-            try { server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
-            catch { server_name = "UnknownServer"; }
-            string Format = "";
-            this.ClientIP = GetClientIP(ref dictionary);
+            ExtraInfo.Add("ClientIP", ClientIP);
+            ExtraInfo.Add("TaskName", TaskName);
+            ExtraInfo.Add("server_name", server_name);
+            ExtraInfo.Add("windows_name", windows_name);
 
             switch (queryType)
             {
-                //case "SqlSearch": query = dictionary["cmd"];
-                //    break;
-
                 case "SqlSearch":
-                    SqlSearch sqlsearch = new SqlSearch(ref dictionary);
+                    SqlSearch sqlsearch = new SqlSearch(dictionary, ExtraInfo);
                     query = sqlsearch.query; // here the query is wrapped inside SpExecuteSQL
                     ExtraInfo["syntax"] = sqlsearch.syntax;
                     ExtraInfo["QueryForUserDisplay"] = sqlsearch.QueryForUserDisplay;
+                    ExtraInfo["query"] = query;
                     break;
 
-                case "DatabaseSearch":// this one goes directly to a DB server instead to CasJobs
-                    DatabaseSearch dbsearch = new DatabaseSearch(ref dictionary, ClientIP, IsDirectUserConnection, server_name);
-                    query = dbsearch.query; // here the query is wrapped inside SpExecuteSQL
-                    Format = dbsearch.Format;
+                case "CrossIdSearch":
+                    CrossIdSearch crossId = new CrossIdSearch(dictionary, ExtraInfo, HttpContext.Current.Request, api.Request.Content);
+                    query = crossId.query; // here the query is not wrapped inside SpExecuteSQL
+                    //Format = crossId.Format;
+                    ExtraInfo["QueryForUserDisplay"] = crossId.QueryForUserDisplay;
+                    ExtraInfo["query"] = query;
+                    break;
+
+                case "ObjectSearch":// here, multiple queries might be run in order to resolve the object. That's why we have to run them here and get the dataset immediately (no routing to RunDBquery but to SendTables);
+                    ObjectSearch objectSearch = new ObjectSearch(dictionary, ExtraInfo, HttpContext.Current.Request);
+                    ResultsDataSet = objectSearch.ResultDataSet;
+                    //Format = objectSearch.Format;
                     break;
 
                 case "RectangularSearch":
-                    RectangularSearch rs = new RectangularSearch(dictionary);
-                    query = rs.query;
-                    ExtraInfo["QueryForUserDisplay"] = rs.QueryForUserDisplay;
+                    RectangularSearch rectangular = new RectangularSearch(dictionary, ExtraInfo);
+                    query = rectangular.query;
+                    ExtraInfo["QueryForUserDisplay"] = rectangular.QueryForUserDisplay;
+                    ExtraInfo["query"] = query;
                     break;
 
                 case "RadialSearch":
-                    RadialSearch radial = new RadialSearch(dictionary);
+                    RadialSearch radial = new RadialSearch(dictionary, ExtraInfo);
                     query = radial.query;
                     ExtraInfo["fp"] = radial.fp;
                     ExtraInfo["QueryForUserDisplay"] = radial.QueryForUserDisplay;
+                    ExtraInfo["query"] = query;
                     break;
 
                 case "ConeSearch":
@@ -155,6 +174,8 @@ namespace Sciserver_webService.Common
                     }
                     ConeSearch.ConeSearch cs = new ConeSearch.ConeSearch(dictionary);
                     query = cs.getConeSearchQuery();
+                    ExtraInfo["QueryForUserDisplay"] = query;
+                    ExtraInfo["query"] = query;
                     break;
 
                 case "SDSSFields":
@@ -166,10 +187,11 @@ namespace Sciserver_webService.Common
                     catch (Exception e)
                     {
                         format = "dataset";
-                       
                     }
                     NewSDSSFields sf = new NewSDSSFields(dictionary, positionType);
-                    query = sf.sqlQuery;                  
+                    query = sf.sqlQuery;
+                    ExtraInfo["QueryForUserDisplay"] = query;
+                    ExtraInfo["query"] = query;
                     break;
 
                 case "SIAP" :
@@ -178,8 +200,9 @@ namespace Sciserver_webService.Common
 
                 default:
                     QueryTools.BuildQuery.buildQueryMaster(queryType, dictionary, positionType);
-                    ExtraInfo["QueryForUserDisplay"] = QueryTools.BuildQuery.QueryForUserDisplay;
                     query = QueryTools.BuildQuery.query;
+                    ExtraInfo["QueryForUserDisplay"] = QueryTools.BuildQuery.QueryForUserDisplay;
+                    ExtraInfo["query"] = query;
                     break;
             }
 
@@ -195,47 +218,75 @@ namespace Sciserver_webService.Common
 
                 switch (format)
                 {
-
-                    case "csv": format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser",format);  break;
-                    case "xml": format = KeyWords.contentXML; ExtraInfo.Add("FormatFromUser", format); break;
-                    case "votable": format = KeyWords.contentVOTable; ExtraInfo.Add("FormatFromUser", format); break;
-                    case "json": format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
-                    case "fits": format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
-                    case "dataset": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
-                    case "html": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
-                    
-                    default: format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "txt": 
+                    case "text/plain":
+                        format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "csv": 
+                        format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "xml": 
+                    case "application/xml":
+                        format = KeyWords.contentXML; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "votable": 
+                    case "application/x-votable+xml":
+                        format = KeyWords.contentVOTable; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "json":
+                    case "application/json":
+                        format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "fits": 
+                    case "application/fits":
+                        format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "dataset": 
+                    case "application/x-dataset":
+                        format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
+                    case "html": 
+                        format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
+                    default: 
+                        format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
                 }
             }
             catch (Exception exp)
             {
-                format = KeyWords.contentCSV;
-                ExtraInfo.Add("FormatFromUser", KeyWords.contentCSV);
+                if (IsDirectUserConnection)//in case the user did not specify a format
+                {
+                    format = KeyWords.contentJson;
+                    ExtraInfo.Add("FormatFromUser", KeyWords.contentJson);
+                }
+                else
+                    format = KeyWords.contentDataset;//which is a dataset
             }
+
 
             //return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
             //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, DoReturnHtml);
             //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
 
-            if (queryType == "DatabaseSearch")// queries are sent directly to Database Server and executed there.
+            switch (queryType)
             {
-                return new RunDBquery(query, Format);
+                case "SqlSearch":
+                    //return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);// queries are sent to CasJobs
+                    return new RunDBquery(query, format, TaskName, ExtraInfo);// queries are sent to CasJobs
+                case "ObjectSearch":
+                    return new SendTables(ResultsDataSet, format);
+                default:
+                    //return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);// queries are sent to CasJobs
+                    //return new RunDBquery(query, format);
+                    return new RunDBquery(query, format, TaskName, ExtraInfo);
             }
-            else// queries are sent to CasJobs instead
-            {
-                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo, GetClientIP(ref dictionary));
-            }
+
         }
 
 
-        public string GetClientIP(ref Dictionary<String, String> requestDir)
+        public string GetClientIP(Dictionary<String, String> requestDir)
         {
             string clientIP = "unknown";
             try
             {
-                if (HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] != null)
+                if (!string.IsNullOrEmpty(HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"]))
                 {
                     clientIP = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                    string[] addresses = clientIP.Split(',');
+                    if (addresses.Length != 0)
+                        clientIP = addresses[0];
                 }
                 else
                 {
@@ -267,6 +318,18 @@ namespace Sciserver_webService.Common
             return clientIP;
         }
 
+        public string GetTaskName(Dictionary<String, String> requestDir, string casjobsMessage)
+        {
+            if (IsDirectUserConnection)
+                return casjobsMessage + ".DirectQuery";
+            else
+            {
+                string taskname = "";
+                try { taskname = requestDir["TaskName"]; }
+                catch { taskname =  casjobsMessage + ".unkownForAgent"; }
+                return taskname;
+            }
+        }
 
 
 
@@ -324,6 +387,20 @@ namespace Sciserver_webService.Common
                     log.SendMessage(message);
                 }
 
+
+                this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+                this.TaskName = GetTaskName(dictionary, casjobsMessage);// must be executed right after GetClientIP(ref dictionary);
+                try { server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
+                catch { }
+                try { windows_name = System.Environment.MachineName; }
+                catch { };
+
+                dictionary.Add("ClientIP", ClientIP);
+                dictionary.Add("TaskName", TaskName);
+                dictionary.Add("server_name", server_name);
+                dictionary.Add("windows_name", windows_name);
+
+                
                 // get data release number
                 string drnumber = datarelease.ToUpper().Replace("DR", "");
 
@@ -401,7 +478,8 @@ namespace Sciserver_webService.Common
                 }            
 
                 //return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
-                return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo, GetClientIP(ref dictionary));
+                //return new RunDBquery(query, format, this.TaskName, ExtraInfo);return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);
+                return new RunDBquery(query, format, this.TaskName, ExtraInfo);
             }
             catch (Exception exp)
             {

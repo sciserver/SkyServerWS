@@ -22,7 +22,7 @@ namespace Sciserver_webService.Controllers
         {
             ProcessRequest request = new ProcessRequest();
             //return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");            
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService.");            
         }
 
         [ExceptionHandleAttribute]

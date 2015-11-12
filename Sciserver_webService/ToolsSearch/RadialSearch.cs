@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sciserver_webService.Common;
+using System.Text.RegularExpressions;
 
 namespace Sciserver_webService.ToolsSearch
 {
@@ -16,8 +17,22 @@ namespace Sciserver_webService.ToolsSearch
         public string QueryForUserDisplay = "";
         public string WhichPhotometry = "";
 
-        public RadialSearch(Dictionary<string,string> requestDir) 
+        public string ClientIP = "";
+        public string TaskName = "";
+        public string server_name = "";
+        public string windows_name = "";
+
+        public RadialSearch(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo)
         {
+            try
+            {
+                ClientIP = ExtraInfo["ClientIP"];
+                TaskName = ExtraInfo["TaskName"];
+                server_name = ExtraInfo["server_name"];
+                windows_name = ExtraInfo["windows_name"];
+            }
+            catch (Exception e) { throw new Exception(e.Message); };
+
             this.requestDir = requestDir;
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
@@ -25,34 +40,43 @@ namespace Sciserver_webService.ToolsSearch
             try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
 
-            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.searchtype, val.returntype_s, val.limit_s);
+            Int64 limit;
+            try
+            {
+                limit = Convert.ToInt64(requestDir["limit"]);
+            }
+            catch { throw (new Exception("Invalid numerical value for maximum number of rows in LIMIT=" + requestDir["limit"])); }
+            if (limit > Convert.ToInt64(KeyWords.MaxRows))
+            {
+                throw (new Exception("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDir["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
+            }
+
+
+            bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.coordtype, val.returntype_s, val.limit_s);
             fp = val.fp;
             if (val.fp != "only")// Want to just run the query, and do not want to know if RA,DEC,Radius fall inside footprint
             {
-                QueryForUserDisplay = this.buildImageQuery(val);
                 if (datarelease > 9 && WhichPhotometry == "infrared")
                 {
-                    //QueryForUserDisplay += this.buildIRQuery(val);
-                    QueryForUserDisplay = this.buildIRQuery(val);
+                    query = this.buildIRQuery(val);//sets also the QueryForUserDisplay
                 }
-
-                bool IsGoodLimit = true;
-                try
+                else
                 {
-                    if (Convert.ToInt64(requestDir["limit"]) > Convert.ToInt64(KeyWords.MaxRows))
-                    {
-                        query = "SELECT 'Query error in \"TOP " + requestDir["limit"] + "\". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "' as [Error Message]";
-                        IsGoodLimit = false;
-                    }
+                    query = this.buildImageQuery(val);//sets also the QueryForUserDisplay
                 }
-                catch (Exception e) { IsGoodLimit = false; query = "SELECT 'Query error. Wrong input in \"TOP " + requestDir["limit"] + "\" (Invalid numerical value for maximum number of rows).' as [Error Message]"; }
-                if (IsGoodLimit)
-                    query = QueryForUserDisplay;
             }
             else //if only want to know if RA,DEC,Radius fall inside footprint
             {
                 query = this.buildFootPrintQuery(val);
             }
+            string c = this.query;
+            string c2 = Regex.Replace(c, @"\/\*(.*\n)*\*\/", "");	                        // remove all multi-line comments
+            c2 = Regex.Replace(c2, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
+            c2 = Regex.Replace(c2, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
+            c2 = Regex.Replace(c2, @"[ \t\f\v]+", " ");                      				// replace multiple whitespace with single space
+            c2 = Regex.Replace(c2, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
+            c2 = c2.Replace("'", "''");
+            query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";
 
             //if (val.whichquery.Equals("imaging"))
             //{
@@ -111,6 +135,7 @@ namespace Sciserver_webService.ToolsSearch
 
             sql = "SELECT "; 
             sql += " TOP " + limit;
+            this.QueryForUserDisplay = sql + " p.objid,\n";
 
             if (val.format == "html")
             {
@@ -120,14 +145,19 @@ namespace Sciserver_webService.ToolsSearch
             {
                 sql += " p.objid,\n";
             }
-            sql += "   p.run, p.rerun, p.camcol, p.field, p.obj,\n";
-            sql += "   p.type, p.ra, p.dec, p.u,p.g,p.r,p.i,p.z,\n";
-            sql += "   p.Err_u, p.Err_g, p.Err_r,p.Err_i,p.Err_z\n";
-            sql += "   FROM fGetNearbyObjEq(" + val.ra + "," + val.dec + "," + val.radius + ") n,";
-            sql += "   PhotoPrimary p\n";
-            sql += "   WHERE n.objID=p.objID ";
 
-            this.imageQuery = this.addWhereClause(sql, val);
+            string sql2 = ""; 
+            sql2 += "   p.run, p.rerun, p.camcol, p.field, p.obj,\n";
+            sql2 += "   p.type, p.ra, p.dec, p.u,p.g,p.r,p.i,p.z,\n";
+            sql2 += "   p.Err_u, p.Err_g, p.Err_r,p.Err_i,p.Err_z\n";
+            sql2 += "   FROM fGetNearbyObjEq(" + val.ra + "," + val.dec + "," + val.radius + ") n,";
+            sql2 += "   PhotoPrimary p\n";
+            sql2 += "   WHERE n.objID=p.objID ";
+            sql2 += addWhereClause(val);
+
+            this.imageQuery = sql + sql2; 
+            this.QueryForUserDisplay += sql2;
+            
             return this.imageQuery;
         }
 
@@ -138,6 +168,7 @@ namespace Sciserver_webService.ToolsSearch
 
             sql = "SELECT ";
             sql += " TOP " + limit;
+            this.QueryForUserDisplay = sql + " p.apstar_id, \n";
 
             if (val.format == "html")
             {
@@ -147,26 +178,27 @@ namespace Sciserver_webService.ToolsSearch
             {
                 sql += " p.apstar_id, \n";
             }
-            sql += "   p.apogee_id,p.ra, p.dec, p.glon, p.glat,\n";
-            sql += "   p.vhelio_avg,p.vscatter,\n";
-            sql += "   a.teff,a.logg,\n";
-            if(datarelease >= 12) sql += " a.param_m_h \n";
-            else sql += " a.metals\n";
-            sql += "   FROM apogeeStar p\n";
-            sql += "   JOIN fGetNearbyApogeeStarEq(" + val.ra + "," + val.dec + "," + val.radius + ") n on p.apstar_id=n.apstar_id\n";
-            sql += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
-            sql += "   JOIN apogeeObject as o ON a.apogee_id=o.apogee_id"; 
 
-            int ccount = 0;
+            string sql2 = "";
+            sql2 += "   p.apogee_id,p.ra, p.dec, p.glon, p.glat,\n";
+            sql2 += "   p.vhelio_avg,p.vscatter,\n";
+            sql2 += "   a.teff,a.logg,\n";
+            if(datarelease >= 12) sql2 += " a.param_m_h \n";
+            else sql2 += " a.metals\n";
+            sql2 += "   FROM apogeeStar p\n";
+            sql2 += "   JOIN fGetNearbyApogeeStarEq(" + val.ra + "," + val.dec + "," + val.radius + ") n on p.apstar_id=n.apstar_id\n";
+            sql2 += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
+            sql2 += "   JOIN apogeeObject as o ON a.apogee_id=o.apogee_id"; 
+            sql2 += addInfraredWhereClause(val);
 
-            this.irQuery = this.addInfraredWhereClause(sql, val);
-            //this.irQuery = sql;
+            this.irQuery = sql + sql2;
+            this.QueryForUserDisplay += sql2;
             return this.irQuery;
         }
 
-        private string addWhereClause(string queryString, Validation val)
+        private string addWhereClause(Validation val)
         {
-
+            string queryString = ""; 
             if (val.uband) { queryString += " AND p.u between " + val.umin + " AND " + val.umax; }
             if (val.gband) { queryString += " AND p.g between " + val.gmin + " AND " + val.gmax; }
             if (val.iband) { queryString += " AND p.i between " + val.imin + " AND " + val.imax; }
@@ -176,9 +208,9 @@ namespace Sciserver_webService.ToolsSearch
             return queryString;
         }
 
-        private string addInfraredWhereClause(string queryString, Validation val)
+        private string addInfraredWhereClause(Validation val)
         {
-
+            string queryString = ""; 
             if (val.jband) { queryString += " AND o.j between " + val.jmin + " AND " + val.jmax; }
             if (val.hband) { queryString += " AND o.h between " + val.hmin + " AND " + val.hmax; }
             if (val.kband) { queryString += " AND o.k between " + val.kmin + " AND " + val.kmax; }

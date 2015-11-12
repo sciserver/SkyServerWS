@@ -41,7 +41,8 @@ namespace Sciserver_webService.UseCasjobs
                 else
                     this.Format = "";//which is the same as application/x-dataset
             }
-            this.TaskName = "SkyserverWS.SearchTools.DatabaseSearch.DirectUserQuery";
+ 
+            this.TaskName = "SkyserverWS.SearchTools.DatabaseSearch.DirectQuery";
             if (!IsDirectUserConnection)
             {
                 try

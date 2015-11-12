@@ -19,21 +19,19 @@ using Sciserver_webService.Models;
 
 namespace Sciserver_webService.Controllers
 {
-    public class DatabaseSearchController : ApiController
+    public class CrossIdSearchController : ApiController
     {
-        [ExceptionHandleAttribute]
-        public IHttpActionResult get()
-        {
-            ProcessRequest request = new ProcessRequest();
-            //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, "SkyserverWS.SearchTools.DatabaseSearch");
-        }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest();
-            //return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Search Tool.");
-            return request.runquery(this, KeyWords.databaseSearchQuery, KeyWords.databaseSearchQuery, "SkyserverWS.SearchTools.DatabaseSearch");
+            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
+        }
+        [ExceptionHandleAttribute]
+        public IHttpActionResult get()
+        {
+            ProcessRequest request = new ProcessRequest();
+            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
         }
     }
 }
