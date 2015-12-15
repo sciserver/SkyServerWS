@@ -73,7 +73,7 @@ namespace Sciserver_webService.UseCasjobs
             // 'c' is query version that's printed on output page
             // 'c2' is the version that is sent to DB server 
 
-            this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0,Math.Min(TaskName.Length,32)) + "'";// parsing the query against harmful sql commands
+            this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "'";// parsing the query against harmful sql commands
             // @cmd,@limit,@webserver,@winname,@clientIP,@access,@system,@maxQueries
             //this.query = c2;
 

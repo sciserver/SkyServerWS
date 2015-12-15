@@ -16,14 +16,16 @@ namespace Sciserver_webService.Controllers
        [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.ConeSearch");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.cone, "SkyserverWS.IRSpectroQuery.ConeSearch");
         }
 
        [ExceptionHandleAttribute]
        public IHttpActionResult post()
        {
-           ProcessRequest request = new ProcessRequest();
+           ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.ConeSearch");
+           this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
            return request.runquery(this, KeyWords.irspectroQuery, KeyWords.cone, "SkyserverWS.IRSpectroQuery.ConeSearch");
        }
     }

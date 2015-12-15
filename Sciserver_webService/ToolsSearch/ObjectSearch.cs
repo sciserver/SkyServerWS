@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
-using net.ivoa.VOTable;
-using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 using Sciserver_webService.Common;
@@ -66,6 +64,9 @@ namespace Sciserver_webService.ToolsSearch
         public string TaskName = "";
         public string server_name = "";
         public string windows_name = "";
+
+        public string COMMAND = "";// this has the query that is logged in SpExecuteSQL
+
 
 
         public ObjectSearch(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo, HttpRequest Request)
@@ -191,6 +192,7 @@ namespace Sciserver_webService.ToolsSearch
                 }
             }
 
+            //running the query and storing the resultset.
             using (oConn = new SqlConnection(KeyWords.DBconnectionString))
             {
                 oConn.Open();

@@ -26,7 +26,8 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
 
-            ProcessRequest request = new ProcessRequest();
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SIAP.getSIAP");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAP, "SkyserverWS.SIAP.getSIAP");
         }
     }    

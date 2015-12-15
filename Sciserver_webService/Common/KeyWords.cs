@@ -15,18 +15,32 @@ namespace Sciserver_webService.Common
         //// Authentication Token
         public static string XAuthToken = "X-Auth-Token";
 
+        //// Name of variable that stores token in the cookie present in the header (if this cookie exists)
+        public static string CookieToken = "Keystone=token";
+
+        
         // this is data release and target setting for all the different services, eg. DR10
         public static string DR = ConfigurationManager.AppSettings["TARGET"];
         /// <summary>
         /// Authentication settings used for the KeyStone authentication settings
         /// </summary>
         public static string xauth = "X-Auth-Token";
+        public static string contentHTML = "text/html";
         public static string contentJson = "application/json";
         public static string contentXML = "application/xml";
         public static string contentCSV = "text/plain";
         public static string contentVOTable = "application/x-votable+xml";// – VOTABLE XML
         public static string contentFITS = "application/fits"; // – FITS
         public static string contentDataset = "application/x-dataset";// – serialized .NET DataSet
+
+
+        /// <summary>
+        /// Types of Logging messages
+        /// </summary>
+        public static string CustomMessage = "CustomMessage";
+
+        public static string DoLogWithSpExecuteSQL = ConfigurationManager.AppSettings["DoLogWithSpExecuteSQL"] == "yes" ? "1" : "0";
+
 
         /// <summary>
         /// Casjobs setting for REST api
@@ -63,7 +77,11 @@ namespace Sciserver_webService.Common
 
         public static string[] IPClientServers = ConfigurationManager.AppSettings["IPClientServers"].ToString().Split(',');
 
+        public static string[] TasksInUserHistory = ConfigurationManager.AppSettings["TasksInUserHistory"].ToString().Split(',');
+
+
         public static string DBconnectionString = ConfigurationManager.AppSettings["DBconnectionString"];
+        public static string SciserverLogDBconnection = ConfigurationManager.AppSettings["SciserverLogDBconnection"];
         public static string DatabaseSearchTimeout = ConfigurationManager.AppSettings["DatabaseSearchTimeout"] ?? "600";//in seconds
 
         public static string NameResolverURL = ConfigurationManager.AppSettings["nameResolverURL"];
@@ -109,6 +127,7 @@ namespace Sciserver_webService.Common
         public static string SDSSFields = "SDSSFields";
         public static string CrossIdQuery = "CrossIdSearch";
         public static string ObjectQuery = "ObjectSearch";
+        public static string UserHistoryQuery = "UserHistory";
 
         public static float EqSearchRadius = float.Parse(ConfigurationManager.AppSettings["eqSearchRadius"] ?? "0.75");
         
@@ -217,7 +236,7 @@ namespace Sciserver_webService.Common
 
 
         // this skyserver url
-        //public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
+        public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
         
         
     }

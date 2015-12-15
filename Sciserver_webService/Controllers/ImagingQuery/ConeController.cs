@@ -15,15 +15,17 @@ namespace Sciserver_webService.Controllers
     {
         [ExceptionHandleAttribute]
         public IHttpActionResult get() 
-        {   
-            ProcessRequest request = new ProcessRequest();
+        {
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.ConeSearch");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.ConeSearch");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
     }

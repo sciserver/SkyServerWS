@@ -594,6 +594,7 @@ namespace Sciserver_webService.ImgCutout
             cmd.Parameters.AddWithValue("@webserver", httpHost);
             cmd.Parameters.AddWithValue("@clientIP", clientIP);
             cmd.Parameters.AddWithValue("@System", 1);
+            cmd.Parameters.AddWithValue("@log", KeyWords.DoLogWithSpExecuteSQL);
             cmd.CommandType = CommandType.StoredProcedure;
 
             return cmd.ExecuteReader();
@@ -916,7 +917,8 @@ namespace Sciserver_webService.ImgCutout
                     /// If the query contains SELECT, the query is considered correct and the validation 
                     /// is postponed to be run by spExecute store procedure.
                     query = new StringBuilder();
-                    query.AppendFormat("EXEC spExecuteSQL '{0}', '{1}' ", myq, rows);
+                    query.AppendFormat("EXEC spExecuteSQL @cmd='{0}', @limit='{1}', @webserver='{2}', @winname='{3}', @clientIP='{4}', @log=1, @filter=1", myq, KeyWords.MaxRows.ToString(), httpHost, serverName, clientIP);
+
                     //This needs to be clarify
                     // EXEC spExecuteSQL '" + c +"  ', 100000,'" + server_name + "','" + windows_name + "','" + remote_addr + "','" + access + "'";
                     break;

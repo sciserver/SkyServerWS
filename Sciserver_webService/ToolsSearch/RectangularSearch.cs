@@ -46,10 +46,10 @@ namespace Sciserver_webService.ToolsSearch
             Validation val = new Validation(requestDir);
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease = Convert.ToInt32(requestDir["datarelease"]);
+            skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
             try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.coordtype, val.returntype_s, val.limit_s);
-            bool IsGoodLimit = true;
             Int64 limit;
             try
             {
@@ -78,7 +78,7 @@ namespace Sciserver_webService.ToolsSearch
                 c2 = Regex.Replace(c2, @"[ \t\f\v]+", " ");                      				// replace multiple whitespace with single space
                 c2 = Regex.Replace(c2, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
                 c2 = c2.Replace("'", "''");
-                query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";
+                query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=1,@log=1";
             }
             
         }

@@ -9,7 +9,7 @@ using System.IO;
 using System.Text;
 using Sciserver_webService.Common;
 
-namespace Sciserver_webService.UseCasjobs
+namespace Sciserver_webService.ToolsSearch
 {
     public class SqlSearch
     {

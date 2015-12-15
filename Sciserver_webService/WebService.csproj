@@ -83,7 +83,7 @@
     </Reference>
     <Reference Include="SciServer.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\SciServer.Logging.dll</HintPath>
+      <HintPath>..\..\sciserver-logging\SciServer.Logging\bin\Debug\SciServer.Logging.dll</HintPath>
     </Reference>
     <Reference Include="SimpleRESTServices">
       <HintPath>..\packages\SimpleRESTServices.1.3.0.1\lib\net40\SimpleRESTServices.dll</HintPath>
@@ -154,6 +154,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\RequestMisc.cs" />
+    <Compile Include="Common\SciserverLogging.cs" />
+    <Compile Include="Controllers\SciserverLog\UserHistoryController.cs" />
+    <Compile Include="ToolsSearch\UserHistory.cs" />
     <Compile Include="DataWrapper\DataSetWrapper.cs" />
     <Compile Include="DataWrapper\DataWrapper.cs" />
     <Compile Include="Common\Functions.cs" />
@@ -171,6 +175,7 @@
     <Compile Include="DataWrapper\VOTableWrapper.cs" />
     <Compile Include="Controllers\SearchTools\ObjectSearchController.cs" />
     <Compile Include="DataWrapper\HexEncoding.cs" />
+    <Compile Include="SciserverLog\UserHistory.cs" />
     <Compile Include="SIAP\ReturnSIAPresults.cs" />
     <Compile Include="Common\UploadDataReader.cs" />
     <Compile Include="ConeSearch\ConeSearch.cs" />

@@ -35,16 +35,21 @@ namespace Sciserver_webService.Common
 
         String Format = "";
         DataSet ResultsDataSet;
+        LoggedInfo ActivityInfo;
+        Dictionary<string, string> ExtraInfo = new Dictionary<string, string>();
 
         public SendTables()
         {
             this.Format = "";
             this.ResultsDataSet = new DataSet();
+            this.ActivityInfo = new LoggedInfo();
         }
-        public SendTables(DataSet ResultsDataSet, string Format)
+        public SendTables(DataSet ResultsDataSet, string Format, LoggedInfo ActivityInfo, Dictionary<string, string> ExtraInfo)
         {
             this.Format = Format;
             this.ResultsDataSet = ResultsDataSet;
+            this.ActivityInfo = ActivityInfo;
+            this.ExtraInfo = ExtraInfo;
         }
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
@@ -67,6 +72,7 @@ namespace Sciserver_webService.Common
                         ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteFits(ResultsDataSet, stream); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentFITS)));
+                        response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
                         break;
                     case "votable":
                     case "application/x-votable+xml":
@@ -88,10 +94,22 @@ namespace Sciserver_webService.Common
                         break;
                     case "dataset":
                     case "application/x-dataset":
-                        BinaryFormatter fmt = new BinaryFormatter();
-                        ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
-                        WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ResultsDataSet); stream.Close(); };
-                        response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(KeyWords.contentDataset));
+                        if (ExtraInfo.ContainsKey("FormatFromUser"))
+                        {
+                            if (ExtraInfo["FormatFromUser"] == "html")
+                            {
+                                ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
+                                WriteToStream = (stream, foo, bar) => { OutputUtils.WriteHTML(ResultsDataSet, stream); };
+                                response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentHTML)));
+                            }
+                            else
+                            {
+                                BinaryFormatter fmt = new BinaryFormatter();
+                                ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
+                                WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ResultsDataSet); stream.Close(); };
+                                response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue(KeyWords.contentDataset));
+                            }
+                        }
                         break;
                     default:
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
@@ -99,6 +117,11 @@ namespace Sciserver_webService.Common
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
                         break;
                 }
+
+                //logging 
+                SciserverLogging logger = new SciserverLogging();
+                logger.LogActivity(ActivityInfo, "CustomMessage");
+
                 return response;
             }
             catch (Exception e)

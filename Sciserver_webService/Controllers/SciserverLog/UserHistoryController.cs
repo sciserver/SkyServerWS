@@ -17,23 +17,29 @@ using System.IO;
 using System.Text;
 using Sciserver_webService.Models;
 
+
+
 namespace Sciserver_webService.Controllers
 {
-    public class CrossIdSearchController : ApiController
+    public class UserHistoryController : ApiController
     {
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.CrossIdSearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SciserverLog.UserHistory");
             this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
-            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
+            return request.runquery(this, KeyWords.UserHistoryQuery, "", "SkyserverWS.SciserverLog.UserHistory");
+
         }
+
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.CrossIdSearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SciserverLog.UserHistory");
             this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
-            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
+            return request.runquery(this, KeyWords.UserHistoryQuery, "", "SkyserverWS.SciserverLog.UserHistory");
         }
+
+
     }
 }

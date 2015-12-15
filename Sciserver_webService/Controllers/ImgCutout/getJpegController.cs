@@ -23,44 +23,14 @@ namespace Sciserver_webService.Controllers
         //// Get The cone search results
         [ExceptionHandleAttribute]
         public HttpResponseMessage Get([FromUri] string ra = null, [FromUri] string dec = null, [FromUri] string scale = "0.396127",
-            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "")
+            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "", [FromUri]String token = "")
         {
+            RequestMisc rm = new RequestMisc(this.Request, "SkyserverWS.ImgCutout.getJpeg");
+            this.Request.RequestUri = rm.AddTaskNameToURI(this.Request.RequestUri);
+            LoggedInfo ActivityInfo = rm.ActivityInfo;
+            ActivityInfo.Message = rm.GetLoggedMessage("");
+            
             HttpResponseMessage resp = new HttpResponseMessage();
-            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-            string token = "";
-            string userid = "unknown";
-            IEnumerable<string> values;
-            if (ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
-            {
-                try
-                {
-                    // Keystone authentication
-                    token = values.First();
-                    var userAccess = Keystone.Authenticate(token);
-
-                    // logging for the request
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, Request.ToString());
-                    userid = userAccess.User.Id;
-                    message.UserId = userAccess.User.Id;
-                    log.SendMessage(message);
-
-                }
-                catch (Exception e)
-                {
-
-                    // No authentication (anonymous) // Logg
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, e.Message);
-                    message.UserId = userid;
-                    log.SendMessage(message);
-                    throw new UnauthorizedAccessException("Given token is not authorized.");
-                }
-            }
-            else
-            {
-                Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, ControllerContext.Request.ToString());
-                message.UserId = userid;
-                log.SendMessage(message);
-            }
 
             Validation valid = new Validation();
 
@@ -77,6 +47,10 @@ namespace Sciserver_webService.Controllers
                 resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, clientIP));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                 resp.StatusCode = HttpStatusCode.OK;
+
+                //logging
+                SciserverLogging logger = new SciserverLogging();
+                logger.LogActivity(ActivityInfo, "CustomMessage");
 
                 return resp;
             }

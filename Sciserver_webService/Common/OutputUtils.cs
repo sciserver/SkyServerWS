@@ -127,7 +127,68 @@ namespace Sciserver_webService.Common
         }
 
 
-        public static void WriteJson(DataSet dataSet, Stream stream)
+        public static void WriteHTML(DataSet ds, Stream stream)
+        {
+
+            using (StreamWriter writer = new StreamWriter(stream))
+            {
+
+
+                string ColumnName = "";
+                //StringBuilder sb = new StringBuilder();
+                writer.Write("<html><head>\n");
+                writer.Write("<title>SDSS Query Results</title>\n");
+                writer.Write("</head><body bgcolor=white>\n");
+                int NumTables = ds.Tables.Count;
+
+                for (int t = 0; t < NumTables; t++)
+                {
+
+                    int NumRows = ds.Tables[t].Rows.Count;
+                    if (NumRows == 0)
+                    {
+                        writer.Write("<h3><br><font color=red>No entries have been found</font> </h3>");
+                    }
+                    else
+                    {
+                        if (ds.Tables[0].Rows[0][0].ToString().StartsWith("error: limit is") || ds.Tables[0].Rows[0][0].ToString().Contains("Maximum number of rows allowed"))
+                        {
+                        }
+                        else
+                        {
+                            for (int r = 0; r < NumRows; r++)
+                            {
+                                int NumColumns = ds.Tables[t].Columns.Count;
+                                if (r == 0)// filling the first row with the names of the columns
+                                {
+                                    writer.Write("<table border='1' BGCOLOR=cornsilk>\n");
+                                    writer.Write("<tr align=center>");
+                                    for (int c = 0; c < NumColumns; c++)
+                                    {
+                                        ColumnName = ds.Tables[t].Columns[c].ColumnName;
+                                        writer.Write("<td><font size=-1>{0}</font></td>", ColumnName);
+                                    }
+                                    writer.Write("</tr>");
+                                }
+
+                                writer.Write("<tr align=center BGCOLOR=#eeeeff>");
+                                for (int c = 0; c < NumColumns; c++)
+                                    writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                                writer.Write("</tr>");
+                            }
+                            writer.Write("</TABLE>");
+                        }
+                    }
+                    writer.Write("<hr>");
+                }
+                writer.Write("</BODY></HTML>\n");
+            }
+        }
+
+
+
+
+        public static string WriteJson(DataSet dataSet)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -176,13 +237,17 @@ namespace Sciserver_webService.Common
                     json.WriteEndArray();
                     json.WriteEndObject();
                 }
-
                 json.WriteEndArray();
             }
+            return sb.ToString();
+        }
 
+
+        public static void WriteJson(DataSet dataSet, Stream stream)
+        {
             using (StreamWriter writer = new StreamWriter(stream))
             {
-                writer.Write(sb.ToString());
+                writer.Write(WriteJson(dataSet));
             }
         }
 

@@ -149,9 +149,10 @@ namespace Sciserver_webService.Common
                     return getTableHTMLresult(ds);
                 }
             }
-            catch (Exception e) // if the stream (s results table) is not deserialized and casted properly, means that it is really an error message.
+            catch (Exception e)
             {
-                return e.Message;
+                throw;
+                //return e.Message;
             }
         }
 
@@ -248,11 +249,11 @@ namespace Sciserver_webService.Common
                 int NumRows = ds.Tables[t].Rows.Count;
                 if (NumRows == 0)
                 {
-                    sb.AppendFormat("<h3><br><font color=red>No objects have been found</font> </h3>");
+                    sb.AppendFormat("<h3><br><font color=red>No entries have been found</font> </h3>");
                 }
                 else
                 {
-                    if (ds.Tables[0].Rows[0][0].ToString().StartsWith("error: limit is") || ds.Tables[0].Rows[0][0].ToString().Contains("Maximum number of rows allowed"))
+                    if (ds.Tables[0].Rows[0][0].ToString().StartsWith("error: limit is") || ds.Tables[0].Rows[0][0].ToString().Contains("Maximum number of rows allowed"))// 
                     {
                         sb.AppendFormat("<h3><br><font color=red> Error: Maximum number of rows is " + (Int64.Parse(KeyWords.MaxRows)).ToString("c0").Remove(0, 1) + ". Try using 'TOP " + KeyWords.MaxRows + "' in the SQL command.</font> </h3>");
                     }

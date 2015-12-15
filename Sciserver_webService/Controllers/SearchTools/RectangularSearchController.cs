@@ -36,20 +36,20 @@ namespace Sciserver_webService.Controllers
 
         //    ProcessRequest request = new ProcessRequest();
         //    return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "RectangularSearch Tool.");
-        //}      
+        //}
         [ExceptionHandleAttribute]
         public IHttpActionResult Get()
         {
-            ProcessRequest request = new ProcessRequest();
-            //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.ReactangularSearch");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.ReactangularSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult Post()
         {
-            ProcessRequest request = new ProcessRequest();
-            //return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "Rectangular Search Tool.");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.ReactangularSearch");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.ReactangularSearch");
         }
     }

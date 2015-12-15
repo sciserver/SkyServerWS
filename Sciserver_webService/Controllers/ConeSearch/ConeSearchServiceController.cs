@@ -20,15 +20,17 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            //return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService.");            
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
+
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
         //[ExceptionHandleAttribute]

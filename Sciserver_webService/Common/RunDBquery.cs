@@ -18,9 +18,8 @@ using Sciserver_webService.Common;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
 using System.Net;
-
-
 using System.Data.SqlClient;
+using System.Web;
 
 //This class is used to submit query to casjobs
 namespace Sciserver_webService.DoDatabaseQuery
@@ -34,19 +33,16 @@ namespace Sciserver_webService.DoDatabaseQuery
         Dictionary<string, string> ExtraInfo = null;
         string ErrorMessage = "There no errors.";
         DataSet ResultsDataSet = new DataSet();
+        LoggedInfo ActivityInfo;
         
-        public RunDBquery(string query,  string format)
-        {
-            this.query = query;
-            this.format = format;
-        }
 
-        public RunDBquery(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo)
+        public RunDBquery(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, LoggedInfo ActivityInfo)
         {
             this.query = query;
             this.format = format;
             this.TaskName = TaskName;
             this.ExtraInfo = ExtraInfo;
+            this.ActivityInfo = ActivityInfo;
         }
 
 
@@ -69,9 +65,9 @@ namespace Sciserver_webService.DoDatabaseQuery
                 //BinaryFormatter fmt = new BinaryFormatter();
                 Action<Stream, HttpContent, TransportContext> WriteToStream = null;
                 BinaryFormatter fmt;
-                if(format != "csv" && format != "txt" && format != "text/plain" && format != "fits" && format != "application/fits")
+                if (!format.Contains("csv") && !format.Contains("txt") && !format.Contains("text/plain") && !format.Contains("fits"))
                 {
-                    AddQueryTable(ResultsDataSet);
+                    AddQueryTable(ResultsDataSet);// this adds to "ResultsDataSet" a new Table that shows the sql command.
                 }
 
                 switch (format)
@@ -88,6 +84,7 @@ namespace Sciserver_webService.DoDatabaseQuery
                         ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteFits(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentFITS)));
+                        response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
                         break;
                     case "votable":
                     case "application/x-votable+xml":
@@ -112,6 +109,13 @@ namespace Sciserver_webService.DoDatabaseQuery
                     case "application/x-dataset":
                         ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, true);
                         response.Content = proc.GetContent(ResultsDataSet);
+                        if (ExtraInfo.ContainsKey("FormatFromUser"))
+                        {
+                            if (ExtraInfo["FormatFromUser"] == "html")
+                            {
+                                response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
+                            }
+                        }
                         //ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
                         //fmt = new BinaryFormatter();
                         //WriteToStream = (stream, foo, bar) => { fmt.Serialize(stream, ResultsDataSet); stream.Close(); };
@@ -126,6 +130,13 @@ namespace Sciserver_webService.DoDatabaseQuery
                 }
                 //reader.Close();
                 //response.Content = new StringContent(ClientIP);
+
+
+                //logging 
+                SciserverLogging logger = new SciserverLogging();
+                logger.LogActivity(ActivityInfo, "CustomMessage");
+
+
                 return response;
                 //return processDBqueryResults(stream);
             }

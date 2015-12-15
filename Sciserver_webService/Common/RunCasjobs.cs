@@ -348,7 +348,7 @@ namespace Sciserver_webService.UseCasjobs
                 int NumRows = ds.Tables[t].Rows.Count;
                 if (NumRows == 0)
                 {
-                    sb.AppendFormat("<h3><br><font color=red>No objects have been found</font> </h3>");
+                    sb.AppendFormat("<h3><br><font color=red>No entries have been found</font> </h3>");
                 }
                 else
                 {
@@ -489,7 +489,6 @@ namespace Sciserver_webService.UseCasjobs
             }
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
-
 
         }
         

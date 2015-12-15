@@ -20,8 +20,8 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult Get()
         {
-
-            ProcessRequest request = new ProcessRequest();
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SIAP.getAllSIAPInfo");
+            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SkyserverWS.SIAP.getAllSIAPInfo");
         }
       

@@ -577,8 +577,6 @@ namespace Sciserver_webService.QueryTools
             }
             QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
             query = QueryForUserDisplay;
-            query = query.Replace("'", "''");
-            query = "EXEC spExecuteSQL '" + query + "'";
         }
 
 
