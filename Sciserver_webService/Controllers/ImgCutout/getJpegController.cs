@@ -28,7 +28,7 @@ namespace Sciserver_webService.Controllers
             RequestMisc rm = new RequestMisc(this.Request, "SkyserverWS.ImgCutout.getJpeg");
             this.Request.RequestUri = rm.AddTaskNameToURI(this.Request.RequestUri);
             LoggedInfo ActivityInfo = rm.ActivityInfo;
-            ActivityInfo.Message = rm.GetLoggedMessage("");
+            string ClientIP = rm.GetClientIP(rm.dictionary);
             
             HttpResponseMessage resp = new HttpResponseMessage();
 
@@ -44,12 +44,13 @@ namespace Sciserver_webService.Controllers
                 /// This part can be changed later if we change internal ImgCutout code.
                 if (opt != null) opt = "C" + opt; else opt = "C";
 
-                resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, clientIP));
+                resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, ClientIP));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                 resp.StatusCode = HttpStatusCode.OK;
 
                 //logging
                 SciserverLogging logger = new SciserverLogging();
+                ActivityInfo.Message = rm.GetLoggedMessage(query);
                 logger.LogActivity(ActivityInfo, "CustomMessage");
 
                 return resp;

@@ -62,7 +62,7 @@ namespace Sciserver_webService.Common
 
             IEnumerable<string> values;
             string token = "";
-            string userid = "anonymous"; // before knowing whether it is an authenticated user.
+            string userid = null; // before knowing whether it is an authenticated user.
 
             //try getting token from the Header
             if (ActivityInfo.Headers.TryGetValues(KeyWords.XAuthToken, out values))
@@ -160,7 +160,7 @@ namespace Sciserver_webService.Common
 
             IEnumerable<string> values;
             string token = "";
-            string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
+            string userid = null; ; // before knowing whether its authenticated user or unknown.
             if (api.ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
             {
                 try

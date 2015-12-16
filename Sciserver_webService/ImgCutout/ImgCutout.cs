@@ -161,7 +161,7 @@ namespace Sciserver_webService.ImgCutout
         private string datarelease = "";
 
         //For logging
-        private string clientIP = "";
+        public string clientIP = "";
         private string serverName = "";
         private string httpHost = "";
         private string remoteAdd = "";
@@ -375,7 +375,7 @@ namespace Sciserver_webService.ImgCutout
                     if (drawFrames | drawField) getFrames();
                     if (drawQuery) getQueryObjects(query_);
                     
-                    OverlayOptions options = new OverlayOptions(SqlConn, canvas, size, ra, dec, radius, zoom, fradius,datarelease, token);
+                    OverlayOptions options = new OverlayOptions(SqlConn, canvas, size, ra, dec, radius, zoom, fradius,datarelease, token, clientIP);
 
                     if (drawApogee) options.getApogeeObjects();
                     if (drawField) options.getFields(cTable);
@@ -594,7 +594,9 @@ namespace Sciserver_webService.ImgCutout
             cmd.Parameters.AddWithValue("@webserver", httpHost);
             cmd.Parameters.AddWithValue("@clientIP", clientIP);
             cmd.Parameters.AddWithValue("@System", 1);
+            cmd.Parameters.AddWithValue("@access", "SkyserverWS.ImgCutout.getJpeg");
             cmd.Parameters.AddWithValue("@log", KeyWords.DoLogWithSpExecuteSQL);
+            cmd.Parameters.AddWithValue("@filter", 1);
             cmd.CommandType = CommandType.StoredProcedure;
 
             return cmd.ExecuteReader();
@@ -799,6 +801,11 @@ namespace Sciserver_webService.ImgCutout
                 cmd.Parameters.AddWithValue("@webserver", httpHost);
                 cmd.Parameters.AddWithValue("@clientIP", clientIP);
                 cmd.Parameters.AddWithValue("@System", 1);
+                cmd.Parameters.AddWithValue("@access", "SkyserverWS.ImgCutout.getJpeg.MarkedObjects");
+                cmd.Parameters.AddWithValue("@log", KeyWords.DoLogWithSpExecuteSQL);
+                cmd.Parameters.AddWithValue("@filter", 1);
+                
+                
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 //set up the data adapter to get our data...
@@ -917,7 +924,7 @@ namespace Sciserver_webService.ImgCutout
                     /// If the query contains SELECT, the query is considered correct and the validation 
                     /// is postponed to be run by spExecute store procedure.
                     query = new StringBuilder();
-                    query.AppendFormat("EXEC spExecuteSQL @cmd='{0}', @limit='{1}', @webserver='{2}', @winname='{3}', @clientIP='{4}', @log=1, @filter=1", myq, KeyWords.MaxRows.ToString(), httpHost, serverName, clientIP);
+                    query.AppendFormat("EXEC spExecuteSQL @cmd='{0}', @limit='{1}', @webserver='{2}', @winname='{3}', @log={4}, @clientIP='{5}', @access='SkyserverWS.ImgCutout.getJpeg', @filter=1", myq, KeyWords.MaxRows.ToString(), httpHost, serverName, KeyWords.DoLogWithSpExecuteSQL,clientIP);
 
                     //This needs to be clarify
                     // EXEC spExecuteSQL '" + c +"  ', 100000,'" + server_name + "','" + windows_name + "','" + remote_addr + "','" + access + "'";

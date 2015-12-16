@@ -89,13 +89,13 @@ namespace Sciserver_webService.ToolsSearch
                    }
                }
                //this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";// parsing the query against harmful sql commands
-               this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=1,@log=1";// parsing the query against harmful sql commands
                // @cmd,@limit,@webserver,@winname,@clientIP,@access,@system,@maxQueries
 
            }
            else
            {
-               this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName.Substring(0, Math.Min(TaskName.Length, 32)) + "',@filter=1,@log=1";// parsing the query against harmful sql commands
+               this.query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=1,@log=1";// parsing the query against harmful sql commands
            }
            QueryForUserDisplay = c;
         }

@@ -26,7 +26,7 @@ namespace Sciserver_webService.ImgCutout
         string datarelease;
         string token;
 
-        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token)
+        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token, string clientIP)
         {
             this.SqlConn = sqlcon;
             this.canvas = canvas;
@@ -38,9 +38,10 @@ namespace Sciserver_webService.ImgCutout
             this.fradius = fradius;
             this.datarelease = datarelease;
             this.token = token;
+            this.imgCutout.clientIP = clientIP;
         }
 
-        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius)
+        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string clientIP)
         {
             this.SqlConn = sqlcon;
             this.canvas = canvas;
@@ -50,6 +51,7 @@ namespace Sciserver_webService.ImgCutout
             this.radius = radius;
             this.zoom = zoom;
             this.fradius = fradius;
+            this.imgCutout.clientIP = clientIP;
         }
 
         /// <summary>

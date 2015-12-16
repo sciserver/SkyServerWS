@@ -219,7 +219,6 @@
     <Compile Include="SDSSFields\FieldQueries.cs" />
     <Compile Include="SDSSFields\NewSDSSFields.cs" />
     <Compile Include="ToolsSearch\CrossIdSearch.cs" />
-    <Compile Include="ToolsSearch\DatabaseSearch.cs" />
     <Compile Include="ToolsSearch\ObjectQueries.cs" />
     <Compile Include="ToolsSearch\ObjectInfo.cs" />
     <Compile Include="ToolsSearch\ObjectSearch.cs" />
