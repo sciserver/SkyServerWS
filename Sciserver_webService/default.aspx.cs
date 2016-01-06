@@ -34,7 +34,7 @@ namespace Sciserver_webService
         private static string SIAP2 = urlbase + "/SIAP/getSIAPinfo?POS=132,12&SIZE=0.1&FORMAT=metadata&bandpass=i";
         private static string siapParams2 = "pos,size,format,bandpass";
 
-        private static string SIAP3 = urlbase + "/SIAP/getSIAPinfoAll?POS=132,12&SIZE=0.01";
+        private static string SIAP3 = urlbase + "/SIAP/getAllSIAPinfo?POS=132,12&SIZE=0.01";
         private static string siapParams3 = "pos,size";
 
         //sdssFields 4

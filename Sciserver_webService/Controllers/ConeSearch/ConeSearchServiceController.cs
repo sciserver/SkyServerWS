@@ -7,7 +7,6 @@ using Sciserver_webService.ConeSearch;
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.casjobs;
 using Sciserver_webService.Models;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 using net.ivoa.VOTable;

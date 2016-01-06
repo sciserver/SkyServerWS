@@ -21,7 +21,7 @@ using System.Net;
 using System.Data.SqlClient;
 using System.Web;
 
-//This class is used to submit query to casjobs
+//This class is used to submit query to the database
 namespace Sciserver_webService.DoDatabaseQuery
 {
 
@@ -34,15 +34,18 @@ namespace Sciserver_webService.DoDatabaseQuery
         string ErrorMessage = "There no errors.";
         DataSet ResultsDataSet = new DataSet();
         LoggedInfo ActivityInfo;
-        
+        String queryType = "";
+        String positionType = "";
 
-        public RunDBquery(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, LoggedInfo ActivityInfo)
+        public RunDBquery(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, LoggedInfo ActivityInfo, string queryType, string positionType)
         {
             this.query = query;
             this.format = format;
             this.TaskName = TaskName;
             this.ExtraInfo = ExtraInfo;
             this.ActivityInfo = ActivityInfo;
+            this.queryType = queryType;
+            this.positionType = positionType;
         }
 
 
@@ -65,7 +68,9 @@ namespace Sciserver_webService.DoDatabaseQuery
                 //BinaryFormatter fmt = new BinaryFormatter();
                 Action<Stream, HttpContent, TransportContext> WriteToStream = null;
                 BinaryFormatter fmt;
-                if (!format.Contains("csv") && !format.Contains("txt") && !format.Contains("text/plain") && !format.Contains("fits"))
+
+                // do not add the SQL query as a second table in vo services and csv/txt/fits formats.
+                if (!format.Contains("csv") && !format.Contains("txt") && !format.Contains("text/plain") && !format.Contains("fits") && queryType != KeyWords.SDSSFields && queryType != KeyWords.ConeSearchQuery && queryType != KeyWords.SIAP)
                 {
                     AddQueryTable(ResultsDataSet);// this adds to "ResultsDataSet" a new Table that shows the sql command.
                 }
@@ -107,7 +112,7 @@ namespace Sciserver_webService.DoDatabaseQuery
                     case "html":
                     case "dataset":
                     case "application/x-dataset":
-                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, true);
+                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, true, positionType, queryType);
                         response.Content = proc.GetContent(ResultsDataSet);
                         if (ExtraInfo.ContainsKey("FormatFromUser"))
                         {
@@ -145,7 +150,7 @@ namespace Sciserver_webService.DoDatabaseQuery
                 if (ExtraInfo["FormatFromUser"] == "html")
                 {
                     ErrorMessage = e.Message;
-                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, false);
+                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, false, positionType, queryType);
                     response.Content = proc.GetContent(ResultsDataSet);
                 }
                 else

@@ -38,14 +38,14 @@ namespace Sciserver_webService.sdssSIAP
 
             switch (casjobsTaskName)
             {
-              case "SIAP:getSIAP":
+              case "getSIAP":
                     vout = siap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], dictionary["FORMAT"], "");
                   break;
-              case "SIAP:getSIAPInfo":
+              case "getSIAPInfo":
                   vout = siap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], dictionary["FORMAT"], dictionary["bandpass"]);
 
                   break;
-              case "SIAP:getSIAPInfoAll":
+              case "getSIAPInfoAll":
                   vout = siap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], "All", "*");
                   break;  
 

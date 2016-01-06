@@ -54,20 +54,30 @@ namespace Sciserver_webService.ToolsSearch
 
                     if (keyL == "limit")
                     {
-                        try { limit = Convert.ToInt64(requestDir[key]); }
-                        catch { throw new Exception("The row limit parameter does not have a valid nuerical value."); }
-                        if( limit <= 0 || limit > Int64.Parse(KeyWords.MaxRows))
-                            throw new Exception("The row limit parameter has to be an integer greater than 0 and smaller than " + Int64.Parse(KeyWords.MaxRows)) ;
+                        if (!String.IsNullOrEmpty(requestDir[key]))
+                        {
+                            try { limit = Convert.ToInt64(requestDir[key]); }
+                            catch { throw new Exception("The row limit parameter does not have a valid numerical value."); }
+                            if (limit <= 0 || limit > Int64.Parse(KeyWords.MaxRows))
+                                throw new Exception("The row limit parameter has to be an integer greater than 0 and smaller than " + Int64.Parse(KeyWords.MaxRows));
+                        }
                     }
-                    if (keyL == "time_low")
+                    if (keyL == "date_low")
                     {
-                        try { Time1 = DateTime.Parse(requestDir[key]); }
-                        catch { throw new Exception("Lower time limit does not have a valid format"); }
+                        if (!String.IsNullOrEmpty(requestDir[key]))
+                        {
+                            try { Time1 = DateTime.Parse(requestDir[key]); }
+                            catch { throw new Exception("Lower date limit does not have a valid format"); }
+                        }
                     }
-                    if (keyL == "time_high")
+                    if (keyL == "date_high")
                     {
-                        try { Time2 = DateTime.Parse(requestDir[key]); }
-                        catch { throw new Exception("Upper time limit does not have a valid format"); }
+                        if (!String.IsNullOrEmpty(requestDir[key]))
+                        {
+
+                            try { Time2 = DateTime.Parse(requestDir[key]); }
+                            catch { throw new Exception("Upper date limit does not have a valid format"); }
+                        }
                     }
                     if (keyL == "token")
                     {
@@ -81,8 +91,11 @@ namespace Sciserver_webService.ToolsSearch
                     }
                     if (keyL == "custommessagetype")
                     {
-                        try { CustomMessageType = Int32.Parse(requestDir[key]); }
-                        catch { throw new Exception("CustomMessageType should be a valid integer value."); }
+                        if (!String.IsNullOrEmpty(requestDir[key]))
+                        {
+                            try { CustomMessageType = Int32.Parse(requestDir[key]); }
+                            catch { throw new Exception("CustomMessageType should be a valid integer value."); }
+                        }
                     }
                     if (keyL == "format")
                     {
@@ -305,7 +318,7 @@ namespace Sciserver_webService.ToolsSearch
             else
                 cmd.CommandText += KeyWords.MaxRows;
 
-            cmd.CommandText += "task_name as Application, Time, content as Content, 'parameters' as Parameters FROM MESSAGES as m LEFT JOIN CustomMessages as c on m.Message_ID = c.Message_ID";
+            cmd.CommandText += " task_name as Application, Time, content as Content, 'parameters' as Parameters FROM MESSAGES as m LEFT JOIN CustomMessages as c on m.Message_ID = c.Message_ID";
             cmd.CommandText += " WHERE user_id= @UserID";
             cmd.Parameters.Add("@UserID", SqlDbType.NVarChar);
             cmd.Parameters["@UserID"].Value = UserID;

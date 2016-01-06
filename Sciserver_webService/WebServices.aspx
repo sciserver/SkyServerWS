@@ -137,8 +137,8 @@
 			</section>
 			<section>
 				<article>
-					<header>getSIAPInfoAll</header>
-						<p><a target="_blank" href="<%=baseurl%>/SIAP/getSIAPinfoAll?POS=132,12&SIZE=0.01"><%=baseurl%>/SIAP/getSIAPinfoAll?POS=132,12&SIZE=0.01</a></p>
+					<header>getAllSIAPInfo</header>
+						<p><a target="_blank" href="<%=baseurl%>/SIAP/getSIAPinfoAll?POS=132,12&SIZE=0.01"><%=baseurl%>/SIAP/getAllSIAPinfo?POS=132,12&SIZE=0.01</a></p>
 					</article>
 					<article>
 					<header>Parameters</header>

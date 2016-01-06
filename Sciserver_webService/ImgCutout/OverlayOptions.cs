@@ -7,7 +7,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Collections;
 using System.Text;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 namespace Sciserver_webService.ImgCutout

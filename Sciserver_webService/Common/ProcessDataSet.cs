@@ -32,8 +32,12 @@ namespace Sciserver_webService.Common
         string ErrorMessage = "";
         net.ivoa.VOTable.VOTABLE vot;
 
+        String positionType = "";
+        String queryType = "";
 
-        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccessStatusCode)
+
+
+        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccessStatusCode, string positionType, string queryType)
         {
             this.query = query;
             this.format = format;
@@ -41,6 +45,8 @@ namespace Sciserver_webService.Common
             this.ExtraInfo = ExtraInfo;
             this.ErrorMessage = ErrorMessage;
             this.IsSuccessStatusCode = IsSuccessStatusCode;
+            this.positionType = positionType;
+            this.queryType = queryType;
         }
 
 
@@ -57,31 +63,31 @@ namespace Sciserver_webService.Common
                 if (this.ExtraInfo["FormatFromUser"] != "html")
                 {
                     NewSDSSFields sf = new NewSDSSFields();
-                    switch (TaskName)
+                    switch (positionType)
                     {
 
-                        case "FOR CONE SEARCH":
+                        case "cone":
                             DefaultCone cstest = new DefaultCone();
                             vot = cstest.ConeSearch(ds);
                             response.Content = new StringContent(ToXML(vot), Encoding.UTF8, KeyWords.contentXML);
                             break;
 
-                        case "SDSSFields:FieldArray":
+                        case "FieldArray":
 
                             response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, KeyWords.contentXML);
                             break;
 
-                        case "SDSSFields:FieldArrayRect":
+                        case "FieldArrayRect":
 
                             response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, KeyWords.contentXML);
                             break;
 
-                        case "SDSSFields:ListOfFields":
+                        case "ListOfFields":
 
                             response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, KeyWords.contentXML);
                             break;
 
-                        case "SDSSFields:UrlsOfFields":
+                        case "UrlsOfFields":
 
                             response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, KeyWords.contentXML);
                             break;

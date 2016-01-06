@@ -916,8 +916,6 @@ namespace Sciserver_webService.ToolsSearch
             // if we couldn't find that plate/mjd/fiber, maybe it's an APOGEE object
             if (!String.IsNullOrEmpty(objectInfo.objId))
             {
-                //ds = runQuery.RunCasjobs(cmd, "Explore: Summary");
-                //ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getApogeeFromEq");
                 ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
@@ -937,8 +935,6 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@qdec", qdec.ToString());
             cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
             //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getApogeeFromEq");
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -958,8 +954,6 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@qdec", qdec.ToString());
             cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
             //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getPhotoFromEq");
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -978,8 +972,6 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@qdec", qdec.ToString());
             cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
             //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getpmtsFromEq");
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1056,8 +1048,6 @@ namespace Sciserver_webService.ToolsSearch
         {
             string cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
             cmd = cmd.Replace("@sid", sid.ToString());
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getpmtsFromSpecWithSpecobjID");
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1084,8 +1074,6 @@ namespace Sciserver_webService.ToolsSearch
             string cmd = ExploreQueries.getpmtsFromPhoto;
             cmd = cmd.Replace("@objid", id.ToString());
 
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getpmtsFromPhoto");
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1111,8 +1099,6 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = ExploreQueries.getPlateFiberFromSpecObj;
                 cmd = cmd.Replace("@specId", specId.ToString());
 
-                //ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-                //ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getPlateFiberFromSpecObj");
                 ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
@@ -1160,8 +1146,6 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@field", Field == null ? "null" : Field.ToString());
             cmd = cmd.Replace("@obj", Obj == null ? "null" : Obj.ToString());
 
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getpmtsFrom5PartSDSS");
             ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1187,8 +1171,6 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = ExploreQueries.getPlateFiberFromSpecObj;
                 cmd = cmd.Replace("@specId", specId.ToString());
 
-                //ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-                //ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getPlateFiberFromSpecObj");
                 ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
@@ -1243,8 +1225,6 @@ namespace Sciserver_webService.ToolsSearch
             ParameterValuePairs.Clear(); ParameterValuePairs.Add("@apogeeId", apid);
             //cmd = cmd.Replace("@apogeeId", apid);
 
-            //DataSet ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //DataSet ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, taskname);
             DataSet ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1261,8 +1241,6 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
             //cmd = cmd.Replace("@searchRadius", (0.5/60).ToString());
 
-            //ds = runQuery.RunCasjobs(cmd,"Explore: Summary");
-            //ds = runQuery.RunDatabaseSearch(cmd, globals.ContentDataset, ClientIP, "Skyserver.Explore.Summary.getpmtsFromEq");
             ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
             {
@@ -1418,6 +1396,8 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = ExploreQueries.fitsimg.Replace("@fieldId", objectInfo.fieldId.ToString());break;
                 case "fitsspec":
                     cmd = ExploreQueries.fitsspec.Replace("@specObjId", objectInfo.specObjId.ToString()); break;
+                case "wiseLinkCrossId":
+                    cmd = ExploreQueries.wiseLinkCrossId; ParameterValuePairs.Clear(); ParameterValuePairs.Add("@objId", objectInfo.objId.ToString()); break;
                 case "SpecById":
                     cmd = SpecQueries.SpecById.Replace("@specId", objectInfo.specObjId.ToString()); break;
                 case "SpecByPF":

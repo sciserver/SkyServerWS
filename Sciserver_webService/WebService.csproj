@@ -223,7 +223,6 @@
     <Compile Include="ToolsSearch\ObjectInfo.cs" />
     <Compile Include="ToolsSearch\ObjectSearch.cs" />
     <Compile Include="ToolsSearch\RectangularSearch.cs" />
-    <Compile Include="Common\RunCasjobs.cs" />
     <Compile Include="Controllers\SearchTools\SqlSearchController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPController.cs" />
     <Compile Include="Controllers\SIAP\getSIAPInfoController.cs" />

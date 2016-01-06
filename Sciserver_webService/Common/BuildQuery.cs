@@ -642,7 +642,6 @@ namespace Sciserver_webService.QueryTools
             //double calculatedDec = 0;
 
             
-            // This needs to go uncommented if the selectClause is not passed to CasJOBS inside SpExecuteSQL.
             Int64 limit;
             try
             {

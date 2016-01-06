@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using net.ivoa.VOTable;
 using Sciserver_webService.Common;
-using Sciserver_webService.UseCasjobs;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
@@ -83,20 +82,6 @@ namespace Sciserver_webService.ToolsSearch
             
         }
 
-        //public RectangularSearch(String ra, String dec, String ra2, String dec2,String uband ,String gband,
-        //                        String rband , String iband,String zband,String searchtype , String returntype, String limit) {
-           
-        //    if (ra == null || dec == null || ra2 == null || dec2 == null) throw new ArgumentException("There are not enough parameters to process your request.");
-
-        //    Validation val = new Validation();
-        //    if(val.ValidateInput(ra,dec,ra2,dec2)){
-        //       bool temp = val.ValidateOtherParameters(uband, gband, rband, iband, zband, searchtype, returntype, limit);               
-        //       this.buildImageQuery(val);
-        //       this.buildIRQuery(val);
-        //    }
-        //}
-
-
         private string buildImageQuery(Validation val)
         {
             string sql = "";
@@ -170,40 +155,6 @@ namespace Sciserver_webService.ToolsSearch
         }
 
 
-       
-        //public string getJSON()
-        //{
-        //    RunCasjobs rCasjobs = new RunCasjobs(KeyWords.Rectangular);            
-        //    return rCasjobs.getJSON(this.query);
-        //}
-
-
-        //public string getJSONstring()
-        //{
-        //    RunCasjobs rCasjobs = new RunCasjobs(KeyWords.Rectangular);           
-        //    return rCasjobs.executeQuickQuery(this.query);
-        //}
-
-        //public VOTABLE getVOTable()
-        //{
-        //    RunCasjobs rCasjobs = new RunCasjobs(KeyWords.Rectangular);           
-        //    return rCasjobs.getVOtable(this.query);
-        //}
-       
-        //private string getQuery(double ra, double dec, double ra2, double dec2)
-        //{
-        //    // This part is used for UI to have direct link to explore page , for web service we just return objid
-        //    //string query = " SELECT  TOP 10 '<a target=INFO href=../../../en/tools/explore/obj.aspx?id=' + cast(p.objId as varchar(20)) ";
-        //    //       query += " + '>' + cast(p.objId as varchar(20)) + '</a>' as objID,";  
-
-        //    string query = "Select top 10 p.objid, ";
-        //    query += " p.run, p.rerun, p.camcol, p.field, p.obj,";
-        //    query += " p.type, p.ra, p.dec, p.u,p.g,p.r,p.i,p.z,";
-        //    query += " p.Err_u, p.Err_g, p.Err_r,p.Err_i,p.Err_z";
-        //    query += " FROM fGetObjFromRect(" + ra + "," + ra2 + "," + dec + "," + dec2 + " ) n, PhotoPrimary p  WHERE n.objID=p.objID ";
-        //    return query;
-        //}
-
         private string addWhereClause(Validation val)
         {
             string queryString = ""; 
@@ -226,93 +177,6 @@ namespace Sciserver_webService.ToolsSearch
             return queryString;
         }
 
-        //public string getJson(string[] resultContent, string[] query)
-        //{
-        //    string[] lines = resultContent[0].Split('\n');
-        //    var csv = new List<string[]>(); // or, List<YourClass>            
-        //    foreach (string line in lines)
-        //        csv.Add(line.Split(',')); // or, populate YourClass          
-        //    //string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(csv);
-
-        //    string[] lines2 = resultContent[1].Split('\n');
-        //    var csv2 = new List<string[]>(); // or, List<YourClass>            
-        //    foreach (string line2 in lines2)
-        //        csv2.Add(line2.Split(',')); // or, populate YourClass          
-
-        //    string[] querytype = new string[2] { "Imaging", "IR Spectra" };
-
-        //    StringBuilder sb = new StringBuilder();
-        //    StringWriter sw = new StringWriter(sb);
-
-        //    using (JsonWriter writer = new JsonTextWriter(sw))
-        //    {
-        //        writer.Formatting = Formatting.Indented;
-        //        writer.WriteStartArray();
-
-        //        for (int r = 0; r < resultContent.Length; r++)
-        //        {
-        //            writer.WriteStartObject();
-        //            writer.WritePropertyName("Query");
-        //            writer.WriteValue(query[r]);
-        //            writer.WritePropertyName("Query type");
-        //            writer.WriteValue(querytype[r]);
-        //            writer.WritePropertyName("Query Results:");
-        //            writer.WriteStartArray();
-        //            if (r == 0)
-        //            {
-        //                for (int i = 1; i < lines.Length; i++)
-        //                {
-        //                    writer.WriteStartObject();
-        //                    for (int Index = 0; Index < csv[0].Length; Index++)
-        //                    {
-        //                        writer.WritePropertyName(csv[0][Index]);
-        //                        writer.WriteValue(csv[i][Index]);
-        //                    }
-        //                    writer.WriteEndObject();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                for (int i = 1; i < lines2.Length; i++)
-        //                {
-        //                    writer.WriteStartObject();
-        //                    for (int Index = 0; Index < csv2[0].Length; Index++)
-        //                    {
-        //                        writer.WritePropertyName(csv2[0][Index]);
-        //                        writer.WriteValue(csv2[i][Index]);
-        //                    }
-        //                    writer.WriteEndObject();
-        //                }
-        //            }
-        //            writer.WriteEndArray();
-        //            writer.WriteEndObject();
-        //        }
-        //        writer.WriteEndArray();
-        //    }
-        //    return sb.ToString();
-        //}
-
-        //public String getResult(String token, String casjobsMessage, String format) {
-        //    try
-        //    {
-        //        //RunCasjobs run = new RunCasjobs();
-        //        //String imageQueryResult = run.postCasjobs(this.ImagingQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-        //        //String irQueryResult = run.postCasjobs(this.IRQuery, token, casjobsMessage).Content.ReadAsStringAsync().Result;
-        //        //String results = "";
-        //        //if (format.Equals("json"))
-        //        //    results = this.getJson(new String[2] { imageQueryResult, irQueryResult }, new String[2] { this.ImagingQuery, this.IRQuery });
-        //        //else
-        //        //{
-        //        //    results = "# Imaging Query:" + this.ImagingQuery.Replace("\n", "") + "\n\n" + imageQueryResult;
-        //        //    results += "\n\n#IR Spectra Query:" + this.IRQuery.Replace("\n", "") + "\n\n" + irQueryResult;
-        //        //}
-        //        //return results;
-        //        return "";
-        //    }
-        //    catch (Exception e) {
-        //        throw new Exception("Error while running casjobs:"+e.Message);
-        //    }
-        //}
 
     }
 }

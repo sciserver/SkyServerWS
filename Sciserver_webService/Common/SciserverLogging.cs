@@ -152,58 +152,6 @@ namespace Sciserver_webService.Common
 
 
 
-    
-
-        public void LogActivity(ApiController api)
-        {
-            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-
-            IEnumerable<string> values;
-            string token = "";
-            string userid = null; ; // before knowing whether its authenticated user or unknown.
-            if (api.ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
-            {
-                try
-                {
-                    // Keystone authentication
-                    token = values.First();
-                    var userAccess = Keystone.Authenticate(token);
-
-                    // logging for the request
-
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, api.ControllerContext.Request.ToString());
-                    userid = userAccess.User.Id;
-                    message.UserId = userAccess.User.Id;
-                    log.SendMessage(message);
-
-                }
-                catch (Exception e)
-                {
-
-                    // No authentication (anonymous) // Logg
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, e.Message);
-                    message.UserId = userid;
-                    log.SendMessage(message);
-                    throw new UnauthorizedAccessException("Given token is not authorized.");
-                }
-
-            }
-            else
-            {
-                Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, api.ControllerContext.Request.ToString());
-                message.UserId = userid;
-                log.SendMessage(message);
-            }
-
-
-
-        }
-
-
-
-
-
-
 
     }
 }

@@ -13,7 +13,6 @@ using SciServer.Logging;
 using Sciserver_webService.SDSSFields;
 using Sciserver_webService.sdssSIAP;
 using Sciserver_webService.ToolsSearch;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.DoDatabaseQuery;
 //using Sciserver_webService.SciserverLog;
 using System.Web.Http.Filters;
@@ -147,8 +146,6 @@ namespace Sciserver_webService.Common
             String format = "";        
             String query = "";
 
-            //string Format = "";
-
             if (string.IsNullOrEmpty(this.ClientIP))
                 this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
             if (string.IsNullOrEmpty(this.TaskName)) 
@@ -251,7 +248,7 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "SIAP" :
-                    return new ReturnSIAPresults(Task, "VOTable", datarelease, dictionary); // this is tricky code
+                    return new ReturnSIAPresults(positionType, "VOTable", datarelease, dictionary); // this is tricky code
                     break;
 
                 default:// runs all the Imaging, Spectro and SpectroIR queries in SkyServer
@@ -314,10 +311,6 @@ namespace Sciserver_webService.Common
             }
 
 
-            //return new RunCasjobs( query, token, casjobsMessage, format, datarelease);
-            //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, DoReturnHtml);
-            //return new RunCasjobs(query, token, casjobsMessage, format, datarelease, ExtraInfo);
-
             //logging -----------------------------------------------------------------------------------------------------------------------
             if (ActivityInfo == null)
             {
@@ -333,22 +326,19 @@ namespace Sciserver_webService.Common
             switch (queryType)
             {
                 case "SqlSearch":
-                    //return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);// queries are sent to CasJobs
-                    return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo);// queries are sent to CasJobs
+                    return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo, queryType, positionType);// queries are sent through direct database connection.
                 case "ObjectSearch":
                 case "UserHistory":
                     return new SendTables(ResultsDataSet, format, ActivityInfo, ExtraInfo);
                 default:
-                    //return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);// queries are sent to CasJobs
-                    //return new RunDBquery(query, format);
-                    return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo);
+                    return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo, queryType, positionType);
             }
 
         }
 
 
         /// Upload table        
-        public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string casjobsMessage)
+        public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string Message)
         {
             // This dict stores extra info needed for running and rendering the query results.
             Dictionary<string, string> ExtraInfo = new Dictionary<string, string>();
@@ -379,7 +369,7 @@ namespace Sciserver_webService.Common
                 if (string.IsNullOrEmpty(this.ClientIP))                
                     this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
                 if (string.IsNullOrEmpty(this.TaskName))
-                    this.TaskName = GetTaskName(dictionary, casjobsMessage);// must be executed right after GetClientIP(ref dictionary);
+                    this.TaskName = GetTaskName(dictionary, Message);// must be executed right after GetClientIP(ref dictionary);
                 if (string.IsNullOrEmpty(this.server_name)) 
                     try { server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
                     catch { }
@@ -494,7 +484,7 @@ namespace Sciserver_webService.Common
 
                 //return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
                 //return new RunDBquery(query, format, this.TaskName, ExtraInfo);return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);
-                return new RunDBquery(query, format, this.TaskName, ExtraInfo, ActivityInfo);
+                return new RunDBquery(query, format, this.TaskName, ExtraInfo, ActivityInfo, queryType, positionType);
             }
             catch (Exception exp)
             {
