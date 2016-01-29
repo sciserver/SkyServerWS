@@ -252,7 +252,7 @@
 			<section>
 				<article>
 					<header>Radial Search</header>
-						<p><a target="_blank" href"<%=baseurl%>/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equitorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging"><%=baseurl%>/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equitorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging</a></p>
+						<p><a target="_blank" href"<%=baseurl%>/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equatorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging"><%=baseurl%>/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equatorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging</a></p>
 					</article>
 					<article>
 					<header>Parameters</header>
@@ -278,7 +278,7 @@
 			<section>
 				<article>
 					<header>RectangularSearch</header>
-						<p><a target="_blank" href="<%=baseurl%>/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equitorial&limit=10&format=json&whichquery=irspectra"><%=baseurl%>/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equitorial&limit=10&format=json&whichquery=irspectra</a></p>
+						<p><a target="_blank" href="<%=baseurl%>/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equatorial&limit=10&format=json&whichquery=irspectra"><%=baseurl%>/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equatorial&limit=10&format=json&whichquery=irspectra</a></p>
 				</article>
 				<article>
 					<header>Parameters</header>
@@ -288,7 +288,7 @@
 							<dt>max_ra</dt><dd>Ra :Upper limit</dd>
 							<dt>min_dec</dt><dd>Dec : Lower Limit</dd>
 							<dt>max_dec</dt><dd>Dec : Upper Limit</dd>
-							<dt>searchtype</dt><dd>Search Type e.g. equitorial</dd>
+							<dt>searchtype</dt><dd>Search Type e.g. equatorial</dd>
 							<dt>limit</dt><dd>number of rows in output</dd>
 							<dt>format</dt><dd>output format</dd>
 					</dl>

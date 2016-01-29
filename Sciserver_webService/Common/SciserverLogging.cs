@@ -42,77 +42,42 @@ namespace Sciserver_webService.Common
         /// </summary>
         public Uri URI = null;
         /// <summary>
-        /// SQL commands that where executed.
+        /// SQL commands that were executed.
         /// </summary>
         public string query = "";
 
         public string UrlReferrer = "";
 
+        public bool DoShowInUserHistory = false;
+
+        public string ShortTaskName = "";
+
     }
 
     public class SciserverLogging
     {
+        public Message message = null;
+        public string userid = null; // before knowing whether it is an authenticated user.
+        public string user_name = null;
+        private bool HasAthenticatedWithActivityInfo = false;
 
+        public SciserverLogging(LoggedInfo ActivityInfo)
+        {
+            AthenticateUser(ActivityInfo);
+        }
+
+        public SciserverLogging()
+        {
+
+        }
 
         public void LogActivity(LoggedInfo ActivityInfo, string TypeOfLogging)
         {
+            if(!HasAthenticatedWithActivityInfo)
+                AthenticateUser(ActivityInfo);
 
 
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-
-            IEnumerable<string> values;
-            string token = "";
-            string userid = null; // before knowing whether it is an authenticated user.
-
-            //try getting token from the Header
-            if (ActivityInfo.Headers.TryGetValues(KeyWords.XAuthToken, out values))
-            {
-                try
-                {
-                    token = values.First();
-                }
-                catch (Exception e) { }
-            }
-            //try getting token from cookie in Header
-            else
-            {
-                try
-                {
-                    IEnumerable<string> cookies = ActivityInfo.Headers.GetValues("Cookie");
-                    string info = KeyWords.CookieToken+"=";
-                    foreach(string cookie in cookies)
-                    {
-                        if(cookie.Contains(info))
-                        {
-                            string tok = cookie.Split(';').Where((i => i.Contains(info))).First().Trim();
-                            token = tok.Remove(tok.IndexOf(info), info.Length);
-                        }
-                    }
-                }catch{}
-            }
-            //try getting token from the URI:
-            if(ActivityInfo.URI != null && String.IsNullOrEmpty(token))
-            {
-                try
-                {
-                    NameValueCollection col = ActivityInfo.URI.ParseQueryString();
-                    token = col.Get("token");
-                }
-                catch { }
-            }
-
-
-            if(!String.IsNullOrEmpty(token))
-            {
-                try
-                {
-                    var userAccess = Keystone.Authenticate(token);
-                    userid = userAccess.User.Id;
-                }
-                catch { }
-            }
-
-            Message message;
 
             if (TypeOfLogging == "CustomMessage")
             {
@@ -147,7 +112,125 @@ namespace Sciserver_webService.Common
             message.UserId = userid;
             message.ClientIP = ActivityInfo.ClientIP ?? "";
             message.TaskName = ActivityInfo.TaskName ?? "";
+            message.UserName = user_name;
             log.SendMessage(message);
+        }
+
+
+
+        public void AthenticateUser(LoggedInfo ActivityInfo)
+        {
+            IEnumerable<string> values;
+            string token = "";
+
+            //try getting token from the Header
+            if (ActivityInfo.Headers.TryGetValues(KeyWords.XAuthToken, out values))
+            {
+                try
+                {
+                    token = values.First();
+                }
+                catch (Exception e) { }
+            }
+            //try getting token from cookie in Header
+            else
+            {
+                try
+                {
+                    IEnumerable<string> cookies = ActivityInfo.Headers.GetValues("Cookie");
+                    string info = KeyWords.CookieToken + "=";
+                    foreach (string cookie in cookies)
+                    {
+                        if (cookie.Contains(info))
+                        {
+                            string tok = cookie.Split(';').Where((i => i.Contains(info))).First().Trim();
+                            token = tok.Remove(tok.IndexOf(info), info.Length);
+                        }
+                    }
+                }
+                catch { }
+            }
+            //try getting token from the URI:
+            if (ActivityInfo.URI != null && String.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    NameValueCollection col = ActivityInfo.URI.ParseQueryString();
+                    token = col.Get("token");
+                }
+                catch { }
+            }
+
+
+            if (!String.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    var userAccess = Keystone.Authenticate(token);
+                    userid = userAccess.User.Id;
+                    user_name = userAccess.User.Name;
+                }
+                catch { }
+            }
+            HasAthenticatedWithActivityInfo = true;
+        }
+
+        public void AthenticateUser()
+        {
+            string token = ""; 
+
+            //try getting token from the Header
+            IEnumerable<string> values = null;
+            try{values = HttpContext.Current.Request.Headers.GetValues(KeyWords.XAuthToken);}catch{}
+            if (values!=null)
+            {
+                try
+                {
+                    token = values.First();
+                }
+                catch (Exception e) { }
+            }
+            //try getting token from cookie in Header
+            else
+            {
+                try
+                {
+                    IEnumerable<string> cookies = HttpContext.Current.Request.Headers.GetValues("Cookie");
+                    string info = KeyWords.CookieToken + "=";
+                    foreach (string cookie in cookies)
+                    {
+                        if (cookie.Contains(info))
+                        {
+                            string tok = cookie.Split(';').Where((i => i.Contains(info))).First().Trim();
+                            token = tok.Remove(tok.IndexOf(info), info.Length);
+                        }
+                    }
+                }
+                catch { }
+            }
+            //try getting token from the URI:
+            if (HttpContext.Current.Request.Url != null && String.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    NameValueCollection col = HttpContext.Current.Request.Url.ParseQueryString();
+                    token = col.Get("token");
+                }
+                catch { }
+            }
+
+
+            if (!String.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    var userAccess = Keystone.Authenticate(token);
+                    userid = userAccess.User.Id;
+                    user_name = userAccess.User.Name;
+                }
+                catch { }
+            }
+            HasAthenticatedWithActivityInfo = false;
         }
 
 

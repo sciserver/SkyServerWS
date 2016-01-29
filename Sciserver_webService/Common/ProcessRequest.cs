@@ -424,7 +424,7 @@ namespace Sciserver_webService.Common
                         if (!HasRaDecText && !HasFile)
                         {
                             //query = "SELECT 'ERROR: Neither upload file nor list specified for Proximity search.'--";
-                            throw new Exception("Neither upload file nor list specified for Proximity search.");
+                            throw new ArgumentException("Neither upload file nor list specified for Proximity search.");
                         }
                     }
                 }
@@ -640,7 +640,7 @@ namespace Sciserver_webService.Common
         public string GetTaskName(Dictionary<String, String> requestDir, string EntryPoint)
         {
             if (IsDirectUserConnection && !String.IsNullOrEmpty(EntryPoint))
-                return EntryPoint + ".DirectQuery";
+                return EntryPoint;// + ".DirectQuery";
             else
             {
                 string taskname = "";

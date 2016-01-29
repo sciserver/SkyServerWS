@@ -31,7 +31,7 @@ namespace Sciserver_webService.DoDatabaseQuery
         String format = "";
         String TaskName = "";
         Dictionary<string, string> ExtraInfo = null;
-        string ErrorMessage = "There no errors.";
+        string ErrorMessage = "";
         DataSet ResultsDataSet = new DataSet();
         LoggedInfo ActivityInfo;
         String queryType = "";
@@ -112,7 +112,7 @@ namespace Sciserver_webService.DoDatabaseQuery
                     case "html":
                     case "dataset":
                     case "application/x-dataset":
-                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, true, positionType, queryType);
+                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, null, true, positionType, queryType, null);
                         response.Content = proc.GetContent(ResultsDataSet);
                         if (ExtraInfo.ContainsKey("FormatFromUser"))
                         {
@@ -141,7 +141,6 @@ namespace Sciserver_webService.DoDatabaseQuery
                 SciserverLogging logger = new SciserverLogging();
                 logger.LogActivity(ActivityInfo, "CustomMessage");
 
-
                 return response;
                 //return processDBqueryResults(stream);
             }
@@ -149,16 +148,48 @@ namespace Sciserver_webService.DoDatabaseQuery
             {
                 if (ExtraInfo["FormatFromUser"] == "html")
                 {
-                    ErrorMessage = e.Message;
-                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, ErrorMessage, false, positionType, queryType);
-                    response.Content = proc.GetContent(ResultsDataSet);
+
+                    HttpStatusCode errorCode = HttpStatusCode.InternalServerError;
+                    string reasonPhrase = errorCode.ToString();
+                    string errorMessage = e.Message + ((e.InnerException != null) ? (": " + e.InnerException.Message) : "");
+
+                    SciserverLogging Logger = new SciserverLogging();
+                    LoggedInfo Info = new LoggedInfo();
+                    Info.Exception = e;
+                    Info.ClientIP = this.ActivityInfo.ClientIP;
+                    Info.TaskName = this.ActivityInfo.TaskName;
+                    Info.Headers = this.ActivityInfo.Headers;
+                    Info.Message = errorMessage;
+                    Logger.LogActivity(Info, "ErrorMessage");
+
+                    StringBuilder strbldr = new StringBuilder();
+                    StringWriter sw = new StringWriter(strbldr);
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        writer.WriteStartObject();
+                        writer.WritePropertyName("Error Code");
+                        writer.WriteValue((int)errorCode);
+                        writer.WritePropertyName("Error Type");
+                        writer.WriteValue(errorCode.ToString());
+                        writer.WritePropertyName("Error Message");
+                        writer.WriteValue(errorMessage);
+                        writer.WritePropertyName("LogMessageID");
+                        writer.WriteValue(Logger.message.MessageId);
+                    }
+
+                    string TechnicalErrorInfo = strbldr.ToString();
+
+                    bool IsSuccess = false;
+                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, errorMessage, IsSuccess, positionType, queryType, TechnicalErrorInfo);
+                    response.Content = proc.GetContent(ResultsDataSet);// this will log
+                    response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
+                    return response;
                 }
                 else
                 {
-                    throw new Exception(e.Message);
-                    //response.Content = new StringContent("There is an error running this Query:\n" + query + "\n\n" + "Extra information:\n" + e.Message);
+                    throw new Exception(e.Message);//throwing the exception takes to CustomFilter.cs, where error logging is performed and the error response is returned to the user.
                 }
-                return response;
+                
             }
 
 

@@ -53,11 +53,11 @@ namespace Sciserver_webService
         //Search Tools 3
         private static string SqlSearch = urlbase + "/SearchTools/SqlSearch?cmd=select top 10 ra,dec from Frame&format=csv";
         private static string sqlParam = "cmd,format";
-        //whichway=equitorial&ra=258.25&dec=64.05&radius=3&min_u=0&max_u=20&min_g=0&max_g=20&min_r=0&max_r=20&min_i=0&max_i=20&min_z=0&max_z=20&format=html&limit=10
-        private static string RadialSearch = urlbase + "/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equitorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging";
+        //whichway=equatorial&ra=258.25&dec=64.05&radius=3&min_u=0&max_u=20&min_g=0&max_g=20&min_r=0&max_r=20&min_i=0&max_i=20&min_z=0&max_z=20&format=html&limit=10
+        private static string RadialSearch = urlbase + "/SearchTools/RadialSearch?ra=258.2&dec=64&radius=4.1&whichway=equatorial&limit=10&format=json&fp=none&uband=0,17&gband=0,15&whichquery=imaging";
         private static string radialParam = "ra,dec,radius,searchtype,limit,format,fp \n optional parameters: uband,gband,rband,iband,zband";
 
-        private static string RectangleSearch = urlbase + "/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equitorial&limit=10&format=json&whichquery=irspectra";
+        private static string RectangleSearch = urlbase + "/SearchTools/RectangularSearch?min_ra=250.2&max_ra=250.5&min_dec=35.1&max_dec=35.5&searchtype=equatorial&limit=10&format=json&whichquery=irspectra";
         private static string rectParam = "min_ra,max_ra,min_dec,max_dec,searchtype,limit,format \n optional parameters: uband,gband,rband,iband,zband";
 
         //imageQyery 4

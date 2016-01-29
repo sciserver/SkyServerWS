@@ -64,7 +64,7 @@ r+="1237664871898481122,145.000043453448,33.9937119425584,GALAXY,24.34384,22.774
         [TestMethod]
         public void TestGetRadial() {
             string requestUri = ConfigurationManager.AppSettings["WebServiceUri"] + "SearchTools/RadialSearch";
-            string parameters = "ra=258.2&dec=64&radius=0.35&whichway=equitorial&limit=10&fp=none";
+            string parameters = "ra=258.2&dec=64&radius=0.35&whichway=equatorial&limit=10&fp=none";
             var request = (HttpWebRequest)WebRequest.Create(requestUri + "?" + parameters);
             request.Method = "GET";
 
@@ -83,7 +83,7 @@ r+="1237664871898481122,145.000043453448,33.9937119425584,GALAXY,24.34384,22.774
         public void TestGetRectangular() { 
             
             string requestUri = ConfigurationManager.AppSettings["WebServiceUri"] + "SearchTools/RectangularSearch";
-            string parameters = "min_ra=258.2&max_ra=258.3&min_dec=64.1&max_dec=64.2&searchtype=equitorial&limit=10&uband=0,15&gband=0,17";
+            string parameters = "min_ra=258.2&max_ra=258.3&min_dec=64.1&max_dec=64.2&searchtype=equatorial&limit=10&uband=0,15&gband=0,17";
             var request = (HttpWebRequest)WebRequest.Create(requestUri + "?" + parameters);
             request.Method = "GET";
 

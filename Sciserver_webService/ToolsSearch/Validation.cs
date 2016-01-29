@@ -282,7 +282,7 @@ namespace Sciserver_webService.ToolsSearch
             try {
                 
                 //this.gband = false; this.uband = false; this.rband = false; this.iband = false; this.zband = false;
-                //this.searchtype = "equitorial"; // default search type
+                //this.searchtype = "equatorial"; // default search type
 
                 string[] values;
                 if (gband != null & this.gband == true)

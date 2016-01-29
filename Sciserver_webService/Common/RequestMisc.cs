@@ -180,7 +180,7 @@ namespace Sciserver_webService.Common
         public string GetTaskName(Dictionary<String, String> requestDir, string EntryPoint)
         {
             if (IsDirectUserConnection && !String.IsNullOrEmpty(EntryPoint))
-                return EntryPoint + ".DirectQuery";
+                return EntryPoint;// + ".DirectQuery";
             else
             {
                 string taskname = "";

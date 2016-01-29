@@ -27,38 +27,35 @@ namespace Sciserver_webService.Common
         String query = "";
         String TaskName = "";
         String format = "";
-        bool IsSuccessStatusCode;
+        bool IsSuccess;
         Dictionary<string, string> ExtraInfo = null;
         string ErrorMessage = "";
         net.ivoa.VOTable.VOTABLE vot;
 
         String positionType = "";
         String queryType = "";
+        String TechnicalErrorInfo = null;
 
 
-
-        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccessStatusCode, string positionType, string queryType)
+        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccess, string positionType, string queryType, string TechnicalErrorInfo)
         {
             this.query = query;
             this.format = format;
             this.TaskName = TaskName;
             this.ExtraInfo = ExtraInfo;
             this.ErrorMessage = ErrorMessage;
-            this.IsSuccessStatusCode = IsSuccessStatusCode;
+            this.IsSuccess = IsSuccess;
             this.positionType = positionType;
-            this.queryType = queryType;
+            this.queryType = queryType; 
+            this.TechnicalErrorInfo = TechnicalErrorInfo;
         }
-
-
-        
-        
         
         public HttpContent GetContent(DataSet ds)
         {
 
             var response = new HttpResponseMessage();
 
-            if (this.IsSuccessStatusCode)
+            if (this.IsSuccess)
             {
                 if (this.ExtraInfo["FormatFromUser"] != "html")
                 {
@@ -108,7 +105,7 @@ namespace Sciserver_webService.Common
                     response.Content = new StringContent(getHtmlContent(ds));
                 }
             }
-            else // not IsSuccessStatusCode
+            else // not IsSuccess
             {
                 if (ExtraInfo["FormatFromUser"] == "html")
                 {
@@ -116,8 +113,10 @@ namespace Sciserver_webService.Common
                 }
                 else
                 {
-                    //response.Content = new StreamContent(stream);
-                    response.Content = new StringContent(ErrorMessage);
+                    if (String.IsNullOrEmpty(TechnicalErrorInfo))
+                        response.Content = new StringContent(ErrorMessage);
+                    else
+                        response.Content = new StringContent(ErrorMessage + " \nTechnical Info:" + TechnicalErrorInfo);
                 }
             }
             return response.Content;
@@ -128,7 +127,8 @@ namespace Sciserver_webService.Common
         {
             if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
             {
-                return getINCORRECTsyntaxHTMLresult(ErrorMessage);
+                return getSyntaxHTMLresult(null, ErrorMessage, TechnicalErrorInfo);
+                //return getINCORRECTsyntaxHTMLresult(ErrorMessage);
             }
             else // in case we want to run que sql command and retrrieve the resultset:
             {
@@ -144,7 +144,8 @@ namespace Sciserver_webService.Common
             {
                 if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
                 {
-                    return getOKsyntaxHTMLresult(ds);
+                    return getSyntaxHTMLresult(ds, null, null);
+                    //return getOKsyntaxHTMLresult(ds);
                 }
                 else if (ExtraInfo["fp"] == "only") // in case user want to run the "is in footprint?" query
                 {
@@ -157,8 +158,7 @@ namespace Sciserver_webService.Common
             }
             catch (Exception e)
             {
-                throw;
-                //return e.Message;
+                throw(e);
             }
         }
 
@@ -173,8 +173,6 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
         }
-
-
 
         private string getOKsyntaxHTMLresult(DataSet ds)
         {
@@ -203,18 +201,41 @@ namespace Sciserver_webService.Common
         }
 
 
+        private string getSyntaxHTMLresult(DataSet ds, string errorMessage, string technicalErrorInfo)
+        {
+            string HtmlContent = "";
+            HtmlContent += "<html><head>";
+            HtmlContent += "<title>SDSS Query Syntax Check</title>";
+            HtmlContent += "</head><body bgcolor=white>";
+            HtmlContent += "<h2>SQL Syntax Check</h2>";
+            if (ds != null)// OK syntax
+                HtmlContent += "<H3> <font color=green>" + ds.Tables[0].Rows[0][0].ToString() + "</font></H3>";
+            else if(!String.IsNullOrEmpty(errorMessage))
+                HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + errorMessage + "</font></H3>";
+            else
+                HtmlContent += "<H3> <font color=green> no message </font></H3>";
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+            if (!String.IsNullOrEmpty(technicalErrorInfo))// adding error log-message ID at the end of the html document
+                HtmlContent += "<br> Technical Info:<br>" + technicalErrorInfo;
+            HtmlContent += "</BODY></HTML>";
+            return HtmlContent;
+        }
+
+
         private string getGenericHTMLerror(string ErrorMessage)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("<html><head>\n");
-            sb.AppendFormat("<title>SDSS error message</title>\n");
-            sb.AppendFormat("</head><body bgcolor=white>\n");
-            sb.AppendFormat("<h2>SDSS error message</h2>");
-            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
+            string HtmlContent = "";
+            HtmlContent += "<html><head>\n";
+            HtmlContent += "<title>SDSS error message</title>\n";
+            HtmlContent += "</head><body bgcolor=white>\n";
+            HtmlContent += "<h2>SDSS error message</h2>";
+            HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>";
             //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
-            sb.AppendFormat("</BODY></HTML>\n");
-            return sb.ToString();
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+            if(!String.IsNullOrEmpty(TechnicalErrorInfo))
+                HtmlContent += "<br>Technical Info:<br>" + TechnicalErrorInfo; // writes command
+            HtmlContent += "</BODY></HTML>\n";
+            return HtmlContent;
         }
 
 
@@ -396,8 +417,6 @@ namespace Sciserver_webService.Common
             }
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
-
-
         }
 
 

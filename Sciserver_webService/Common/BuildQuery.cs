@@ -570,10 +570,10 @@ namespace Sciserver_webService.QueryTools
             {
                 limit = Convert.ToInt64(requestDictionary["limit"]);
             }
-            catch { throw (new Exception("Invalid numerical value for maximum number of rows in LIMIT=" + requestDictionary["limit"])); }
+            catch { throw (new ArgumentException("Invalid numerical value for maximum number of rows in LIMIT=" + requestDictionary["limit"])); }
             if (limit > Convert.ToInt64(KeyWords.MaxRows))
             {
-                throw (new Exception("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDictionary["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
+                throw (new ArgumentException("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDictionary["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
             }
             QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
             query = QueryForUserDisplay;

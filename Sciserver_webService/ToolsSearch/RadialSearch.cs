@@ -45,10 +45,10 @@ namespace Sciserver_webService.ToolsSearch
             {
                 limit = Convert.ToInt64(requestDir["limit"]);
             }
-            catch { throw (new Exception("Invalid numerical value for maximum number of rows in LIMIT=" + requestDir["limit"])); }
+            catch { throw (new ArgumentException("Invalid numerical value for maximum number of rows in LIMIT=" + requestDir["limit"])); }
             if (limit > Convert.ToInt64(KeyWords.MaxRows))
             {
-                throw (new Exception("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDir["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
+                throw (new ArgumentException("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDir["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
             }
 
 
