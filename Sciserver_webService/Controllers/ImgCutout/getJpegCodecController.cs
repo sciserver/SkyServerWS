@@ -43,7 +43,9 @@ namespace Sciserver_webService.Controllers
 
                 //logging
                 SciserverLogging logger = new SciserverLogging();
-                logger.LogActivity(ActivityInfo, "CustomMessage");
+                ActivityInfo.Message = rm.GetLoggedMessage("");
+                ActivityInfo.DoShowInUserHistory = false;
+                logger.LogActivity(ActivityInfo, "SkyserverMessage");
 
                 return resp;
             }

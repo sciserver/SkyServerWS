@@ -16,7 +16,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.RadialSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "SkyserverWS.SearchTools.RadialSearch");
         }
 
@@ -24,7 +23,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.RadialSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RadialQuery, KeyWords.RadialQuery, "SkyserverWS.SearchTools.RadialSearch");
         }
     }

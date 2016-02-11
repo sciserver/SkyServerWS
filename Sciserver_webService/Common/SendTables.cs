@@ -120,7 +120,8 @@ namespace Sciserver_webService.Common
 
                 //logging 
                 SciserverLogging logger = new SciserverLogging();
-                logger.LogActivity(ActivityInfo, "CustomMessage");
+                //logger.LogActivity(ActivityInfo, "CustomMessage");
+                logger.LogActivity(ActivityInfo, "SkyserverMessage");
 
                 return response;
             }

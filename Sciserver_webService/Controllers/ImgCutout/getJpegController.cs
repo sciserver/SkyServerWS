@@ -23,12 +23,12 @@ namespace Sciserver_webService.Controllers
         //// Get The cone search results
         [ExceptionHandleAttribute]
         public HttpResponseMessage Get([FromUri] string ra = null, [FromUri] string dec = null, [FromUri] string scale = "0.396127",
-            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "", [FromUri]String token = "")
+            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "", [FromUri]String token = "", [FromUri]String TaskName = "")
         {
             RequestMisc rm = new RequestMisc(this.Request, "SkyserverWS.ImgCutout.getJpeg");
             this.Request.RequestUri = rm.AddTaskNameToURI(this.Request.RequestUri);
             LoggedInfo ActivityInfo = rm.ActivityInfo;
-            string ClientIP = rm.GetClientIP(rm.dictionary);
+            string ClientIP = ActivityInfo.ClientIP;
             
             HttpResponseMessage resp = new HttpResponseMessage();
 
@@ -51,7 +51,7 @@ namespace Sciserver_webService.Controllers
                 //logging
                 SciserverLogging logger = new SciserverLogging();
                 ActivityInfo.Message = rm.GetLoggedMessage(query);
-                logger.LogActivity(ActivityInfo, "CustomMessage");
+                logger.LogActivity(ActivityInfo, "SkyserverMessage");
 
                 return resp;
             }

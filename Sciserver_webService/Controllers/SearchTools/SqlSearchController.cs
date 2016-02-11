@@ -24,14 +24,12 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.SqlSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "SkyserverWS.SearchTools.SqlSearch");
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.SqlSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "SkyserverWS.SearchTools.SqlSearch");
         }
     }

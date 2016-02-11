@@ -17,7 +17,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.ProximitySearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
 
@@ -26,7 +25,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.ProximitySearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
     }

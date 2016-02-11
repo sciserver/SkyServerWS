@@ -22,7 +22,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.UrlsOfFields");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SkyserverWS.SDSSFields.UrlsOfFields");
         }
 
@@ -30,7 +29,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.UrlsOfFields");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SkyserverWS.SDSSFields.UrlsOfFields");
         }
         ///*** input parameters are [FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band

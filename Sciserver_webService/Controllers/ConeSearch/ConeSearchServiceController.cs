@@ -20,7 +20,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
 
@@ -29,7 +28,6 @@ namespace Sciserver_webService.Controllers
         {
 
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
         //[ExceptionHandleAttribute]

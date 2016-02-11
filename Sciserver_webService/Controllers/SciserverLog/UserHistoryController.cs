@@ -26,7 +26,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SciserverLog.UserHistory");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.UserHistoryQuery, "", "SkyserverWS.SciserverLog.UserHistory");
 
         }
@@ -35,7 +34,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SciserverLog.UserHistory");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.UserHistoryQuery, "", "SkyserverWS.SciserverLog.UserHistory");
         }
 

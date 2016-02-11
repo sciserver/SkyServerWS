@@ -15,7 +15,6 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get(){
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
         }
 
@@ -23,7 +22,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.noposition, "SkyserverWS.IRSpectroQuery.NoPositionSearch");
         }
     }

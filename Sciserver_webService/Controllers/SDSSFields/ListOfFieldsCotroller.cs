@@ -22,7 +22,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.ListOfFields");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SkyserverWS.SDSSFields.ListOfFields");
         }
 
@@ -30,7 +29,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.ListOfFields");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.ListOfFields, "SkyserverWS.SDSSFields.ListOfFields");
         }     
     }

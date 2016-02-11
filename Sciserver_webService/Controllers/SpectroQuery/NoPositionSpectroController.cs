@@ -16,14 +16,12 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.NoPositionSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.spectroQuery, KeyWords.noposition, "SkyserverWS.SpectroQuery.NoPositionSearch");
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.NoPositionSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.spectroQuery, KeyWords.noposition, "SkyserverWS.SpectroQuery.NoPositionSearch");
         }
     }

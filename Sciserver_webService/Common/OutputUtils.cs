@@ -151,33 +151,28 @@ namespace Sciserver_webService.Common
                     }
                     else
                     {
-                        if (ds.Tables[0].Rows[0][0].ToString().StartsWith("error: limit is") || ds.Tables[0].Rows[0][0].ToString().Contains("Maximum number of rows allowed"))
+                        for (int r = 0; r < NumRows; r++)
                         {
-                        }
-                        else
-                        {
-                            for (int r = 0; r < NumRows; r++)
+                            int NumColumns = ds.Tables[t].Columns.Count;
+                            if (r == 0)// filling the first row with the names of the columns
                             {
-                                int NumColumns = ds.Tables[t].Columns.Count;
-                                if (r == 0)// filling the first row with the names of the columns
-                                {
-                                    writer.Write("<table border='1' BGCOLOR=cornsilk>\n");
-                                    writer.Write("<tr align=center>");
-                                    for (int c = 0; c < NumColumns; c++)
-                                    {
-                                        ColumnName = ds.Tables[t].Columns[c].ColumnName;
-                                        writer.Write("<td><font size=-1>{0}</font></td>", ColumnName);
-                                    }
-                                    writer.Write("</tr>");
-                                }
-
-                                writer.Write("<tr align=center BGCOLOR=#eeeeff>");
+                                writer.Write("<table border='1' BGCOLOR=cornsilk>\n");
+                                writer.Write("<tr align=center>");
                                 for (int c = 0; c < NumColumns; c++)
-                                    writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                                {
+                                    ColumnName = ds.Tables[t].Columns[c].ColumnName;
+                                    writer.Write("<td><font size=-1>{0}</font></td>", ColumnName);
+                                }
                                 writer.Write("</tr>");
                             }
-                            writer.Write("</TABLE>");
+
+                            writer.Write("<tr align=center BGCOLOR=#eeeeff>");
+                            for (int c = 0; c < NumColumns; c++)
+                                writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                            writer.Write("</tr>");
                         }
+                        writer.Write("</TABLE>");
+
                     }
                     writer.Write("<hr>");
                 }

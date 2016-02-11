@@ -139,7 +139,8 @@ namespace Sciserver_webService.DoDatabaseQuery
 
                 //logging 
                 SciserverLogging logger = new SciserverLogging();
-                logger.LogActivity(ActivityInfo, "CustomMessage");
+                //logger.LogActivity(ActivityInfo, "CustomMessage");
+                logger.LogActivity(ActivityInfo, "SkyserverMessage");
 
                 return response;
                 //return processDBqueryResults(stream);
@@ -154,13 +155,8 @@ namespace Sciserver_webService.DoDatabaseQuery
                     string errorMessage = e.Message + ((e.InnerException != null) ? (": " + e.InnerException.Message) : "");
 
                     SciserverLogging Logger = new SciserverLogging();
-                    LoggedInfo Info = new LoggedInfo();
-                    Info.Exception = e;
-                    Info.ClientIP = this.ActivityInfo.ClientIP;
-                    Info.TaskName = this.ActivityInfo.TaskName;
-                    Info.Headers = this.ActivityInfo.Headers;
-                    Info.Message = errorMessage;
-                    Logger.LogActivity(Info, "ErrorMessage");
+                    ActivityInfo.Exception = e;
+                    Logger.LogActivity(ActivityInfo, "ErrorMessage");
 
                     StringBuilder strbldr = new StringBuilder();
                     StringWriter sw = new StringWriter(strbldr);

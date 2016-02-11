@@ -23,16 +23,14 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.CrossIdSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
-            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.CrossId");
+            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.CrossId");
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.CrossIdSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
-            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.SearchTools.CrossIdSearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.CrossId");
+            return request.runquery(this, KeyWords.CrossIdQuery, "", "SkyserverWS.CrossId");
         }
     }
 }

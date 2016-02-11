@@ -40,7 +40,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.RectangularSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.RectangularSearch");
         }
 
@@ -48,7 +47,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.RectangularSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.RectangularQuery, KeyWords.RectangularQuery, "SkyserverWS.SearchTools.RectangularSearch");
         }
     }

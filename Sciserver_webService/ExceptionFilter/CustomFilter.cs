@@ -18,10 +18,6 @@ namespace Sciserver_webService.ExceptionFilter
         public override void OnException(HttpActionExecutedContext context)
         {
 
-            ProcessRequest pr = new ProcessRequest(context.Request, "");
-            SciserverLogging Logger = new SciserverLogging();
-
-
             System.Text.Encoding tCode = System.Text.Encoding.UTF8;
             String responseType = "application/json";
 
@@ -85,18 +81,21 @@ namespace Sciserver_webService.ExceptionFilter
                 //reasonPhrase = "An internal error occured";
             }
 
-            errorMessage = context.Exception.Message + ((context.Exception.InnerException != null) ? (": " + context.Exception.InnerException.Message) : "");
+
+            //ProcessRequest pr = new ProcessRequest(context.Request, "");
+            SciserverLogging Logger = new SciserverLogging();
+            RequestMisc rm = new RequestMisc(context.Request, "");
 
             //// There should be some logging code here
-            LoggedInfo ActivityInfo = new LoggedInfo();
+
+            LoggedInfo ActivityInfo = rm.ActivityInfo;
             ActivityInfo.Exception = context.Exception;
-            ActivityInfo.ClientIP = pr.ActivityInfo.ClientIP;
-            ActivityInfo.TaskName = pr.ActivityInfo.TaskName;
-            ActivityInfo.Headers = pr.ActivityInfo.Headers;
-            ActivityInfo.Message = errorMessage;
+            ActivityInfo.Message = rm.GetLoggedMessage("");
             Logger.LogActivity(ActivityInfo, "ErrorMessage");
 
+            //preparing the message sent to the user
 
+            errorMessage = context.Exception.Message + ((context.Exception.InnerException != null) ? (": " + context.Exception.InnerException.Message) : "");
             using (JsonWriter writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartObject();
@@ -115,7 +114,7 @@ namespace Sciserver_webService.ExceptionFilter
             bool IsHTMLformat = false;
             try
             {
-                if (pr.dictionary["format"].ToString().ToLower() == "html")
+                if (rm.dictionary["format"].ToString().ToLower() == "html")
                     IsHTMLformat = true;
             }
             catch { }

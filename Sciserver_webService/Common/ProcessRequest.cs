@@ -6,6 +6,7 @@ using System.IO;
 using System.Data;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Http;
@@ -16,6 +17,9 @@ using Sciserver_webService.ToolsSearch;
 using Sciserver_webService.DoDatabaseQuery;
 //using Sciserver_webService.SciserverLog;
 using System.Web.Http.Filters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 namespace Sciserver_webService.Common
 {
@@ -38,36 +42,23 @@ namespace Sciserver_webService.Common
         public string server_name = null;
         public string windows_name = null;
         public Dictionary<String, String> dictionary = null;
-        public System.Net.Http.Headers.HttpRequestHeaders Headers = null;
         public LoggedInfo ActivityInfo = null;
-                
-
-        public ProcessRequest()
-        {
-
-        }
-
+        public RequestMisc rm;
 
         public ProcessRequest(HttpRequestMessage request, string EntryPoint)
         {
             try
             {
+                rm = new RequestMisc(request, EntryPoint);
 
-                //this.dictionary = request.GetQueryNameValuePairs().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
-                this.dictionary = GetDict(request.RequestUri.ParseQueryString());
-                this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
-                this.TaskName = GetTaskName(dictionary, EntryPoint);// must be executed right after GetClientIP(ref dictionary);
                 this.server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"];
                 this.windows_name = System.Environment.MachineName;
-                this.Headers = request.Headers;
 
-                this.ActivityInfo = new LoggedInfo();
-                this.ActivityInfo.ClientIP = this.ClientIP;
-                this.ActivityInfo.TaskName = this.TaskName;
-                //this.ActivityInfo.Headers = api.ControllerContext.Request.Headers;
-                this.ActivityInfo.Headers = request.Headers;
-                this.ActivityInfo.EntryPoint = EntryPoint;
-                this.ActivityInfo.URI = request.RequestUri;
+                this.dictionary = rm.GetDict(request.RequestUri.ParseQueryString());
+                this.ClientIP = rm.GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+                this.TaskName = rm.GetTaskName(dictionary, EntryPoint);// must be executed right after GetClientIP(ref dictionary);
+                this.ActivityInfo = rm.ActivityInfo;
+                
             }
             catch { throw; }
         }
@@ -77,39 +68,12 @@ namespace Sciserver_webService.Common
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public string GetLoggedMessage(string query)
-        {
-            try
-            {
-                string Referer = "";
-                try
-                {
-                    Referer = ActivityInfo.Headers.Referrer.ToString();
-                }
-                catch { };
 
-                string DoShowInUserHistory = "false";
-                if (ActivityInfo.TaskName.ToLower().Contains("loadexplore") && (Referer.ToLower().Contains("explore") || Referer.ToLower().Contains("quicklook")))
-                    DoShowInUserHistory = "true";
-
-                foreach (string task in KeyWords.TasksInUserHistory)
-                {
-                    if (ActivityInfo.EntryPoint.ToLower().Contains(task.ToLower()))
-                    {
-                        DoShowInUserHistory = "true";
-                        break;
-                    }
-                }
-
-                string Message = "{ \"WebServiceEntryPoint\": \"" + ActivityInfo.EntryPoint + "\", \"TaskName\": \"" + ActivityInfo.TaskName + "\", \"DoShowInUserHistory\": \"" + DoShowInUserHistory + "\", \"SqlCommands\": \"" + query + "\", \"RequestUri\": \"" + ActivityInfo.URI + "\", \"Headers\": \"" + ActivityInfo.Headers.ToString() + "\", \"Referer\": \"" + Referer + "\"}";
-                return Message;
-            }
-            catch { throw; }
-        }
 
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string Task)
         {
-            api.Request.Headers.Add("TaskName", Task);
+            //api.Request.Headers.Add("TaskName", Task);
+            //api.Request.Headers.Add("EntryPoint", Task);
             string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
 
             DataSet ResultsDataSet = new DataSet();
@@ -129,10 +93,6 @@ namespace Sciserver_webService.Common
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-            IEnumerable<string> values;
-            string token = "";
-            string userid = "unknown"; ; // before knowing whether its authenticated user or unknown.
-
             try
             {
                 if(dictionary == null)
@@ -147,9 +107,9 @@ namespace Sciserver_webService.Common
             String query = "";
 
             if (string.IsNullOrEmpty(this.ClientIP))
-                this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+                this.ClientIP = rm.GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
             if (string.IsNullOrEmpty(this.TaskName)) 
-                this.TaskName = GetTaskName(dictionary, Task);// must be executed right after GetClientIP(ref dictionary);
+                this.TaskName = rm.GetTaskName(dictionary, Task);// must be executed right after GetClientIP(ref dictionary);
             if (string.IsNullOrEmpty(this.server_name)) 
                 try { this.server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
                 catch { }
@@ -321,7 +281,7 @@ namespace Sciserver_webService.Common
             }
 
             //creating the message that is being logged
-            ActivityInfo.Message = GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
+            ActivityInfo.Message = rm.GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
 
             switch (queryType)
             {
@@ -367,9 +327,9 @@ namespace Sciserver_webService.Common
 
 
                 if (string.IsNullOrEmpty(this.ClientIP))                
-                    this.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+                    this.ClientIP = rm.GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
                 if (string.IsNullOrEmpty(this.TaskName))
-                    this.TaskName = GetTaskName(dictionary, Message);// must be executed right after GetClientIP(ref dictionary);
+                    this.TaskName = rm.GetTaskName(dictionary, Message);// must be executed right after GetClientIP(ref dictionary);
                 if (string.IsNullOrEmpty(this.server_name)) 
                     try { server_name = HttpContext.Current.Request.ServerVariables["SERVER_NAME"]; }
                     catch { }
@@ -478,7 +438,7 @@ namespace Sciserver_webService.Common
                 }
 
                 //creating the message that is being logged
-                ActivityInfo.Message = GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
+                ActivityInfo.Message = rm.GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
 
 
 
@@ -544,113 +504,6 @@ namespace Sciserver_webService.Common
                 throw new Exception("Exception while uploading data to create temp table."+exp.Message);
             }
         }
-
-
-
-        public Uri AddTaskNameToURI(Uri uri)
-        {
-            string Task = this.TaskName;
-
-            if (this.IsDirectUserConnection)
-            {
-                if (this.dictionary.ContainsKey("TaskName"))
-                    this.dictionary["TaskName"] = this.TaskName;
-                else
-                    this.dictionary.Add("TaskName", this.TaskName);
-            }
-            else
-            {
-                if (!this.dictionary.ContainsKey("TaskName"))
-                    this.dictionary["TaskName"] = this.TaskName;
-            }
-
-
-            string query = "?";
-
-            foreach (string key in dictionary.Keys)
-            {
-                query += key + "=" + Uri.EscapeDataString(this.dictionary[key]) + "&";
-            }
-            query = query.Remove(query.Length - 1);
-
-            string URI = "";
-            if (uri.Query == "")
-                URI = uri.OriginalString + query;
-            else
-            {
-                int index = uri.OriginalString.IndexOf(uri.Query, 0);
-                URI = uri.OriginalString.Remove(index) + query;
-            }
-            return new Uri(URI);
-        }
-
-
-        public Dictionary<String, String> GetDict(NameValueCollection col)
-        {
-            Dictionary<String, String> dict = new Dictionary<string, string>();
-            for (int i = 0; i < col.Count; i++)
-                dict.Add(col.GetKey(i), col.GetValues(i)[0]);
-
-            return dict;
-        }
-
-        public string GetClientIP(Dictionary<String, String> requestDir)
-        {
-            string clientIP = "unknown";
-            try
-            {
-                if (!string.IsNullOrEmpty(HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"]))
-                {
-                    clientIP = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
-                    string[] addresses = clientIP.Split(',');
-                    if (addresses.Length != 0)
-                        clientIP = addresses[0];
-                }
-                else
-                {
-                    if (HttpContext.Current.Request.UserHostAddress != null)
-                    {
-                        clientIP = HttpContext.Current.Request.UserHostAddress;
-                    }
-                    else
-                    {
-                        clientIP = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
-                    }
-                }
-                //checking whether the request came from our servers that host Skyserver website.
-                foreach (string ip in KeyWords.IPClientServers)
-                {
-                    if (clientIP.Contains(ip))
-                    {
-                        this.IsDirectUserConnection = false;
-                        try { clientIP = requestDir["clientIP"]; }
-                        catch { clientIP = "unkownForAgent"; }
-                        if (clientIP == "")
-                            clientIP = "unkownForAgent";
-                        break;
-                    }
-                }
-                if (clientIP == "")
-                    clientIP = "unspecified";
-            }
-            catch { }
-            return clientIP;
-        }
-
-        public string GetTaskName(Dictionary<String, String> requestDir, string EntryPoint)
-        {
-            if (IsDirectUserConnection && !String.IsNullOrEmpty(EntryPoint))
-                return EntryPoint;// + ".DirectQuery";
-            else
-            {
-                string taskname = "";
-                try { taskname = requestDir["TaskName"]; }
-                catch { taskname = EntryPoint + ".unkownForAgent"; }
-                return taskname;
-            }
-        }
-
-
 
 
 

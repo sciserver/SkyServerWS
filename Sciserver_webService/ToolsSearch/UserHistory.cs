@@ -38,9 +38,9 @@ namespace Sciserver_webService.ToolsSearch
         string Application = null;
         string ContentSearchText = null;
         int? CustomMessageType = null;
-        string format = "html";//default value
+        string format = "json";//default value
         bool DoShowAllHistory = false;//default value
-        
+        Dictionary<string, string> ShortTaskNamesDict = null;
         
         public UserHistory(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo, HttpRequest Request)
         {
@@ -90,14 +90,6 @@ namespace Sciserver_webService.ToolsSearch
                         try { Application = requestDir[key]; }
                         catch {}
                     }
-                    if (keyL == "custommessagetype")
-                    {
-                        if (!String.IsNullOrEmpty(requestDir[key]))
-                        {
-                            try { CustomMessageType = Int32.Parse(requestDir[key]); }
-                            catch { throw new Exception("CustomMessageType should be a valid integer value."); }
-                        }
-                    }
                     if (keyL == "format")
                     {
                         try { format = requestDir[key]; }
@@ -108,14 +100,11 @@ namespace Sciserver_webService.ToolsSearch
                         try { DoShowAllHistory = requestDir[key] == "true" ? true : false; }
                         catch { }
                     }
-                    /*
                     if (keyL == "contentsearchtext")
                     {
                         try { ContentSearchText = requestDir[key]; }
                         catch { }
                     }
-                    */ 
-
             }
 
             if (Request.Headers.AllKeys.Contains(KeyWords.XAuthToken))
@@ -164,17 +153,48 @@ namespace Sciserver_webService.ToolsSearch
         }
 
 
-        public string GetPositionType(DataSet ds, int RowIndex)
+        /// <summary>
+        /// Initializes the ShortTaskNamesDict
+        /// </summary>
+        public void InitializeShortTaskNamesDict()
         {
-            string PositionType = "";
-            try
-            {
-                Dictionary<string, string> values = JsonConvert.DeserializeObject<Dictionary<string, string>>(ds.Tables[0].Rows[RowIndex]["Content"].ToString());
-            }
-            catch { }
-            return PositionType;
+            ShortTaskNamesDict = new Dictionary<string, string>()
+                                        {
+                                            { "Skyserver.GetRCFZ", "1"},
+                                            { "Skyserver.FrameById", "2"},
+                                            { "Skyserver.FrameByRCFZ", "3"},
+                                            { "Skyserver.SpecById", "4"},
+                                            { "Skyserver.SpecByPF", "5"},
+                                            { "Skyserver.Chart.F_SQL", "Image List SQL Search"},
+                                            { "Skyserver.Chart.Image", "Finding Chart"},
+                                            { "Skyserver.Chart.List", "Image List"},
+                                            { "Skyserver.Chart.Navi", "Navigate Tool"},
+                                            { "Skyserver.Chart.ShowNearest", "6"},
+                                            { "Skyserver.CrossId", "Cross-ID Query"},
+                                            { "Skyserver.Explore.Allspec", "7"},
+                                            { "Skyserver.Explore.Image", "Explore Tool Image"},
+                                            { "Skyserver.Explore.FitsImg", "9"},
+                                            { "Skyserver.Explore.FitsSpec", "10"},
+                                            { "Skyserver.Explore.Galaxyzoo", "11"},
+                                            { "Skyserver.Explore.Matches", "12"},
+                                            { "Skyserver.Explore.Neighbors", "13"},
+                                            { "Skyserver.Explore.Parameters", "14"},
+                                            { "Skyserver.Explore.Plate", "15"},
+                                            { "Skyserver.Explore.Summary", "Explore Tool"},
+                                            { "Skyserver.GetImg.Plate", "16"},
+                                            { "Skyserver.GetImg.PlateAPOGEE", "17"},
+                                            { "Skyserver.QuickLook.Image", "QuickLook Tool Image"},
+                                            { "Skyserver.QuickLook.Summary", "QuickLook Tool"},
+                                            { "Skyserver.Search.SearchForm", "SQL Search Form"},
+                                            { "Skyserver.Search.IQS", "Imaging Query"},
+                                            { "Skyserver.Search.IRQS", "Infrared Spectroscopy Query"},
+                                            { "Skyserver.Search.Radial", "Radial Search"},
+                                            { "Skyserver.Search.Rectangular", "Rectangular Search"},
+                                            { "Skyserver.Search.SQL", "SQL Search Query"},
+                                            { "Skyserver.Search.SQS", "Spectroscopy Query"},
+                                            { "Skyserver.UserHistory", "User History"}
+                                        };
         }
-
 
         public void SetApplicationName(DataSet ds, int RowIndex)
         {
@@ -187,8 +207,17 @@ namespace Sciserver_webService.ToolsSearch
             }
             else//use of skyserver tool
             {
+                if(ShortTaskNamesDict.ContainsKey(Application0))
+                    Application = ShortTaskNamesDict[Application0];
+                else
+                    Application = Application0;
+
+                /*
+
                 if (Application.Contains("sqlsearch") || Application.Contains("search.sql"))
                     Application = "SQL Search";
+                else if (Application.Contains("f_sql"))
+                    Application = "Image List SQL Search";
                 else if (Application.Contains("radial"))
                     Application = "Radial Search";
                 else if (Application.Contains("rectangular"))
@@ -207,29 +236,41 @@ namespace Sciserver_webService.ToolsSearch
                     Application = "Explore tool";
                 else if (Application.Contains(".quicklook"))
                     Application = "QuickLook tool";
-
                 else if (Application.Contains("conesearch"))
                     Application = "Cone Search";
-                else if (Application.Contains("userhistory"))
+                else if (Application.Contains("history"))
                     Application = "User History";
                 else if (Application.Contains("sdssfields"))
                     Application = "SDSS Fields";
                 else if (Application.Contains("siap"))
                     Application = "SIAP";
+                else if (Application.Contains("chart.image"))
+                    Application = "Finding Chart";
+                else if (Application.Contains("chart.list"))
+                    Application = "Image List";
+                else if (Application.Contains("chart.Navi"))
+                    Application = "Navigate";
                 else
                     Application = Application0;
+                 */
             }
+             
             ds.Tables[0].Rows[RowIndex]["Application"] = Application;
         }
-
 
         public void PrepareResultSet(ref DataSet ds, Dictionary<string, string> requestDir)
         {
             Dictionary<string, string> values;
+            
             bool DoShowInUserHistory = true;
+            bool h1 = false, h2 = false, h3 = false;
 
             if (ds.Tables.Count > 0)
             {
+
+                if (format == "html" || format.ToLower().Contains("dataset"))
+                    InitializeShortTaskNamesDict();
+
                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                 {
                     DoShowInUserHistory = true;
@@ -247,136 +288,16 @@ namespace Sciserver_webService.ToolsSearch
 
                     if (!String.IsNullOrEmpty(json) && values != null)
                     {
-
+                        /*
                         if (!DoShowAllHistory)
                         {
                             if (values.ContainsKey("DoShowInUserHistory"))
                                 DoShowInUserHistory = values["DoShowInUserHistory"].ToString() == "true" ? true : false;
                         }
-
-                        
-                        if (DoShowInUserHistory)
-                        {
-                            SetApplicationName(ds, i);
-                            if (values.ContainsKey("RequestUri"))
-                            {
-
-                                Uri req = new Uri(values["RequestUri"].ToString());
-                                JObject jsonParams = null;
-                                bool success = req.TryReadQueryAsJson(out jsonParams);
-                                if (success)
-                                    ds.Tables[0].Rows[i]["parameters"] = jsonParams.ToString();
-
-
-                                if (format == "html" || format.ToLower().Contains("dataset") )
-                                {
-                                    string Link = values["RequestUri"].ToString();
-                                    string Referer = "";
-                                    if (values.ContainsKey("Referer"))
-                                        Referer = values["Referer"].ToString();
-
-                                    Uri URI = new Uri(values["RequestUri"].ToString());
-
-                                    NameValueCollection Query = URI.ParseQueryString();
-
-                                    bool h1 = values["WebServiceEntryPoint"].Contains("ObjectSearch");
-                                    bool h2 = Referer.ToLower().Contains(requestDir["skyserverUrl"].ToLower());
-
-                                    bool h3 = false;
-                                    try
-                                    {
-                                        h3 = Query.Get("query").ToLower() == "loadexplore";
-                                    }
-                                    catch { }
-
-                                    if (h1 && h2 && h3)
-                                    {
-                                        
-                                        Link = Referer;
-                                        
-                                        if (values["TaskName"].ToLower().Contains(".quicklook."))
-                                            Link = requestDir["skyserverUrl"] + "en/tools/quicklook/summary.aspx?" + URI.Query;
-                                        if (values["TaskName"].ToLower().Contains(".explore."))
-                                            Link = requestDir["skyserverUrl"] + "en/tools/explore/summary.aspx?" + URI.Query;
-                                        
-                                    }
-                                    if (format == "html")
-                                        ds.Tables[0].Rows[i]["content"] = "<a target=INFO href=\"" +  Link + "\">LINK</a>";
-                                    else // case of dataset
-                                        ds.Tables[0].Rows[i]["content"] = Link;
-
-                                }
-                                else
-                                {
-                                    ds.Tables[0].Rows[i]["content"] = values["RequestUri"].ToString();
-                                }
-
-                            }
-                            else
-                            {
-                                ds.Tables[0].Rows[i]["content"] = "";
-                            }
-                            //dt.Rows.Add(dr.);
-
-                        }
-                        else// do not show the info by deleting the row
-                        {
-                            ds.Tables[0].Rows[i].Delete();
-                        }
-                        //}
-                        //catch (Exception e) { throw new Exception(e.Message + "\n\n" + json + "\n\n"); }
-                    }
-                    else
-                    {
-                        ds.Tables[0].Rows[i]["content"] = "";
-                    }
-                }//end for
-                //ds.Tables[0].AcceptChanges();
-                ds.AcceptChanges();
-            }//end 
-        }
-
-        public void PrepareResultSetOLD(ref DataSet ds, Dictionary<string, string> requestDir)
-        {
-            Dictionary<string, string> values;
-            bool DoShowInUserHistory = true;
-
-            if (ds.Tables.Count > 0)
-            {
-                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-                {
-                    DoShowInUserHistory = true;
-
-                    string json = ds.Tables[0].Rows[i]["content"].ToString();
-                    //json = json.Replace("\r\n", "");
-                    json = json.TrimStart(new char[] { '[' });
-                    json = json.TrimEnd(new char[] { ']' });
-
-                    try
-                    {
-                        values = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                    }
-                    catch { values = null; }
-
-                    if (!String.IsNullOrEmpty(json) && values != null)
-                    {
-                        try
-                        {
-                            values = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                        }
-                        catch { }
-
-
-                        if (!DoShowAllHistory)
-                        {
-                            if (values.ContainsKey("DoShowInUserHistory"))
-                                DoShowInUserHistory = values["DoShowInUserHistory"].ToString() == "true" ? true : false;
-                        }
-
+                        */
 
                         if (DoShowInUserHistory)
                         {
-                            SetApplicationName(ds, i);
                             if (values.ContainsKey("RequestUri"))
                             {
 
@@ -397,28 +318,36 @@ namespace Sciserver_webService.ToolsSearch
                                     Uri URI = new Uri(values["RequestUri"].ToString());
 
                                     NameValueCollection Query = URI.ParseQueryString();
-
-                                    bool h1 = values["WebServiceEntryPoint"].Contains("ObjectSearch");
-                                    bool h2 = Referer.ToLower().Contains(requestDir["skyserverUrl"].ToLower());
-
-                                    bool h3 = false;
                                     try
                                     {
-                                        h3 = Query.Get("query").ToLower() == "loadexplore";
+                                        h1 = values["EntryPoint"].Contains("ObjectSearch");
+                                        h2 = Referer.ToLower().Contains(requestDir["skyserverUrl"].ToLower());
+                                        h3 = false;
+                                        h3 = Query.Get("query").ToLower().Contains("loadexplore");
+                                        if (h1 && h2 && h3)
+                                        {
+                                            Link = Referer;
+                                            if (ds.Tables[0].Rows[i]["Application"].ToString().ToLower().Contains(".quicklook."))
+                                                Link = requestDir["skyserverUrl"] + "en/tools/quicklook/summary.aspx" + URI.Query;
+                                            else if (ds.Tables[0].Rows[i]["Application"].ToString().ToLower().Contains(".explore."))
+                                                Link = requestDir["skyserverUrl"] + "en/tools/explore/summary.aspx" + URI.Query;
+                                        }
+
+                                    }
+                                    catch { }
+                                    try
+                                    {
+                                        h1 = values["EntryPoint"].Contains("SqlSearch");
+                                        h2 = Referer.ToLower().Contains(requestDir["skyserverUrl"].ToLower());
+                                        h3 = ds.Tables[0].Rows[i]["Application"].ToString().ToLower().Contains("f_sql");
+                                        if (h1 && h2 && h3)
+                                        {
+                                            Link = requestDir["skyserverUrl"] + "en/tools/chart/sqltoform.aspx" + URI.Query;
+                                        }
                                     }
                                     catch { }
 
-                                    if (h1 && h2 && h3)
-                                    {
-
-                                        Link = Referer;
-
-                                        if (values["TaskName"].ToLower().Contains(".quicklook."))
-                                            Link = requestDir["skyserverUrl"] + "en/tools/quicklook/summary.aspx?" + URI.Query;
-                                        if (values["TaskName"].ToLower().Contains(".explore."))
-                                            Link = requestDir["skyserverUrl"] + "en/tools/explore/summary.aspx?" + URI.Query;
-
-                                    }
+                                    //creating the content for the user
                                     if (format == "html")
                                         ds.Tables[0].Rows[i]["content"] = "<a target=INFO href=\"" + Link + "\">LINK</a>";
                                     else // case of dataset
@@ -435,6 +364,7 @@ namespace Sciserver_webService.ToolsSearch
                             {
                                 ds.Tables[0].Rows[i]["content"] = "";
                             }
+                            SetApplicationName(ds, i);
                             //dt.Rows.Add(dr.);
 
                         }
@@ -455,6 +385,7 @@ namespace Sciserver_webService.ToolsSearch
             }//end 
         }
 
+
         public SqlCommand BuildCommand(SqlConnection oConn)
         {
 
@@ -465,54 +396,45 @@ namespace Sciserver_webService.ToolsSearch
             else
                 cmd.CommandText += KeyWords.MaxRows;
 
-            cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, 'parameters' as Parameters FROM MESSAGES as m LEFT JOIN CustomMessages as c on m.row_id = c.row_id";
-            cmd.CommandText += " WHERE user_id= @UserID";
+            cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, '' as Parameters FROM MESSAGES as m JOIN SkyserverMessages as s on m.row_id = s.row_id";
+            //cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, shortTaskName as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, '' as Parameters FROM MESSAGES as m JOIN SkyserverMessages as s on m.row_id = s.row_id";
+            //cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, 'parameters' as Parameters FROM MESSAGES as m JOIN CustomMessages as c on (m.row_id = c.row_id AND custom_message_type = 1)";
+            
+            cmd.CommandText += " WHERE m.user_id = @UserID";
             cmd.Parameters.Add("@UserID", SqlDbType.NVarChar);
             cmd.Parameters["@UserID"].Value = UserID;
             //cmd.CommandText += " WHERE user_id != 'fsdf' ";
             if (Time1 != null)
             {
-                cmd.CommandText += " AND Time >= @Time1";
+                cmd.CommandText += " AND m.Time >= @Time1";
                 cmd.Parameters.Add("@Time1", SqlDbType.DateTime);
                 cmd.Parameters["@Time1"].Value = Time1.ToString();
             }
             if (Time2 != null)
             {
-                cmd.CommandText += " AND Time <= @Time2";
+                cmd.CommandText += " AND m.Time <= @Time2";
                 cmd.Parameters.Add("@Time2", SqlDbType.DateTime);
                 cmd.Parameters["@Time2"].Value = Time2.ToString();
             }
             if (!String.IsNullOrEmpty(Application))
             {
-                cmd.CommandText += " AND application = @application";
+                cmd.CommandText += " AND application like @application";
                 cmd.Parameters.Add("@application", SqlDbType.NVarChar);
-                cmd.Parameters["@application"].Value = Application;
-            }
-            if (!String.IsNullOrEmpty(Application))
-            {
-                cmd.CommandText += " AND application = @application";
-                cmd.Parameters.Add("@application", SqlDbType.NVarChar);
-                cmd.Parameters["@application"].Value = Application;
-            }
-            if (CustomMessageType != null)
-            {
-                cmd.CommandText += " AND custom_message_type = @CustomMessageType";
-                cmd.Parameters.Add("@CustomMessageType", SqlDbType.Int);
-                cmd.Parameters["@CustomMessageType"].Value = CustomMessageType;
+                cmd.Parameters["@application"].Value = String.Format("%{0}%", Application); 
             }
             if(!DoShowAllHistory)
             {
-                cmd.CommandText += " AND dbo.fJSONgetValue(content,'DoShowInUserHistory') = 'true'";
+                //cmd.CommandText += " AND dbo.fJSONgetValue(content,'DoShowInUserHistory') = 'true'";
+                cmd.CommandText += " AND s.doShowInUserHistory = 1";
             }
-            /*
             if (!String.IsNullOrEmpty(ContentSearchText))
             {
-                cmd.CommandText += " AND content like %@ContentSearchText%";
+                cmd.CommandText += " AND s.content like @ContentSearchText";
                 cmd.Parameters.Add("@ContentSearchText", SqlDbType.NVarChar);
-                cmd.Parameters["@ContentSearchText"].Value = ContentSearchText;
+                cmd.Parameters["@ContentSearchText"].Value = String.Format("%{0}%", ContentSearchText);
             }
-            */ 
-            cmd.CommandText += " order by time desc";
+            
+            cmd.CommandText += " order by m.time desc";
             return cmd;
         }
 

@@ -16,7 +16,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get() 
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.RectangularSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.imagingQuery, KeyWords.rectangular, "SkyserverWS.ImagingQuery.RectangularSearch");
         }
 
@@ -24,7 +23,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.RectangularSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.imagingQuery, KeyWords.rectangular, "SkyserverWS.ImagingQuery.RectangularSearch");
         }
     }

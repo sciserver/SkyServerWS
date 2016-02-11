@@ -23,7 +23,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.FieldArrayRect");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SkyserverWS.SDSSFields.FieldArrayRect");
         }
 
@@ -32,7 +31,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.FieldArrayRect");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArrayRect, "SkyserverWS.SDSSFields.FieldArrayRect");
         }
         ////*** these are input parameters for FieldArrayRect

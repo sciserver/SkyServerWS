@@ -16,7 +16,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult get()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.GalacticConeSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "SkyserverWS.IRSpectroQuery.GalacticConeSearch");
         }
 
@@ -24,7 +23,6 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult post()
         {
             ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.IRSpectroQuery.GalacticConeSearch");
-            this.Request.RequestUri = request.AddTaskNameToURI(this.Request.RequestUri);
             return request.runquery(this, KeyWords.irspectroQuery, KeyWords.conelb, "SkyserverWS.IRSpectroQuery.GalacticConeSearch");
         }
     }

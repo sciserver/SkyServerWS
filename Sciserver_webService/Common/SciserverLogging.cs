@@ -46,7 +46,7 @@ namespace Sciserver_webService.Common
         /// </summary>
         public string query = "";
 
-        public string UrlReferrer = "";
+        public string Referrer = "";
 
         public bool DoShowInUserHistory = false;
 
@@ -83,17 +83,21 @@ namespace Sciserver_webService.Common
             {
                 message = log.CreateCustomMessage(KeyWords.loggingMessageType, ActivityInfo.Message);
             }
+            else if (TypeOfLogging == "SkyserverMessage")
+            {
+                message = log.CreateSkyserverMessage(ActivityInfo.Message, ActivityInfo.DoShowInUserHistory);
+            }
             else if (TypeOfLogging == "DebugMessage")
             {
                 message = log.CreateDebugMessage(ActivityInfo.Message);
             }
             else if (TypeOfLogging == "ErrorMessage")
             {
-                message = log.CreateErrorMessage(ActivityInfo.Exception);
+                message = log.CreateErrorMessage(ActivityInfo.Exception, ActivityInfo.Message);
             }
             else if (TypeOfLogging == "FatalMessage")
             {
-                message = log.CreateFatalMessage(ActivityInfo.Exception);
+                message = log.CreateFatalMessage(ActivityInfo.Exception, ActivityInfo.Message);
             }
             else if (TypeOfLogging == "InfoMessage")
             {
