@@ -216,8 +216,8 @@ namespace Sciserver_webService.Common
 
         public static double glon2ra(double L, double B)
         {
-            // function to convert from a galactic longitude (b) to right ascension
-            // input: the galactic latitude (l) and longitude (b) of a point in degrees
+            // function to convert from a galactic longitude (l) to right ascension
+            // input: the galactic latitude (b) and longitude (l) of a point in degrees
             // output: the celestial RA in degrees
 
             double i = 192.859508;
@@ -246,8 +246,8 @@ namespace Sciserver_webService.Common
 
         public static double glat2dec(double L, double B)
         {
-            // function to convert from a galactic latitude (L) to declination
-            // input: the galactic latitude (L) and longitude (B) of a point in degrees
+            // function to convert from a galactic latitude (B) to declination
+            // input: the galactic latitude (B) and longitude (L) of a point in degrees
             // output: that point's celestial dec in degrees
 
             double i = 192.859508;

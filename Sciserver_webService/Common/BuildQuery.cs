@@ -1161,7 +1161,7 @@ namespace Sciserver_webService.QueryTools
                     specJoin = " ON s.targetObjID = p.objID";
                 else if (!targdb && !ignoreImg)
                     specJoin = " ON s.bestObjID = p.objID";
-                if (imgConst == true && ignoreImg)
+                if ((imgConst == true && ignoreImg) || (flagsOff.Length > 0 || flagsOn.Length > 0))
                 {
                     // if imaging constraints are specified, add a photo table join
                     //joinClause += "\n\tJOIN " + photoTable + " AS " + tableAlias + " ON ";

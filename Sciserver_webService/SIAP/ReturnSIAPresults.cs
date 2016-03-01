@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Xml.Serialization;
+using Sciserver_webService.Common;
 
 namespace Sciserver_webService.sdssSIAP
 {
@@ -16,14 +17,16 @@ namespace Sciserver_webService.sdssSIAP
         String returnType = "";       
         String casjobsTarget = "";
         Dictionary<String, String> dictionary = null;
+        LoggedInfo ActivityInfo = null;
 
         public ReturnSIAPresults() { }
 
-        public ReturnSIAPresults(string casjobsTaskName, string returnType,  string casjobsTarget,  Dictionary<String, String> dictionary) {
+        public ReturnSIAPresults(string casjobsTaskName, string returnType,  string casjobsTarget,  Dictionary<String, String> dictionary, LoggedInfo ActivityInfo) {
             this.casjobsTaskName = casjobsTaskName;
             this.returnType = returnType;            
             this.casjobsTarget = casjobsTarget;
             this.dictionary = dictionary;
+            this.ActivityInfo = ActivityInfo;
         } 
 
         public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
@@ -43,12 +46,15 @@ namespace Sciserver_webService.sdssSIAP
                   break;
               case "getSIAPInfoAll":
                   vout = siap.getSiapInfo(dictionary["POS"], dictionary["SIZE"], "All", "*");
-                  break;  
+                  break;
 
               default : break; 
             }
 
             response.Content = new StringContent(ToXML(vout), Encoding.UTF8, "application/xml");
+            //logging
+            SciserverLogging logger = new SciserverLogging();
+            logger.LogActivity(ActivityInfo, "SkyserverMessage");
             return response;
         }
 

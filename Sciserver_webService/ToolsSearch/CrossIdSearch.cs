@@ -229,10 +229,10 @@ namespace Sciserver_webService.ToolsSearch
                     cmdQuery += "( " + i;
                     if(IsGalactic)
                     {
-                        glon = double.Parse(RowElements[ib]);
-                        glat = double.Parse(RowElements[il]);
-                        RowElements[il] = Utilities.glon2ra(glat, glon).ToString("F5", CultureInfo.InvariantCulture);
-                        RowElements[ib] = Utilities.glat2dec(glat, glon).ToString("F5", CultureInfo.InvariantCulture);
+                        glon = double.Parse(RowElements[il]); 
+                        glat = double.Parse(RowElements[ib]);
+                        RowElements[il] = Utilities.glon2ra(glon, glat).ToString("F5", CultureInfo.InvariantCulture);
+                        RowElements[ib] = Utilities.glat2dec(glon, glat).ToString("F5", CultureInfo.InvariantCulture);
                     }
                     for (int j = 0; j < firstCol; j++)
                         cmdQuery += ", '" + RowElements[j] + "'";

@@ -40,13 +40,15 @@ namespace Sciserver_webService.Common
                 
 
                 this.ActivityInfo = new LoggedInfo();
+                this.ActivityInfo.EntryPoint = EntryPoint;
                 this.ActivityInfo.ClientIP = GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
+                request.RequestUri = AddEntryPointToURI(request.RequestUri);
                 this.ActivityInfo.TaskName = GetTaskName(dictionary, EntryPoint);// must be executed right after GetClientIP(dictionary);
                 this.ActivityInfo.ShortTaskName = SetShortTaskName(this.ActivityInfo.TaskName);
                 this.ActivityInfo.Headers = request.Headers;
-                this.ActivityInfo.EntryPoint = EntryPoint;
                 this.ActivityInfo.URI = request.RequestUri;
                 this.ActivityInfo.DoShowInUserHistory = bool.Parse(DefineShowingInUserHistory(this.ActivityInfo.TaskName));
+                this.ActivityInfo.Referrer = GetReferrer();
             }
             catch { throw; }
         }
@@ -123,6 +125,26 @@ namespace Sciserver_webService.Common
             return Application;
         }
         
+
+        public string GetReferrer()
+        {
+            string Referer = "";
+            try
+            {
+                Referer = ActivityInfo.Headers.Referrer.ToString();
+            }
+            catch { };
+            if (string.IsNullOrEmpty(Referer))
+            {
+                try
+                {
+                    Referer = ActivityInfo.Headers.GetValues(ConfigurationManager.AppSettings["RefererHeaderName"]).First().ToString();
+                }
+                catch { }
+            }
+            return Referer;
+        }
+        
         /// <summary>
         /// Returns a Json object containing an array of relevant information to be logged.
         /// </summary>
@@ -132,21 +154,7 @@ namespace Sciserver_webService.Common
         {
             try
             {
-                string Referer = "";
-                try
-                {
-                    Referer = ActivityInfo.Headers.Referrer.ToString();
-                }
-                catch { };
-                if (string.IsNullOrEmpty(Referer))
-                {
-                    try
-                    {
-                        Referer = ActivityInfo.Headers.GetValues(ConfigurationManager.AppSettings["RefererHeaderName"]).First().ToString();
-                    }
-                    catch { }
-                }
-
+                string Referer = GetReferrer();
 
                 string DoShowInUserHistory = DefineShowingInUserHistory(ActivityInfo.TaskName);
                 //string Message = "{ \"WebServiceEntryPoint\": \"" + ActivityInfo.EntryPoint + "\", \"TaskName\": \"" + ActivityInfo.TaskName + "\", \"DoShowInUserHistory\": \"" + DoShowInUserHistory + "\", \"SqlCommands\": \"" + query + "\", \"RequestUri\": \"" + ActivityInfo.URI + "\", \"Headers\": \"" + ActivityInfo.Headers.ToString() + "\", \"Referer\": \"" + Referer + "\"}";
@@ -216,6 +224,43 @@ namespace Sciserver_webService.Common
             return new Uri(URI);
         }
 
+
+        public Uri GetUriFromNewKeys(Uri uri, Dictionary<string, string> dictionary)
+        {
+            string query = "?";
+            foreach (string key in dictionary.Keys)
+            {
+                query += key + "=" + Uri.EscapeDataString(this.dictionary[key]) + "&";
+            }
+            query = query.Remove(query.Length - 1);
+
+            string URI = "";
+            if (uri.Query == "")
+                URI = uri.OriginalString + query;
+            else
+            {
+                int index = uri.OriginalString.IndexOf(uri.Query, 0);
+                URI = uri.OriginalString.Remove(index) + query;
+            }
+            return new Uri(URI);
+        }
+
+
+
+        public Uri AddEntryPointToURI(Uri uri)
+        {
+            if (string.IsNullOrEmpty(this.ActivityInfo.EntryPoint))
+                return uri;
+            else
+            {
+                if (!this.dictionary.ContainsKey("EntryPoint"))
+                    this.dictionary.Add("EntryPoint", this.ActivityInfo.EntryPoint);
+                else
+                    this.dictionary["EntryPoint"] = this.ActivityInfo.EntryPoint;
+
+                return GetUriFromNewKeys(uri, dictionary);
+            }
+        }
 
         public Dictionary<String, String> GetDict(NameValueCollection col)
         {
@@ -289,7 +334,8 @@ namespace Sciserver_webService.Common
         {
             if (IsDirectUserConnection)
                 //return EntryPoint;// + ".DirectQuery";
-                return !string.IsNullOrEmpty(EntryPoint) ? EntryPoint : requestDir["TaskName"];// + ".DirectQuery";
+                //return !string.IsNullOrEmpty(EntryPoint) ? EntryPoint : requestDir["TaskName"];// + ".DirectQuery";
+                return requestDir["EntryPoint"];
             else
             {
                 string taskname = "";

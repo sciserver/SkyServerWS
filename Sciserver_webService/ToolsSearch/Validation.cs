@@ -249,11 +249,11 @@ namespace Sciserver_webService.ToolsSearch
             try { this.kband = requestDir["check_k"] == "k" ? true : false; }catch (Exception e) { }
             try
             {
-                this.coordtype = requestDir["whichway"];
+                this.coordtype = requestDir["coordtype"];
                 if (this.coordtype == "galactic")
                 {
-                    double RA = Utilities.glon2ra(this.ra, this.dec);
-                    double DEC = Utilities.glat2dec(this.ra, this.dec);
+                    double RA = Utilities.glon2ra(this.dec,this.ra);
+                    double DEC = Utilities.glat2dec(this.dec, this.ra);
                     this.ra = RA;
                     this.dec = DEC;
                 }

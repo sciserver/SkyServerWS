@@ -58,6 +58,12 @@ namespace Sciserver_webService.Common
             try
             {
                 Action<Stream, HttpContent, TransportContext> WriteToStream = null;
+
+                string FileType = "";
+                ExtraInfo.TryGetValue("FormatFromUser", out FileType);
+                string SaveResult = "";
+                ExtraInfo.TryGetValue("SaveResult", out SaveResult);
+
                 switch (Format)
                 {
                     case "csv":
@@ -66,31 +72,44 @@ namespace Sciserver_webService.Common
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.writeCSV(ResultsDataSet, stream); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentCSV)));
+                        if (FileType == "csv")
+                            FileType = ".csv";
+                        else
+                            FileType = ".txt";
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result" + FileType + "\"");
                         break;
                     case "fits":
                     case "application/fits":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteFits(ResultsDataSet, stream); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentFITS)));
-                        response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
                         break;
                     case "votable":
                     case "application/x-votable+xml":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteVOTable(ResultsDataSet, stream); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentVOTable)));
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.votable.xml\"");
                         break;
                     case "xml":
                     case "application/xml":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteXml(ResultsDataSet, stream); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentXML)));
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
                         break;
                     case "json":
                     case "application/json":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteJson(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.json\"");
                         break;
                     case "dataset":
                     case "application/x-dataset":
@@ -115,6 +134,8 @@ namespace Sciserver_webService.Common
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteJson(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.json\"");
                         break;
                 }
 
@@ -127,7 +148,7 @@ namespace Sciserver_webService.Common
             }
             catch (Exception e)
             {
-                throw new Exception("There is an error when getting info for the object:\n" + e.Message);
+                throw new Exception(e.Message);
             }
 
 

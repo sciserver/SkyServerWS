@@ -90,6 +90,7 @@ namespace Sciserver_webService.Common
             ExtraInfo.Add("syntax", "");
             ExtraInfo.Add("QueryForUserDisplay", "");
             ExtraInfo.Add("query", "");
+            ExtraInfo.Add("SaveResult", dictionary.ContainsKey("SaveResult") ? dictionary["SaveResult"] : "false");// default is to show result on webpage instead of saving it to a file.
 
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
@@ -208,7 +209,8 @@ namespace Sciserver_webService.Common
                     break;
 
                 case "SIAP" :
-                    return new ReturnSIAPresults(positionType, "VOTable", datarelease, dictionary); // this is tricky code
+                    ActivityInfo.Message = rm.GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
+                    return new ReturnSIAPresults(positionType, "VOTable", datarelease, dictionary, ActivityInfo); // this is tricky code
                     break;
 
                 default:// runs all the Imaging, Spectro and SpectroIR queries in SkyServer
@@ -235,28 +237,27 @@ namespace Sciserver_webService.Common
                 {
                     case "txt": 
                     case "text/plain":
-                        format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser", format); break;
                     case "csv": 
-                        format = KeyWords.contentCSV; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentCSV; break;
                     case "xml": 
                     case "application/xml":
-                        format = KeyWords.contentXML; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentXML; break;
                     case "votable": 
                     case "application/x-votable+xml":
-                        format = KeyWords.contentVOTable; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentVOTable; break;
                     case "json":
                     case "application/json":
-                        format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentJson; break;
                     case "fits": 
                     case "application/fits":
-                        format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentFITS; break;
                     case "dataset": 
                     case "application/x-dataset":
-                        format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentDataset; break;
                     case "html": 
-                        format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
+                        ExtraInfo.Add("FormatFromUser", "html"); format = KeyWords.contentDataset; break;
                     default: 
-                        format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
+                        ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentJson; break;
                 }
             }
             catch (Exception exp)
@@ -264,10 +265,17 @@ namespace Sciserver_webService.Common
                 if (IsDirectUserConnection)//in case the user did not specify a format
                 {
                     format = KeyWords.contentJson;
-                    ExtraInfo.Add("FormatFromUser", KeyWords.contentJson);
+                    string val;
+                    if (!ExtraInfo.TryGetValue("FormatFromUser", out val))
+                        ExtraInfo.Add("FormatFromUser", "json");
                 }
                 else
+                {
                     format = KeyWords.contentDataset;//which is a dataset
+                    string val;
+                    if (!ExtraInfo.TryGetValue("FormatFromUser", out val))
+                        ExtraInfo.Add("FormatFromUser", "dataset");
+                }
             }
 
 

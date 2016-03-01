@@ -8,6 +8,7 @@ using Sciserver_webService.Common;
 using System.Text;
 using Newtonsoft.Json;
 using System.IO;
+using System.Configuration;
 
 namespace Sciserver_webService.ExceptionFilter
 {
@@ -20,9 +21,6 @@ namespace Sciserver_webService.ExceptionFilter
 
             System.Text.Encoding tCode = System.Text.Encoding.UTF8;
             String responseType = "application/json";
-
-            StringBuilder strbldr = new StringBuilder();
-            StringWriter sw = new StringWriter(strbldr);
             String reasonPhrase = "";
             String errorMessage = "";
 
@@ -96,19 +94,46 @@ namespace Sciserver_webService.ExceptionFilter
             //preparing the message sent to the user
 
             errorMessage = context.Exception.Message + ((context.Exception.InnerException != null) ? (": " + context.Exception.InnerException.Message) : "");
+
+            StringBuilder strbldr = new StringBuilder();
+            StringWriter sw = new StringWriter(strbldr); 
             using (JsonWriter writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName("Error Code");
+                writer.WritePropertyName("ErrorCode");
                 writer.WriteValue((int)errorCode);
-                writer.WritePropertyName("Error Type");
+                writer.WritePropertyName("ErrorType");
                 writer.WriteValue(errorCode.ToString());
-                writer.WritePropertyName("Error Message");
+                writer.WritePropertyName("ErrorMessage");
                 writer.WriteValue(errorMessage);
                 writer.WritePropertyName("LogMessageID");
                 writer.WriteValue(Logger.message.MessageId);
             }
+            string TechInfoJson = strbldr.ToString();
 
+            strbldr = new StringBuilder(); 
+            sw = new StringWriter(strbldr); 
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("ErrorCode");
+                writer.WriteValue((int)errorCode);
+                writer.WritePropertyName("ErrorType");
+                writer.WriteValue(errorCode.ToString());
+                writer.WritePropertyName("ErrorMessage");
+                writer.WriteValue(errorMessage);
+                writer.WritePropertyName("LogMessageID");
+                writer.WriteValue(Logger.message.MessageId);
+                writer.WritePropertyName("username");
+                writer.WriteValue(Logger.user_name);
+                writer.WritePropertyName("userid");
+                writer.WriteValue(Logger.userid);
+                writer.WritePropertyName("pageurl");
+                writer.WriteValue(ActivityInfo.URI);
+                writer.WritePropertyName("referrer");
+                writer.WriteValue(ActivityInfo.Referrer);
+            }
+            string TechInfoJsonAll = HttpUtility.UrlEncode(strbldr.ToString());
 
 
             bool IsHTMLformat = false;
@@ -126,7 +151,11 @@ namespace Sciserver_webService.ExceptionFilter
                 HtmlContent += "</head><body bgcolor=white>";
                 HtmlContent += "<h2>An error occured</h2>";
                 HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + context.Exception.Message + "<br><br></font></H3>";
-                HtmlContent += "<br>Technical info: <br> " + strbldr.ToString();
+                HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
+                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + TechInfoJsonAll + "\" />";
+                HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
+                HtmlContent += "</form>";
+                HtmlContent += "<br>Technical info: <br> " + TechInfoJson;
                 HtmlContent += "</BODY></HTML>";
 
                 HttpResponseMessage resp = new HttpResponseMessage(HttpStatusCode.OK)
@@ -141,7 +170,7 @@ namespace Sciserver_webService.ExceptionFilter
             {
                 HttpResponseMessage resp = new HttpResponseMessage(errorCode)
                 {
-                    Content = new StringContent(strbldr.ToString(), tCode, responseType),
+                    Content = new StringContent(TechInfoJson, tCode, responseType),
                     ReasonPhrase = reasonPhrase
                 };
                 throw new HttpResponseException(resp);

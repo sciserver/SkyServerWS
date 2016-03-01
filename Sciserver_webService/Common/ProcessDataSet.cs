@@ -35,9 +35,10 @@ namespace Sciserver_webService.Common
         String positionType = "";
         String queryType = "";
         String TechnicalErrorInfo = null;
+        String TechnicalErrorInfoAll = null;
 
 
-        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccess, string positionType, string queryType, string TechnicalErrorInfo)
+        public ProcessDataSet(string query, string format, string TaskName, Dictionary<string, string> ExtraInfo, string ErrorMessage, bool IsSuccess, string positionType, string queryType, string TechnicalErrorInfo, string TechnicalErrorInfoAll)
         {
             this.query = query;
             this.format = format;
@@ -48,12 +49,16 @@ namespace Sciserver_webService.Common
             this.positionType = positionType;
             this.queryType = queryType; 
             this.TechnicalErrorInfo = TechnicalErrorInfo;
+            this.TechnicalErrorInfoAll = TechnicalErrorInfoAll;
         }
         
         public HttpContent GetContent(DataSet ds)
         {
 
             var response = new HttpResponseMessage();
+            string SaveResult = "";
+            ExtraInfo.TryGetValue("SaveResult", out SaveResult);
+
 
             if (this.IsSuccess)
             {
@@ -67,26 +72,40 @@ namespace Sciserver_webService.Common
                             DefaultCone cstest = new DefaultCone();
                             vot = cstest.ConeSearch(ds);
                             response.Content = new StringContent(ToXML(vot), Encoding.UTF8, KeyWords.contentXML);
+                            if (SaveResult == "true")
+                                response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
                             break;
 
                         case "FieldArray":
 
                             response.Content = new StringContent(ToXML(sf.FieldArray(ds)), Encoding.UTF8, KeyWords.contentXML);
+                            if (SaveResult == "true")
+                                response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
+
                             break;
 
                         case "FieldArrayRect":
 
                             response.Content = new StringContent(ToXML(sf.FieldArrayRect(ds)), Encoding.UTF8, KeyWords.contentXML);
+                            if (SaveResult == "true")
+                                response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
+
                             break;
 
                         case "ListOfFields":
 
                             response.Content = new StringContent(ToXML(sf.ListOfFields(ds)), Encoding.UTF8, KeyWords.contentXML);
+                            if (SaveResult == "true")
+                                response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
+
                             break;
 
                         case "UrlsOfFields":
 
                             response.Content = new StringContent(ToXML(sf.UrlOfFields(ds)), Encoding.UTF8, KeyWords.contentXML);
+                            if (SaveResult == "true")
+                                response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
+
                             break;
 
                         default:
@@ -127,7 +146,7 @@ namespace Sciserver_webService.Common
         {
             if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
             {
-                return getSyntaxHTMLresult(null, ErrorMessage, TechnicalErrorInfo);
+                return getSyntaxHTMLresult(null, ErrorMessage, TechnicalErrorInfo, TechnicalErrorInfoAll);
                 //return getINCORRECTsyntaxHTMLresult(ErrorMessage);
             }
             else // in case we want to run que sql command and retrrieve the resultset:
@@ -144,7 +163,7 @@ namespace Sciserver_webService.Common
             {
                 if (ExtraInfo["syntax"] == "Syntax") // in case user want only to verify the syntax of the sql command:
                 {
-                    return getSyntaxHTMLresult(ds, null, null);
+                    return getSyntaxHTMLresult(ds, null, null, null);
                     //return getOKsyntaxHTMLresult(ds);
                 }
                 else if (ExtraInfo["fp"] == "only") // in case user want to run the "is in footprint?" query
@@ -201,7 +220,7 @@ namespace Sciserver_webService.Common
         }
 
 
-        private string getSyntaxHTMLresult(DataSet ds, string errorMessage, string technicalErrorInfo)
+        private string getSyntaxHTMLresult(DataSet ds, string errorMessage, string technicalErrorInfo, string technicalErrorInfoAll)
         {
             string HtmlContent = "";
             HtmlContent += "<html><head>";
@@ -215,8 +234,16 @@ namespace Sciserver_webService.Common
             else
                 HtmlContent += "<H3> <font color=green> no message </font></H3>";
             HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
-            if (!String.IsNullOrEmpty(technicalErrorInfo))// adding error log-message ID at the end of the html document
-                HtmlContent += "<br> Technical Info:<br>" + technicalErrorInfo;
+            if (!String.IsNullOrEmpty(technicalErrorInfo))
+            {
+                HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
+                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + technicalErrorInfoAll + "\" />";
+                HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
+                HtmlContent += "</form>";
+            }
+            if (!String.IsNullOrEmpty(TechnicalErrorInfo))
+                HtmlContent += "<br>Technical info: <br> " + TechnicalErrorInfo;
+
             HtmlContent += "</BODY></HTML>";
             return HtmlContent;
         }
@@ -232,8 +259,17 @@ namespace Sciserver_webService.Common
             HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>";
             //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
             HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
-            if(!String.IsNullOrEmpty(TechnicalErrorInfo))
-                HtmlContent += "<br>Technical Info:<br>" + TechnicalErrorInfo; // writes command
+
+            if (!String.IsNullOrEmpty(TechnicalErrorInfoAll))
+            {
+                HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
+                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + TechnicalErrorInfoAll + "\" />";
+                HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
+                HtmlContent += "</form>";
+            }
+            if (!String.IsNullOrEmpty(TechnicalErrorInfo))
+                HtmlContent += "<br>Technical info: <br> " + TechnicalErrorInfo;
+
             HtmlContent += "</BODY></HTML>\n";
             return HtmlContent;
         }

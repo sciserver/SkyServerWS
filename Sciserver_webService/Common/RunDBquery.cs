@@ -75,6 +75,11 @@ namespace Sciserver_webService.DoDatabaseQuery
                     AddQueryTable(ResultsDataSet);// this adds to "ResultsDataSet" a new Table that shows the sql command.
                 }
 
+                string FileType = "";
+                ExtraInfo.TryGetValue("FormatFromUser", out FileType);
+                string SaveResult = "";
+                ExtraInfo.TryGetValue("SaveResult", out SaveResult);
+
                 switch (format)
                 {
                     case "csv":
@@ -83,36 +88,49 @@ namespace Sciserver_webService.DoDatabaseQuery
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.writeCSV(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentCSV)));
+                        if (FileType == "csv")
+                            FileType = ".csv";
+                        else
+                            FileType = ".txt";
+                        if(SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result"+FileType+"\"");
                         break;
                     case "fits":
                     case "application/fits":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Binary;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteFits(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentFITS)));
-                        response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.fits\"");
                         break;
                     case "votable":
                     case "application/x-votable+xml":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteVOTable(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentVOTable)));
+                        if(SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.votable.xml\"");
                         break;
                     case "xml":
                     case "application/xml":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteXml(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentXML)));
+                        if (SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.xml\"");
                         break;
                     case "json":
                     case "application/json":
                         ResultsDataSet.RemotingFormat = SerializationFormat.Xml;
                         WriteToStream = (stream, foo, bar) => { OutputUtils.WriteJson(ResultsDataSet, stream); stream.Close(); };
                         response.Content = new PushStreamContent(WriteToStream, new MediaTypeHeaderValue((KeyWords.contentJson)));
+                        if(SaveResult == "true")
+                            response.Content.Headers.Add("Content-Disposition", "attachment;filename=\"result.json\"");
                         break;
                     case "html":
                     case "dataset":
                     case "application/x-dataset":
-                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, null, true, positionType, queryType, null);
+                        ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, null, true, positionType, queryType, null, null);
                         response.Content = proc.GetContent(ResultsDataSet);
                         if (ExtraInfo.ContainsKey("FormatFromUser"))
                         {
@@ -163,20 +181,43 @@ namespace Sciserver_webService.DoDatabaseQuery
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {
                         writer.WriteStartObject();
-                        writer.WritePropertyName("Error Code");
+                        writer.WritePropertyName("ErrorCode");
                         writer.WriteValue((int)errorCode);
-                        writer.WritePropertyName("Error Type");
+                        writer.WritePropertyName("ErrorType");
                         writer.WriteValue(errorCode.ToString());
-                        writer.WritePropertyName("Error Message");
+                        writer.WritePropertyName("ErrorMessage");
                         writer.WriteValue(errorMessage);
                         writer.WritePropertyName("LogMessageID");
                         writer.WriteValue(Logger.message.MessageId);
                     }
-
                     string TechnicalErrorInfo = strbldr.ToString();
 
+                    strbldr = new StringBuilder();
+                    sw = new StringWriter(strbldr);
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        writer.WriteStartObject();
+                        writer.WritePropertyName("ErrorCode");
+                        writer.WriteValue((int)errorCode);
+                        writer.WritePropertyName("ErrorType");
+                        writer.WriteValue(errorCode.ToString());
+                        writer.WritePropertyName("ErrorMessage");
+                        writer.WriteValue(errorMessage);
+                        writer.WritePropertyName("LogMessageID");
+                        writer.WriteValue(Logger.message.MessageId);
+                        writer.WritePropertyName("username");
+                        writer.WriteValue(Logger.user_name);
+                        writer.WritePropertyName("userid");
+                        writer.WriteValue(Logger.userid);
+                        writer.WritePropertyName("pageurl");
+                        writer.WriteValue(ActivityInfo.URI);
+                        writer.WritePropertyName("referrer");
+                        writer.WriteValue(ActivityInfo.Referrer);
+                    }
+                    string TechnicalErrorInfoAll = strbldr.ToString();
+
                     bool IsSuccess = false;
-                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, errorMessage, IsSuccess, positionType, queryType, TechnicalErrorInfo);
+                    ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, errorMessage, IsSuccess, positionType, queryType, TechnicalErrorInfo, TechnicalErrorInfoAll);
                     response.Content = proc.GetContent(ResultsDataSet);// this will log
                     response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
                     return response;
