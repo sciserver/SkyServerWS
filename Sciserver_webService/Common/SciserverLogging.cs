@@ -60,6 +60,8 @@ namespace Sciserver_webService.Common
         public string userid = null; // before knowing whether it is an authenticated user.
         public string user_name = null;
         private bool HasAthenticatedWithActivityInfo = false;
+        public string Token = "";
+        public bool IsValidUser = false;
 
         public SciserverLogging(LoggedInfo ActivityInfo)
         {
@@ -170,11 +172,13 @@ namespace Sciserver_webService.Common
             {
                 try
                 {
+                    Token = token;
                     var userAccess = Keystone.Authenticate(token);
                     userid = userAccess.User.Id;
                     user_name = userAccess.User.Name;
+                    IsValidUser = true;
                 }
-                catch { }
+                catch { IsValidUser = false; }
             }
             HasAthenticatedWithActivityInfo = true;
         }
@@ -231,8 +235,9 @@ namespace Sciserver_webService.Common
                     var userAccess = Keystone.Authenticate(token);
                     userid = userAccess.User.Id;
                     user_name = userAccess.User.Name;
+                    IsValidUser = true;
                 }
-                catch { }
+                catch { IsValidUser = false; }
             }
             HasAthenticatedWithActivityInfo = false;
         }

@@ -23,6 +23,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Sciserver_webService.Common
 {
+
+    /// <summary>
+    /// Processes the request that comes from each of the controllers.
+    /// </summary>
     public class ProcessRequest
     {
         
@@ -44,7 +48,14 @@ namespace Sciserver_webService.Common
         public Dictionary<String, String> dictionary = null;
         public LoggedInfo ActivityInfo = null;
         public RequestMisc rm;
+        public Dictionary<string, string> ExtraInfo = new Dictionary<string, string>();// This dict stores extra info needed for running and rendering the query results.
+        public string datarelease = "";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProcessRequest"/> class.
+        /// </summary>
+        /// <param name="request">The current Http request from the client.</param>
+        /// <param name="EntryPoint">The name of the unique entry point to the Api, defined in the controller.</param>
         public ProcessRequest(HttpRequestMessage request, string EntryPoint)
         {
             try
@@ -58,42 +69,75 @@ namespace Sciserver_webService.Common
                 this.ClientIP = rm.GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
                 this.TaskName = rm.GetTaskName(dictionary, EntryPoint);// must be executed right after GetClientIP(ref dictionary);
                 this.ActivityInfo = rm.ActivityInfo;
-                
+                this.IsDirectUserConnection = rm.IsDirectUserConnection;
+
+                datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                /// this is temporary read from the web.config
+                string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"];
+
+                // get data release number
+                string drnumber = datarelease.ToUpper().Replace("DR", "");
+
+                dictionary.Add("skyserverUrl", skyserverUrl);
+                dictionary.Add("datarelease", drnumber);
+                ExtraInfo.Add("ClientIP", ClientIP);
+                ExtraInfo.Add("TaskName", TaskName);
+                ExtraInfo.Add("server_name", server_name);
+                ExtraInfo.Add("windows_name", windows_name);
+                dictionary.Add("server_name", server_name);
+                dictionary.Add("windows_name", windows_name);
+                ExtraInfo.Add("EntryPoint", EntryPoint);
+
+
+                ExtraInfo.Add("fp", "");
+                ExtraInfo.Add("syntax", "");
+                ExtraInfo.Add("QueryForUserDisplay", "");
+                ExtraInfo.Add("query", "");
+                ExtraInfo.Add("SaveResult", dictionary.ContainsKey("SaveResult") ? dictionary["SaveResult"] : "false");// default is to show result on webpage instead of saving it to a file.
+                ExtraInfo.Add("IsDirectUserConnection", IsDirectUserConnection.ToString());
+                ExtraInfo.Add("TableName", dictionary.ContainsKey("TableName") ? dictionary["TableName"] : "");
+                string ShowAsHtml = dictionary.ContainsKey("SaveResult") ? dictionary["SaveResult"] : "false";// default is to show result on webpage instead of saving it to a file.
+                string DoShowMyDBAsHtml = dictionary.ContainsKey("DoShowMyDBAsHtml") ? dictionary["DoShowMyDBAsHtml"] : "false";// default is to show result on webpage instead of saving it to a file.
+
+                if (dictionary.ContainsKey("format"))
+                {
+                    if (dictionary["format"] == "html" || (DoShowMyDBAsHtml == "true" && dictionary["format"] == "mydb"))
+                        ExtraInfo.Add("DoReturnHtml", "True");
+                    else
+                        ExtraInfo.Add("DoReturnHtml", "False");
+                }
+                else
+                    ExtraInfo.Add("DoReturnHtml", "False");
+
+
+
+
+
             }
             catch { throw; }
         }
 
+
         /// <summary>
-        /// Returns a Json object containing relevant information to be logged.
+        /// Executes the query for most kinds of searches (except proximity)
         /// </summary>
-        /// <param name="request"></param>
+        /// <param name="api">The API controller.</param>
+        /// <param name="queryType">Type of the query</param>
+        /// <param name="positionType">Type of the position.</param>
+        /// <param name="Task">The TaskName, that uniquely identifies the search (or web service entry point).</param>
         /// <returns></returns>
-
-
+        /// <exception cref="System.ArgumentException">Check input parameters properly.\n+e.Message</exception>
         public IHttpActionResult runquery(ApiController api, string queryType, string positionType, string Task)
         {
             //api.Request.Headers.Add("TaskName", Task);
             //api.Request.Headers.Add("EntryPoint", Task);
-            string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+
 
             DataSet ResultsDataSet = new DataSet();
 
-            /// this is temporary read from the web.config
-            string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"];
-
-            // get data release number
-            string drnumber = datarelease.ToUpper().Replace("DR","");
-
-            // This dict stores extra info needed for running and rendering the query results.
-            Dictionary<string, string> ExtraInfo = new Dictionary<string,string>();
-            ExtraInfo.Add("fp", "");
-            ExtraInfo.Add("syntax", "");
-            ExtraInfo.Add("QueryForUserDisplay", "");
-            ExtraInfo.Add("query", "");
-            ExtraInfo.Add("SaveResult", dictionary.ContainsKey("SaveResult") ? dictionary["SaveResult"] : "false");// default is to show result on webpage instead of saving it to a file.
-
             HttpResponseMessage resp = new HttpResponseMessage();
             Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
+/*
             try
             {
                 if(dictionary == null)
@@ -103,10 +147,10 @@ namespace Sciserver_webService.Common
             {
                 throw new ArgumentException("Check input parameters properly.\n"+e.Message);
             }
-
+*/
             String format = "";        
             String query = "";
-
+            /*
             if (string.IsNullOrEmpty(this.ClientIP))
                 this.ClientIP = rm.GetClientIP(dictionary);//GetClientIP sets the value of IsDirectUserConnection as well.
             if (string.IsNullOrEmpty(this.TaskName)) 
@@ -117,13 +161,8 @@ namespace Sciserver_webService.Common
             if (string.IsNullOrEmpty(this.windows_name)) 
                 try { this.windows_name = System.Environment.MachineName; }
                 catch { };
+            */
 
-            dictionary.Add("skyserverUrl", skyserverUrl);
-            dictionary.Add("datarelease", drnumber);
-            ExtraInfo.Add("ClientIP", ClientIP);
-            ExtraInfo.Add("TaskName", TaskName);
-            ExtraInfo.Add("server_name", server_name);
-            ExtraInfo.Add("windows_name", windows_name);
 
             switch (queryType)
             {
@@ -256,6 +295,8 @@ namespace Sciserver_webService.Common
                         ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentDataset; break;
                     case "html": 
                         ExtraInfo.Add("FormatFromUser", "html"); format = KeyWords.contentDataset; break;
+                    case "mydb":
+                        ExtraInfo.Add("FormatFromUser", format); format = "mydb"; break;
                     default: 
                         ExtraInfo.Add("FormatFromUser", format); format = KeyWords.contentJson; break;
                 }
@@ -305,24 +346,39 @@ namespace Sciserver_webService.Common
         }
 
 
-        /// Upload table        
+        /// <summary>
+        /// Runs the query for the proximity kind of search.
+        /// </summary>
+        /// <param name="api">The API.</param>
+        /// <param name="queryType">Type of the query.</param>
+        /// <param name="positionType">Type of the position.</param>
+        /// <param name="Message">The message.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException">
+        /// Check input parameters properly.\n + e.Message
+        /// or
+        /// Neither upload file nor list specified for Proximity search.
+        /// </exception>
+        /// <exception cref="System.Exception">Error while uploading coordinates to create a temporary table.  + exp.Message</exception>
         public IHttpActionResult proximityQuery(ApiController api, string queryType, string positionType, string Message)
         {
             // This dict stores extra info needed for running and rendering the query results.
+/*
             Dictionary<string, string> ExtraInfo = new Dictionary<string, string>();
             ExtraInfo.Add("fp", "");
             ExtraInfo.Add("syntax", "");
             ExtraInfo.Add("QueryForUserDisplay", "");
-
+*/
 
             try
             {
-                string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                //string datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
 
                 /// 
                 HttpResponseMessage resp = new HttpResponseMessage();
                 Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
                 String query = "";
+                /*
                 try
                 {
                     if (dictionary == null)
@@ -353,7 +409,7 @@ namespace Sciserver_webService.Common
                 string drnumber = datarelease.ToUpper().Replace("DR", "");
 
                 dictionary.Add("datarelease", drnumber);
-
+                */
                 var task = api.Request.Content.ReadAsStreamAsync();
                 task.Wait();
                 Stream stream = task.Result;
@@ -425,7 +481,8 @@ namespace Sciserver_webService.Common
                         case "fits": format = KeyWords.contentFITS; ExtraInfo.Add("FormatFromUser", format); break;
                         case "dataset": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", format); break;
                         case "html": format = KeyWords.contentDataset; ExtraInfo.Add("FormatFromUser", "html"); break;
-
+                        case "mydb":
+                            ExtraInfo.Add("FormatFromUser", format); format = "mydb"; break;
                         default: format = KeyWords.contentJson; ExtraInfo.Add("FormatFromUser", format); break;
                     }
                 }
@@ -448,8 +505,6 @@ namespace Sciserver_webService.Common
                 //creating the message that is being logged
                 ActivityInfo.Message = rm.GetLoggedMessage(ExtraInfo["QueryForUserDisplay"]);   //request.ToString();
 
-
-
                 //return new RunCasjobs(query, token, casjobsMessage, format, datarelease);
                 //return new RunDBquery(query, format, this.TaskName, ExtraInfo);return new RunCasjobs(query, token, this.TaskName, format, datarelease, ExtraInfo, this.ClientIP);
                 return new RunDBquery(query, format, this.TaskName, ExtraInfo, ActivityInfo, queryType, positionType);
@@ -461,7 +516,7 @@ namespace Sciserver_webService.Common
         }
 
 
-        /// Upload table        
+        /// Upload table
         public HttpResponseMessage uploadTest(ApiController api, string queryType, string positionType, string casjobsMessage)
         {
             try

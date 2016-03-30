@@ -18,6 +18,7 @@ using Sciserver_webService.Common;
 using Sciserver_webService.ConeSearch;
 using Sciserver_webService.SDSSFields;
 using System.Net;
+using System.Web;
 
 namespace Sciserver_webService.Common
 {
@@ -126,7 +127,7 @@ namespace Sciserver_webService.Common
             }
             else // not IsSuccess
             {
-                if (ExtraInfo["FormatFromUser"] == "html")
+                if (ExtraInfo["DoReturnHtml"].ToLower() == "true") 
                 {
                     response.Content = new StringContent(getHtmlError(ErrorMessage));
                 }
@@ -213,7 +214,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("<title>SDSS Query Syntax Check</title>\n");
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SQL Syntax Check</h2>");
-            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>");
+            sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>");
             sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
@@ -228,21 +229,26 @@ namespace Sciserver_webService.Common
             HtmlContent += "</head><body bgcolor=white>";
             HtmlContent += "<h2>SQL Syntax Check</h2>";
             if (ds != null)// OK syntax
-                HtmlContent += "<H3> <font color=green>" + ds.Tables[0].Rows[0][0].ToString() + "</font></H3>";
+                HtmlContent += "<H3> <font color=green>" + WebUtility.HtmlEncode(ds.Tables[0].Rows[0][0].ToString()) + "</font></H3>";
             else if(!String.IsNullOrEmpty(errorMessage))
-                HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + errorMessage + "</font></H3>";
+                HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + WebUtility.HtmlEncode(errorMessage) + "</font></H3>";
             else
                 HtmlContent += "<H3> <font color=green> no message </font></H3>";
             HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
-            if (!String.IsNullOrEmpty(technicalErrorInfo))
+            if (!String.IsNullOrEmpty(technicalErrorInfoAll))
             {
                 HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
-                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + technicalErrorInfoAll + "\" />";
+                Dictionary<string, string> ErrorFields = JsonConvert.DeserializeObject<Dictionary<string, string>>(technicalErrorInfoAll);
+                foreach (string key in ErrorFields.Keys)
+                {
+                    HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
+                }
+                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(technicalErrorInfoAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
             }
             if (!String.IsNullOrEmpty(TechnicalErrorInfo))
-                HtmlContent += "<br>Technical info: <br> " + TechnicalErrorInfo;
+                HtmlContent += "<br>Technical info: <br> " + WebUtility.HtmlEncode(TechnicalErrorInfo);
 
             HtmlContent += "</BODY></HTML>";
             return HtmlContent;
@@ -256,23 +262,96 @@ namespace Sciserver_webService.Common
             HtmlContent += "<title>SDSS error message</title>\n";
             HtmlContent += "</head><body bgcolor=white>\n";
             HtmlContent += "<h2>SDSS error message</h2>";
-            HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + ErrorMessage + "</font></H3>";
+            HtmlContent += "<H3 BGCOLOR=pink><font color=red>" +  WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>";
             //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
             HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
 
             if (!String.IsNullOrEmpty(TechnicalErrorInfoAll))
             {
                 HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
-                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + TechnicalErrorInfoAll + "\" />";
+                Dictionary<string, string> ErrorFields = JsonConvert.DeserializeObject<Dictionary<string, string>>(TechnicalErrorInfoAll);
+                foreach (string key in ErrorFields.Keys)
+                {
+                    HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
+                }
+                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
             }
             if (!String.IsNullOrEmpty(TechnicalErrorInfo))
-                HtmlContent += "<br>Technical info: <br> " + TechnicalErrorInfo;
+                HtmlContent += "<br>Technical info: <br> " + WebUtility.HtmlEncode(TechnicalErrorInfo);
 
             HtmlContent += "</BODY></HTML>\n";
             return HtmlContent;
         }
+
+        public string getCasJobsSubmitHTMLresult(string JobID, string TableName, string Token)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("<html><head>\n");
+            sb.AppendFormat("<title>SDSS Query Results</title>\n");
+            sb.AppendFormat("</head><body bgcolor=white>\n");
+            sb.AppendFormat("<h2>SDSS query Results </h2>");
+            sb.AppendFormat("<H3> <font color=green> Your query is being executed as a job in CasJobs with JobID = " + JobID + " and <br> the result stored into table \"" + TableName + "\" in database \"MyDB\". </font></H3>\n");
+            sb.AppendFormat("<br><form method =\"POST\" target=\"_blank\" name=\"casjobsform\" action=\"" + ConfigurationManager.AppSettings["CASJobs"] + "jobdetails.aspx?id=" + JobID + "\">");
+            sb.AppendFormat("<input type=\"hidden\" name=\"token\" id=\"token\" value=\"" + Token + "\" />");
+            sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"See job in CasJobs\">");
+            sb.AppendFormat("</form>");
+
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("</BODY></HTML>\n");
+            return sb.ToString();
+        }
+
+        public string getTableSubmitHTMLresult(string TableName, string Token)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("<html><head>\n");
+            sb.AppendFormat("<title>SDSS Query Results</title>\n");
+            sb.AppendFormat("</head><body bgcolor=white>\n");
+            sb.AppendFormat("<h2>SDSS query Results </h2>");
+            sb.AppendFormat("<H3> <font color=green> Your query result has been stored into table \"" + TableName + "\" in CasJobs database \"MyDB\". </font></H3>\n");
+            sb.AppendFormat("<br><form method =\"POST\" target=\"_blank\" name=\"casjobsform\" action=\"" + ConfigurationManager.AppSettings["CASJobs"] + "MyDB.aspx\">");
+            sb.AppendFormat("<input type=\"hidden\" name=\"token\" id=\"token\" value=\"" + Token + "\" />");
+            sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"Go to MyDB\">");
+            sb.AppendFormat("</form>");
+
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("</BODY></HTML>\n");
+            return sb.ToString();
+        }
+
+        public string getGenericCasJobsHTMLerror(string ErrorMessage)
+        {
+            string HtmlContent = "";
+            HtmlContent += "<html><head>\n";
+            HtmlContent += "<title>SDSS error message</title>\n";
+            HtmlContent += "</head><body bgcolor=white>\n";
+            HtmlContent += "<h2>Error message from CasJobs:</h2>";
+            HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>";
+            //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+
+            if (!String.IsNullOrEmpty(TechnicalErrorInfoAll))
+            {
+                HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
+                Dictionary<string, string> ErrorFields = JsonConvert.DeserializeObject<Dictionary<string, string>>(TechnicalErrorInfoAll);
+                foreach (string key in ErrorFields.Keys)
+                {
+                    HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
+                }
+                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
+                HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
+                HtmlContent += "</form>";
+            }
+            if (!String.IsNullOrEmpty(TechnicalErrorInfo))
+                HtmlContent += "<br>Technical info: <br> " + WebUtility.HtmlEncode(TechnicalErrorInfo);
+
+            HtmlContent += "</BODY></HTML>\n";
+            return HtmlContent;
+        }
+
+
 
 
         private string getTableHTMLresult(DataSet ds)

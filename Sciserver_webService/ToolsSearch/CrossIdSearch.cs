@@ -511,7 +511,7 @@ namespace Sciserver_webService.ToolsSearch
                 uquery = Regex.Replace(uquery, reSelect, "\nSELECT x.objID,", RegexOptions.IgnoreCase);
             if (firstCol > 0)
             {
-                var fields = "SELECT ";
+                var fields = "\nSELECT ";
                 for (int i = 0; i < firstCol; i++)
                     fields += "u.up_" + colNames[i] + " as [" + colNames[i] + "],";
                 uquery = Regex.Replace(uquery, reSelect, fields, RegexOptions.IgnoreCase);

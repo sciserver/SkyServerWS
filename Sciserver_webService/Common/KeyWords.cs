@@ -108,7 +108,7 @@ namespace Sciserver_webService.Common
         //public static string Database = ConfigurationManager.AppSettings["database"];
         public static string Release = DR;
         public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
-        //public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
+        public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
         
 
 
@@ -128,6 +128,7 @@ namespace Sciserver_webService.Common
         public static string CrossIdQuery = "CrossIdSearch";
         public static string ObjectQuery = "ObjectSearch";
         public static string UserHistoryQuery = "UserHistory";
+
 
         public static float EqSearchRadius = float.Parse(ConfigurationManager.AppSettings["eqSearchRadius"] ?? "0.75");
         

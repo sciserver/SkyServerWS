@@ -9,6 +9,7 @@ using System.Text;
 using Newtonsoft.Json;
 using System.IO;
 using System.Configuration;
+using System.Collections.Generic;
 
 namespace Sciserver_webService.ExceptionFilter
 {
@@ -132,6 +133,11 @@ namespace Sciserver_webService.ExceptionFilter
                 writer.WriteValue(ActivityInfo.URI);
                 writer.WritePropertyName("referrer");
                 writer.WriteValue(ActivityInfo.Referrer);
+                writer.WritePropertyName("StackTrace");
+                writer.WriteValue(ActivityInfo.Exception.StackTrace);
+                writer.WritePropertyName("InnerTrace");
+                writer.WriteValue(ActivityInfo.Exception.InnerException != null ? ActivityInfo.Exception.InnerException.StackTrace : "");
+
             }
             string TechInfoJsonAll = HttpUtility.UrlEncode(strbldr.ToString());
 
@@ -139,7 +145,7 @@ namespace Sciserver_webService.ExceptionFilter
             bool IsHTMLformat = false;
             try
             {
-                if (rm.dictionary["format"].ToString().ToLower() == "html")
+                if (rm.dictionary["format"].ToString().ToLower() == "html" || (rm.dictionary["format"].ToLower() == "mydb" && !rm.IsDirectUserConnection)   )// || (rm.dictionary["format"].ToString().ToLower() == "mydb" && !rm.IsDirectUserConnection ) )
                     IsHTMLformat = true;
             }
             catch { }
@@ -152,7 +158,12 @@ namespace Sciserver_webService.ExceptionFilter
                 HtmlContent += "<h2>An error occured</h2>";
                 HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + context.Exception.Message + "<br><br></font></H3>";
                 HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
-                HtmlContent += "<input type=\"hidden\" name=\"bugreport\" id=\"bugreport\" value=\"" + TechInfoJsonAll + "\" />";
+                Dictionary<string, string> ErrorFields = JsonConvert.DeserializeObject<Dictionary<string, string>>(TechInfoJsonAll);
+                foreach (string key in ErrorFields.Keys)
+                {
+                    HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
+                }
+                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechInfoJsonAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
                 HtmlContent += "<br>Technical info: <br> " + TechInfoJson;

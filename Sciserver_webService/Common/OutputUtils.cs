@@ -78,6 +78,11 @@ namespace Sciserver_webService.Common
 
         public static void writeCSV(DataSet dataSet, Stream stream)
         {
+            writeCSV(dataSet, stream, true);
+        }
+
+        public static void writeCSV(DataSet dataSet, Stream stream, bool DoWriteTableName)
+        {
 
             using (StreamWriter writer = new StreamWriter(stream))
             {
@@ -85,7 +90,9 @@ namespace Sciserver_webService.Common
                 foreach (DataTable table in dataSet.Tables)
                 {
                     ntables++;
-                    writer.Write("#" + table.TableName + "\n");
+                    if(DoWriteTableName)
+                        writer.Write("#" + table.TableName + "\n");
+
                     for (int Index = 0; Index < (table.Columns.Count); Index++)
                     {
                         writer.Write(table.Columns[Index].ColumnName);
@@ -125,6 +132,8 @@ namespace Sciserver_webService.Common
                 }
             }
         }
+
+
 
 
         public static void WriteHTML(DataSet ds, Stream stream)

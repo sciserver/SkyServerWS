@@ -40,10 +40,11 @@ namespace Sciserver_webService.ToolsSearch
             skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
             try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
-            Int64 limit;
+            Int64 limit = 1;
             try
             {
-                limit = Convert.ToInt64(requestDir["limit"]);
+                if(val.fp != "only")
+                    limit = Convert.ToInt64(requestDir["limit"]);
             }
             catch { throw (new ArgumentException("Invalid numerical value for maximum number of rows in LIMIT=" + requestDir["limit"])); }
             if (limit > Convert.ToInt64(KeyWords.MaxRows))
@@ -64,19 +65,30 @@ namespace Sciserver_webService.ToolsSearch
                 {
                     query = this.buildImageQuery(val);//sets also the QueryForUserDisplay
                 }
+
+                string c = this.query;
+                string c2 = Regex.Replace(c, @"\/\*(.*\n)*\*\/", "");	                        // remove all multi-line comments
+                c2 = Regex.Replace(c2, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
+                c2 = Regex.Replace(c2, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
+                c2 = Regex.Replace(c2, @"[ \t\f\v]+", " ");                      				// replace multiple whitespace with single space
+                c2 = Regex.Replace(c2, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
+                c2 = c2.Replace("'", "''");
+                query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=1,@log=1";
+                
             }
             else //if only want to know if RA,DEC,Radius fall inside footprint
             {
                 query = this.buildFootPrintQuery(val);
+                this.QueryForUserDisplay = query;
+                string c = this.query;
+                string c2 = Regex.Replace(c, @"\/\*(.*\n)*\*\/", "");	                        // remove all multi-line comments
+                c2 = Regex.Replace(c2, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
+                c2 = Regex.Replace(c2, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
+                c2 = Regex.Replace(c2, @"[ \t\f\v]+", " ");                      				// replace multiple whitespace with single space
+                c2 = Regex.Replace(c2, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
+                c2 = c2.Replace("'", "''");
+                query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=0,@log=1";
             }
-            string c = this.query;
-            string c2 = Regex.Replace(c, @"\/\*(.*\n)*\*\/", "");	                        // remove all multi-line comments
-            c2 = Regex.Replace(c2, @"^[ \t\f\v]*--.*\r\n", "", RegexOptions.Multiline);		// remove all isolated single-line comments
-            c2 = Regex.Replace(c2, @"--[^\r^\n]*", "");				                        // remove all embedded single-line comments
-            c2 = Regex.Replace(c2, @"[ \t\f\v]+", " ");                      				// replace multiple whitespace with single space
-            c2 = Regex.Replace(c2, @"^[ \t\f\v]*\r\n", "", RegexOptions.Multiline);			// remove empty lines
-            c2 = c2.Replace("'", "''");
-            query = "EXEC spExecuteSQL '" + c2 + "','" + KeyWords.MaxRows + "','" + server_name + "','" + windows_name + "','" + ClientIP + "','" + TaskName + "',@filter=1,@log=1";
 
 
         }

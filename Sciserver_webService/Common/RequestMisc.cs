@@ -265,6 +265,10 @@ namespace Sciserver_webService.Common
         public Dictionary<String, String> GetDict(NameValueCollection col)
         {
             Dictionary<String, String> dict = new Dictionary<string, string>();
+            if (col.Count == 0)
+            {
+                throw new ArgumentException("Query parameters in request URI are missing.");
+            }
             for (int i = 0; i < col.Count; i++)
                 dict.Add(col.GetKey(i), col.GetValues(i)[0]);
 
