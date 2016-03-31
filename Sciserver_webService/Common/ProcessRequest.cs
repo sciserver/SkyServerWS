@@ -97,11 +97,11 @@ namespace Sciserver_webService.Common
                 ExtraInfo.Add("IsDirectUserConnection", IsDirectUserConnection.ToString());
                 ExtraInfo.Add("TableName", dictionary.ContainsKey("TableName") ? dictionary["TableName"] : "");
                 string ShowAsHtml = dictionary.ContainsKey("SaveResult") ? dictionary["SaveResult"] : "false";// default is to show result on webpage instead of saving it to a file.
-                string DoShowMyDBAsHtml = dictionary.ContainsKey("DoShowMyDBAsHtml") ? dictionary["DoShowMyDBAsHtml"] : "false";// default is to show result on webpage instead of saving it to a file.
+                string ReturnHtml = dictionary.ContainsKey("ReturnHtml") ? dictionary["ReturnHtml"] : "false";// default is to show result on webpage instead of saving it to a file.
 
                 if (dictionary.ContainsKey("format"))
                 {
-                    if (dictionary["format"] == "html" || (DoShowMyDBAsHtml == "true" && dictionary["format"] == "mydb"))
+                    if (dictionary["format"].ToLower() == "html" || ReturnHtml.ToLower() == "true")
                         ExtraInfo.Add("DoReturnHtml", "True");
                     else
                         ExtraInfo.Add("DoReturnHtml", "False");

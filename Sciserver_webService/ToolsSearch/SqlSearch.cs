@@ -75,17 +75,17 @@ namespace Sciserver_webService.ToolsSearch
            if (syntax == "Syntax")
            {
                string[] clines = c.Split('\n');
-               c = "<i>Line#</i>\n";
+               c = "Line#\n";
                for (int i = 0; i < clines.Length; i++)
                {
                    if ((i < (clines.Length - 1)) || (clines[i].Length > 0))
                    {
                        if ((i + 1) < 10)
-                           c += "<i>" + (i + 1) + ".</i>   " + clines[i];
+                           c += "" + (i + 1) + ".   " + clines[i];
                        else if ((i + 1) < 100)
-                           c += "<i>" + (i + 1) + ".</i>  " + clines[i];
+                           c += "" + (i + 1) + ".  " + clines[i];
                        else
-                           c += "<i>" + (i + 1) + ".</i> " + clines[i];
+                           c += "" + (i + 1) + ". " + clines[i];
                    }
                }
                //this.query = "EXEC spExecuteSQL 'set parseonly on " + c2 + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";// parsing the query against harmful sql commands

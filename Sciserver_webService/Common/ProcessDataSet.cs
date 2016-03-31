@@ -202,7 +202,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SQL Syntax Check</h2>");
             sb.AppendFormat("<H3> <font color=green>" + ds.Tables[0].Rows[0][0].ToString() + "</font></H3>\n");
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
         }
@@ -215,7 +215,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SQL Syntax Check</h2>");
             sb.AppendFormat("<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>");
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
         }
@@ -234,7 +234,7 @@ namespace Sciserver_webService.Common
                 HtmlContent += "<H3 BGCOLOR=pink><font color=red>SQL returned the following error: <br>     " + WebUtility.HtmlEncode(errorMessage) + "</font></H3>";
             else
                 HtmlContent += "<H3> <font color=green> no message </font></H3>";
-            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"; // writes command
             if (!String.IsNullOrEmpty(technicalErrorInfoAll))
             {
                 HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
@@ -264,7 +264,7 @@ namespace Sciserver_webService.Common
             HtmlContent += "<h2>SDSS error message</h2>";
             HtmlContent += "<H3 BGCOLOR=pink><font color=red>" +  WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>";
             //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
-            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"; // writes command
 
             if (!String.IsNullOrEmpty(TechnicalErrorInfoAll))
             {
@@ -298,7 +298,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"See job in CasJobs\">");
             sb.AppendFormat("</form>");
 
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
         }
@@ -316,7 +316,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"Go to MyDB\">");
             sb.AppendFormat("</form>");
 
-            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"); // writes command
             sb.AppendFormat("</BODY></HTML>\n");
             return sb.ToString();
         }
@@ -330,7 +330,7 @@ namespace Sciserver_webService.Common
             HtmlContent += "<h2>Error message from CasJobs:</h2>";
             HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + WebUtility.HtmlEncode(ErrorMessage) + "</font></H3>";
             //sb.AppendFormat("<H3 BGCOLOR=pink><font color=red> Some tips: <br> No multiple SQL commands allowed     </font></H3>");
-            HtmlContent += "<h3>Your SQL command was: <br><pre>" + ExtraInfo["QueryForUserDisplay"] + "</pre></h3><hr>"; // writes command
+            HtmlContent += "<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"; // writes command
 
             if (!String.IsNullOrEmpty(TechnicalErrorInfoAll))
             {

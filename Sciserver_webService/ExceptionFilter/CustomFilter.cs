@@ -139,7 +139,7 @@ namespace Sciserver_webService.ExceptionFilter
                 writer.WriteValue(ActivityInfo.Exception.InnerException != null ? ActivityInfo.Exception.InnerException.StackTrace : "");
 
             }
-            string TechInfoJsonAll = HttpUtility.UrlEncode(strbldr.ToString());
+            string TechInfoJsonAll = strbldr.ToString();
 
 
             bool IsHTMLformat = false;
@@ -156,7 +156,7 @@ namespace Sciserver_webService.ExceptionFilter
                 HtmlContent += "<title>Skyserver Error</title>";
                 HtmlContent += "</head><body bgcolor=white>";
                 HtmlContent += "<h2>An error occured</h2>";
-                HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + context.Exception.Message + "<br><br></font></H3>";
+                HtmlContent += "<H3 BGCOLOR=pink><font color=red>" + WebUtility.HtmlEncode(context.Exception.Message) + "<br><br></font></H3>";
                 HtmlContent += "<br><br> <form method =\"POST\" target=\"_blank\" name=\"bugreportform\" action=\"" + ConfigurationManager.AppSettings["BugReportURL"] + "\">";
                 Dictionary<string, string> ErrorFields = JsonConvert.DeserializeObject<Dictionary<string, string>>(TechInfoJsonAll);
                 foreach (string key in ErrorFields.Keys)
@@ -166,7 +166,7 @@ namespace Sciserver_webService.ExceptionFilter
                 HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechInfoJsonAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
-                HtmlContent += "<br>Technical info: <br> " + TechInfoJson;
+                HtmlContent += "<br>Technical info: <br> " + WebUtility.HtmlEncode(TechInfoJson);
                 HtmlContent += "</BODY></HTML>";
 
                 HttpResponseMessage resp = new HttpResponseMessage(HttpStatusCode.OK)
