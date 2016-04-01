@@ -243,7 +243,7 @@ namespace Sciserver_webService.Common
                 {
                     HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
                 }
-                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(technicalErrorInfoAll) + "\" />";
+                //HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(technicalErrorInfoAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
             }
@@ -274,7 +274,7 @@ namespace Sciserver_webService.Common
                 {
                     HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
                 }
-                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
+                //HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
             }
@@ -340,7 +340,7 @@ namespace Sciserver_webService.Common
                 {
                     HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
                 }
-                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
+                //HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechnicalErrorInfoAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
             }

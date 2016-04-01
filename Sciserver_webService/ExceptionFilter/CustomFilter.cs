@@ -163,7 +163,7 @@ namespace Sciserver_webService.ExceptionFilter
                 {
                     HtmlContent += "<input type=\"hidden\" name=\"popz_" + key + "\" id=\"popz_" + key + "\" value=\"" + WebUtility.HtmlEncode(ErrorFields[key]) + "\" />";
                 }
-                HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechInfoJsonAll) + "\" />";
+                //HtmlContent += "<input type=\"hidden\" name=\"popz_bugreport\" id=\"popz_bugreport\" value=\"" + WebUtility.HtmlEncode(TechInfoJsonAll) + "\" />";
                 HtmlContent += "<input id=\"submit\" type=\"submit\" value=\"Click to Report Error\">";
                 HtmlContent += "</form>";
                 HtmlContent += "<br>Technical info: <br> " + WebUtility.HtmlEncode(TechInfoJson);
