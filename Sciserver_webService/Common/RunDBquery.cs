@@ -101,6 +101,8 @@ namespace Sciserver_webService.DoDatabaseQuery
                         writer.WriteValue(errorMessage);
                         writer.WritePropertyName("LogMessageID");
                         writer.WriteValue(Logger.message.MessageId);
+                        writer.WritePropertyName("LogTime");
+                        writer.WriteValue(Logger.message.Time);
                     }
                     string TechnicalErrorInfo = strbldr.ToString();
 
@@ -129,6 +131,10 @@ namespace Sciserver_webService.DoDatabaseQuery
                         writer.WriteValue(ActivityInfo.Exception.StackTrace);
                         writer.WritePropertyName("InnerTrace");
                         writer.WriteValue(ActivityInfo.Exception.InnerException != null ? ActivityInfo.Exception.InnerException.StackTrace : "");
+                        writer.WritePropertyName("LogTime");
+                        writer.WriteValue(Logger.message.Time);
+                        writer.WritePropertyName("ClientIP");
+                        writer.WriteValue(Logger.message.ClientIP);
                     }
                     string TechnicalErrorInfoAll = strbldr.ToString();
 

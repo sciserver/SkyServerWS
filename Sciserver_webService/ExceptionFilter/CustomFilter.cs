@@ -109,6 +109,8 @@ namespace Sciserver_webService.ExceptionFilter
                 writer.WriteValue(errorMessage);
                 writer.WritePropertyName("LogMessageID");
                 writer.WriteValue(Logger.message.MessageId);
+                writer.WritePropertyName("LogTime");
+                writer.WriteValue(Logger.message.Time);
             }
             string TechInfoJson = strbldr.ToString();
 
@@ -137,7 +139,10 @@ namespace Sciserver_webService.ExceptionFilter
                 writer.WriteValue(ActivityInfo.Exception.StackTrace);
                 writer.WritePropertyName("InnerTrace");
                 writer.WriteValue(ActivityInfo.Exception.InnerException != null ? ActivityInfo.Exception.InnerException.StackTrace : "");
-
+                writer.WritePropertyName("LogTime");
+                writer.WriteValue(Logger.message.Time);
+                writer.WritePropertyName("ClientIP");
+                writer.WriteValue(Logger.message.ClientIP);
             }
             string TechInfoJsonAll = strbldr.ToString();
 

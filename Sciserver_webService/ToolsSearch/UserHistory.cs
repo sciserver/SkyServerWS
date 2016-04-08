@@ -396,7 +396,7 @@ namespace Sciserver_webService.ToolsSearch
             else
                 cmd.CommandText += KeyWords.MaxRows;
 
-            cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, '' as Parameters FROM MESSAGES as m JOIN SkyserverMessages as s on m.row_id = s.row_id";
+            cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss UTCzzz') as Time, content as Content, '' as Parameters FROM MESSAGES as m JOIN SkyserverMessages as s on m.row_id = s.row_id";
             //cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, shortTaskName as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, '' as Parameters FROM MESSAGES as m JOIN SkyserverMessages as s on m.row_id = s.row_id";
             //cmd.CommandText += " ROW_NUMBER() OVER( ORDER BY time DESC ) as RowIndex, task_name as Application, FORMAT(Time,'yyyy-MM-dd HH:mm:ss') as Time, content as Content, 'parameters' as Parameters FROM MESSAGES as m JOIN CustomMessages as c on (m.row_id = c.row_id AND custom_message_type = 1)";
             
