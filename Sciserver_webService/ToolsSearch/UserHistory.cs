@@ -160,29 +160,29 @@ namespace Sciserver_webService.ToolsSearch
         {
             ShortTaskNamesDict = new Dictionary<string, string>()
                                         {
-                                            { "Skyserver.GetRCFZ", "1"},
-                                            { "Skyserver.FrameById", "2"},
-                                            { "Skyserver.FrameByRCFZ", "3"},
-                                            { "Skyserver.SpecById", "4"},
-                                            { "Skyserver.SpecByPF", "5"},
+                                            { "Skyserver.GetRCFZ", "Skyserver.GetRCFZ"},
+                                            { "Skyserver.FrameById", "Skyserver.FrameById"},
+                                            { "Skyserver.FrameByRCFZ", "Skyserver.FrameByRCFZ"},
+                                            { "Skyserver.SpecById", "Skyserver.SpecById"},
+                                            { "Skyserver.SpecByPF", "Skyserver.SpecByPF"},
                                             { "Skyserver.Chart.F_SQL", "Image List SQL Search"},
                                             { "Skyserver.Chart.Image", "Finding Chart"},
                                             { "Skyserver.Chart.List", "Image List"},
                                             { "Skyserver.Chart.Navi", "Navigate Tool"},
-                                            { "Skyserver.Chart.ShowNearest", "6"},
+                                            { "Skyserver.Chart.ShowNearest", "Skyserver.Chart.ShowNearest"},
                                             { "Skyserver.CrossId", "Cross-ID Query"},
-                                            { "Skyserver.Explore.Allspec", "7"},
+                                            { "Skyserver.Explore.Allspec", "Skyserver.Explore.Allspec"},
                                             { "Skyserver.Explore.Image", "Explore Tool Image"},
-                                            { "Skyserver.Explore.FitsImg", "9"},
-                                            { "Skyserver.Explore.FitsSpec", "10"},
-                                            { "Skyserver.Explore.Galaxyzoo", "11"},
-                                            { "Skyserver.Explore.Matches", "12"},
-                                            { "Skyserver.Explore.Neighbors", "13"},
-                                            { "Skyserver.Explore.Parameters", "14"},
-                                            { "Skyserver.Explore.Plate", "15"},
+                                            { "Skyserver.Explore.FitsImg", "Skyserver.Explore.FitsImg"},
+                                            { "Skyserver.Explore.FitsSpec", "Skyserver.Explore.FitsSpec"},
+                                            { "Skyserver.Explore.Galaxyzoo", "Skyserver.Explore.Galaxyzoo"},
+                                            { "Skyserver.Explore.Matches", "Skyserver.Explore.Matches"},
+                                            { "Skyserver.Explore.Neighbors", "Skyserver.Explore.Neighbors"},
+                                            { "Skyserver.Explore.Parameters", "Skyserver.Explore.Parameters"},
+                                            { "Skyserver.Explore.Plate", "Skyserver.Explore.Plate"},
                                             { "Skyserver.Explore.Summary", "Explore Tool"},
-                                            { "Skyserver.GetImg.Plate", "16"},
-                                            { "Skyserver.GetImg.PlateAPOGEE", "17"},
+                                            { "Skyserver.GetImg.Plate", "Skyserver.GetImg.Plate"},
+                                            { "Skyserver.GetImg.PlateAPOGEE", "Skyserver.GetImg.PlateAPOGEE"},
                                             { "Skyserver.QuickLook.Image", "QuickLook Tool Image"},
                                             { "Skyserver.QuickLook.Summary", "QuickLook Tool"},
                                             { "Skyserver.Search.SearchForm", "SQL Search Form"},
@@ -268,8 +268,8 @@ namespace Sciserver_webService.ToolsSearch
             if (ds.Tables.Count > 0)
             {
 
-                if (format == "html" || format.ToLower().Contains("dataset"))
-                    InitializeShortTaskNamesDict();
+                //if (format == "html" || format.ToLower().Contains("dataset"))
+                InitializeShortTaskNamesDict();
 
                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                 {

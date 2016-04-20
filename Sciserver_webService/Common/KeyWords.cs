@@ -75,8 +75,6 @@ namespace Sciserver_webService.Common
         ///dasUrlBase URL
         public static string defaultSpRerun = ConfigurationManager.AppSettings["defaultSpRerun"];
 
-        public static string[] IPClientServers = ConfigurationManager.AppSettings["IPClientServers"].ToString().Split(',');
-
         public static string[] TasksInUserHistory = ConfigurationManager.AppSettings["TasksInUserHistory"].ToString().Split(',');
 
 
@@ -107,7 +105,6 @@ namespace Sciserver_webService.Common
         //public static string Database = "BEST" + ConfigurationManager.AppSettings["Release"].ToString();
         //public static string Database = ConfigurationManager.AppSettings["database"];
         public static string Release = DR;
-        public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
         public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
         
 
