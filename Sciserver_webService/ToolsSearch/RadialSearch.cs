@@ -37,7 +37,7 @@ namespace Sciserver_webService.ToolsSearch
             Validation val = new Validation(requestDir, "radialSearch");
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease =Convert.ToInt32( requestDir["datarelease"]);
-            skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
+            //skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
             try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
             Int64 limit = 1;

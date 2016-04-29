@@ -45,7 +45,7 @@ namespace Sciserver_webService.ToolsSearch
             Validation val = new Validation(requestDir);
             skyserverUrl = requestDir["skyserverUrl"];
             datarelease = Convert.ToInt32(requestDir["datarelease"]);
-            skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
+            //skyserverUrl = skyserverUrl + "DR" + datarelease.ToString();
             try { WhichPhotometry = requestDir["whichphotometry"]; } catch { }
 
             bool temp = val.ValidateOtherParameters(val.uband_s, val.gband_s, val.rband_s, val.iband_s, val.zband_s, val.jband_s, val.hband_s, val.kband_s, val.coordtype, val.returntype_s, val.limit_s);
