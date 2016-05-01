@@ -311,7 +311,7 @@ namespace Sciserver_webService.Common
             sb.AppendFormat("</head><body bgcolor=white>\n");
             sb.AppendFormat("<h2>SDSS query Results </h2>");
             sb.AppendFormat("<H3> <font color=green> Your query result has been stored into table \"" + TableName + "\" in CasJobs database \"MyDB\". </font></H3>\n");
-            sb.AppendFormat("<br><form method =\"POST\" target=\"_blank\" name=\"casjobsform\" action=\"" + ConfigurationManager.AppSettings["CASJobs"] + "MyDB.aspx\">");
+            sb.AppendFormat("<br><form method =\"POST\" target=\"GoToMyDB\" name=\"casjobsform\" action=\"" + ConfigurationManager.AppSettings["CASJobs"] + "MyDB.aspx\">");
             sb.AppendFormat("<input type=\"hidden\" name=\"token\" id=\"token\" value=\"" + Token + "\" />");
             sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"Go to MyDB\">");
             sb.AppendFormat("</form>");
