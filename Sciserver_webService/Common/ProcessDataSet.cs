@@ -467,7 +467,14 @@ namespace Sciserver_webService.Common
 
                         sb.AppendFormat("<tr align=center BGCOLOR=#eeeeff>");
                         for (int c = 0; c < NumColumns; c++)
-                            sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                        {
+                            object value = ds.Tables[t].Rows[r][c];
+                            if (value == DBNull.Value)
+                                sb.AppendFormat("<td nowrap><font size=-1>NULL</font></td>");
+                            else
+                                sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", value.ToString());
+                                //sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                        }
                         sb.AppendFormat("</tr>");
 
                         if (dasFields == true)

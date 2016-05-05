@@ -115,14 +115,26 @@ namespace Sciserver_webService.Common
                                 str = value.ToString();
                             }
 
-                            if ((type == typeof(string)) && (str.Contains(",")) && (str[0] != '"'))
+
+                            if (value == DBNull.Value)
                             {
-                                Regex.Replace(str, "\"([^\"]*)\"", "``$1''");
-                                writer.Write("\"" + str + "\"");
+                                writer.Write("NULL");
                             }
                             else
                             {
-                                writer.Write(str);
+                                if ((type == typeof(string)) && (str.Contains(",")) && (str[0] != '"'))
+                                {
+                                    str = Regex.Replace(str, "\"([^\"]*)\"", "``$1''");
+                                    writer.Write("\"" + str + "\"");
+                                }
+                                else
+                                {
+                                    if (type == typeof(string))
+                                    {
+                                        str = "\"" + str + "\"";
+                                    }
+                                    writer.Write(str);
+                                }
                             }
                             writer.Write((Index != table.Columns.Count - 1) ? "," : "\n");
                         }
@@ -177,7 +189,14 @@ namespace Sciserver_webService.Common
 
                             writer.Write("<tr align=center BGCOLOR=#eeeeff>");
                             for (int c = 0; c < NumColumns; c++)
-                                writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                            {
+                                object value = ds.Tables[t].Rows[r][c];
+                                if (value == DBNull.Value)
+                                    writer.Write("<td nowrap><font size=-1>NULL</font></td>");
+                                else
+                                    writer.Write("<td nowrap><font size=-1>{0}</font></td>", value.ToString()); 
+                                    //writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                            }
                             writer.Write("</tr>");
                         }
                         writer.Write("</TABLE>");
