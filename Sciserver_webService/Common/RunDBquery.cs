@@ -370,20 +370,18 @@ namespace Sciserver_webService.DoDatabaseQuery
                     Cmd.CommandTimeout = Int32.Parse(KeyWords.DatabaseSearchTimeout);
                     using (SqlDataReader reader = Cmd.ExecuteReader())
                     {
-                        reader.Read();
-                        
+                       
                         DataTable schema = reader.GetSchemaTable();
                         
                         DataTable dataTable = new DataTable();
                         dataTable.Load(reader);
 
-                        foreach (DataRow schemaRow in schema.Rows)
+                        for (int i = 0; i < schema.Rows.Count; i++)
                         {
-                            var columnName = schemaRow["ColumnName"].ToString();
-                            var columnSize = (int)schemaRow["ColumnSize"];
-                            if (dataTable.Columns[columnName].DataType.Equals(typeof(string)))
+                            var columnSize = (int)schema.Rows[i]["ColumnSize"];
+                            if (dataTable.Columns[i].DataType.Equals(typeof(string)))
                             {
-                                dataTable.Columns[columnName].MaxLength = columnSize;
+                                dataTable.Columns[i].MaxLength = columnSize;
                             }
                         }
 
