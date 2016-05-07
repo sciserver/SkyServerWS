@@ -363,14 +363,37 @@ namespace Sciserver_webService.DoDatabaseQuery
             using (SqlConnection Conn = new SqlConnection(KeyWords.DBconnectionString))
             {
                 Conn.Open();
-                SqlCommand Cmd = Conn.CreateCommand();
-                Cmd.CommandText = this.query;
-                //Cmd.CommandTimeout = KeyWords.DatabaseSearchTimeout == null || KeyWords.DatabaseSearchTimeout == "" ? 600 : Int32.Parse(KeyWords.DatabaseSearchTimeout);
-                Cmd.CommandTimeout = Int32.Parse(KeyWords.DatabaseSearchTimeout);
-                //SqlDataReader reader = await Cmd.ExecuteReaderAsync();
-                var Adapter = new SqlDataAdapter(Cmd);
-                Adapter.Fill(ResultsDataSet);
-                Conn.Close();
+                using (SqlCommand Cmd = Conn.CreateCommand())
+                {
+                    Cmd.CommandText = this.query;
+                    //Cmd.CommandTimeout = KeyWords.DatabaseSearchTimeout == null || KeyWords.DatabaseSearchTimeout == "" ? 600 : Int32.Parse(KeyWords.DatabaseSearchTimeout);
+                    Cmd.CommandTimeout = Int32.Parse(KeyWords.DatabaseSearchTimeout);
+                    using (SqlDataReader reader = Cmd.ExecuteReader())
+                    {
+                        reader.Read();
+                        
+                        DataTable schema = reader.GetSchemaTable();
+                        
+                        DataTable dataTable = new DataTable();
+                        dataTable.Load(reader);
+
+                        foreach (DataRow schemaRow in schema.Rows)
+                        {
+                            var columnName = schemaRow["ColumnName"].ToString();
+                            var columnSize = (int)schemaRow["ColumnSize"];
+                            if (dataTable.Columns[columnName].DataType.Equals(typeof(string)))
+                            {
+                                dataTable.Columns[columnName].MaxLength = columnSize;
+                            }
+                        }
+
+                        ResultsDataSet.Tables.Add(dataTable);
+                    }
+                    //SqlDataReader reader = await Cmd.ExecuteReaderAsync();
+                    //var Adapter = new SqlDataAdapter(Cmd);
+                    //Adapter.Fill(ResultsDataSet);
+                    //Conn.Close();
+                }
             }
         }
 
