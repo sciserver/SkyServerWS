@@ -12,15 +12,15 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SDSSFields:FieldArray");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.FieldArray");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SkyserverWS.SDSSFields.FieldArray");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SDSSFields:FieldArray");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.FieldArray");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.FieldArray, "SkyserverWS.SDSSFields.FieldArray");
         }   
     }
 }

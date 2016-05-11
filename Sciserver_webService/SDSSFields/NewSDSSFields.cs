@@ -15,7 +15,9 @@ namespace Sciserver_webService.SDSSFields
         public String sqlQuery { get; set; }
 
         public NewSDSSFields()
-        { }        
+        { }
+
+      
 
         public NewSDSSFields(Dictionary<string,string> dictionary, String positiontype) {
 
@@ -305,6 +307,24 @@ namespace Sciserver_webService.SDSSFields
             return FieldUrl(f.run, f.rerun, f.camcol, f.field, band);
         }
 
+
+        /// Added for SIAP
+        /// 
+
+        public NewSDSSFields(double ra, double dec, double sr)
+        {
+            this.ra = ra;
+            this.dec = dec;
+            this.sr = sr;
+        }
+
+        public string getFieldsArrayQuery()
+        {
+            cmdTemplate = FieldQueries.cmdTemplate1;
+            if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");
+            this.sqlQuery = this.SqlSelectCommand();
+            return this.sqlQuery;
+        }
         
         
    }

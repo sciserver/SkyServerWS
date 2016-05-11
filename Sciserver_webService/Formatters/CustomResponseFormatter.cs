@@ -20,7 +20,6 @@ namespace Sciserver_webService.Formatters
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpeg"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpg"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/png"));
-            
         }
 
         public override bool CanWriteType(System.Type type)

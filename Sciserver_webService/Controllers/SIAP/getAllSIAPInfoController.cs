@@ -21,8 +21,11 @@ namespace Sciserver_webService.Controllers
         public IHttpActionResult Get()
         {
 
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SIAP:getAllSIAPInfo");
+            //ProcessRequest request = new ProcessRequest();
+            //return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SIAP:getAllSIAPInfo");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SIAP.getAllSIAPInfo");
+            return request.runquery(this, KeyWords.SIAP, KeyWords.getSIAPInfoAll, "SkyserverWS.SIAP.getAllSIAPInfo");
+
         }
       
     }

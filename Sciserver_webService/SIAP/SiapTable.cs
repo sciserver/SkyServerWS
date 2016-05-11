@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Xml.Serialization;
 using System.Collections;
+using System.Configuration;
+using System.Data;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-
-using net.ivoa.VOTable;
-using Sciserver_webService.SDSSFields;
-using Sciserver_webService.Common;
 using System.Web;
+using net.ivoa.VOTable;
+using Newtonsoft.Json;
+using Sciserver_webService.Common;
+using Sciserver_webService.SDSSFields;
+
 
 namespace Sciserver_webService.sdssSIAP
 {
@@ -30,6 +34,7 @@ namespace Sciserver_webService.sdssSIAP
         private double pixPerDeg = 9088.0;
         private double scale = 3600.0 / 9088.0; // 0.396127, SDSS default scale in arcseconds/pixel
         private string datarelease = "";
+        private string casjobstaskname = "";
         
 
         public SiapTable()
@@ -38,10 +43,13 @@ namespace Sciserver_webService.sdssSIAP
             ///This part is added to get any data release working with thsi DR1 to DRxx
             ///******
             datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
+            //this.datarelease = datarelease;
+            this.casjobstaskname = "SDSSFields For SIAP";
+
             SDSSgetImage = SDSSgetImage.Replace("*DataRelease*", datarelease);
             string[] temp = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Split(new string[]{"siap"}, StringSplitOptions.None);
             UrlSdssFields = temp[0]+"SDSSFields";
-            ///******
+            //****
             
             ////old code
             //if (null != ppd)
@@ -334,7 +342,6 @@ namespace Sciserver_webService.sdssSIAP
                 x.DATA = new DATA();
                 x.DATA.Item = theData;
 
-
                 // add the fields with UCDs etc 
                 setupFields(this.RESOURCE[0].TABLE[0]);
 
@@ -409,34 +416,18 @@ namespace Sciserver_webService.sdssSIAP
         /// <param name="size"> width in degrees</param>
         /// <returns></returns>
 
-        protected string[][] setupValuesFits(double ra, double dec, double size1, double? size2, string bandpass)
+        protected  string[][] setupValuesFits(double ra, double dec, double size1, double? size2, string bandpass)
         {
-            //SdssFields sdssf = new SdssFields();
-            //sdssf.Url = UrlSdssFields;
-            SDSSFields.SDSSFields sdssf = new SDSSFields.SDSSFields();
+            runSDSSFields(ra, dec, (size1 * 60.0 * 0.5 + 8.4F));
+            
 
-            // we have degrees size1 it wants arcmin
-            Field[] fa; string uri;
-            if (size2.HasValue)
-               
-                //fa = sdssf.FieldArrayRect(ra, dec, size1, size2.Value);
-                uri = UrlSdssFields+"/FieldArrayRect?ra="+ra+"&dec="+dec+"&dra="+size1+"&ddec="+size2.Value;
-            else
-                //fa = sdssf.FieldArray(ra, dec, size1 * 60.0 * 0.5 + 8.4F);
-                uri = UrlSdssFields+"/FieldArray?ra="+ra+"&dec="+dec+"&radius="+(size1 * 60.0 * 0.5 + 8.4F);
-
-            ReturnSIAPresults rs=  new ReturnSIAPresults();
-            fa = rs.runSDSSField(uri);
-
-            // 8.4 is half diagonal is requested by the NearbyFrameEq SQL query to bring the
-            // correct number of frames.
             ArrayList list = new ArrayList();
             int count = 0;
 
-            for (int f = 0; f < fa.Length; f++)
+            for (int f = 0; f < fieldArray.Length; f++)
             {
 
-                IEnumerator enumer = fa[f].passband.GetEnumerator();
+                IEnumerator enumer = fieldArray[f].passband.GetEnumerator();
                 while (enumer.MoveNext())
                 {
                     string[] values = new string[FIELDCOUNT];
@@ -451,20 +442,18 @@ namespace Sciserver_webService.sdssSIAP
                         values[ind++] = "Sloan Digital Sky Survey - Filter " + p.filter;///title
                         values[ind++] = "" + p.wcs.NAXIS1;//width
                         values[ind++] = "" + p.wcs.NAXIS2;//height
-                        values[ind++] = "" + (p.wcs.NAXIS1 * p.wcs.NAXIS2);// size of data  Image";
-                        values[ind++] = "" + p.wcs.CRVAL2;
+                        values[ind++] = "" + (p.wcs.NAXIS1 * p.wcs.NAXIS2);// size of data  Image";                        
                         values[ind++] = "" + p.wcs.CRVAL1;
-                        // values[ind++] = "" + p.pixperdeg;// image scale
+                        values[ind++] = "" + p.wcs.CRVAL2;
                         values[ind++] = "" + 1 / p.pixperdeg; // image scale in degrees per pixel as the standard requires
                         values[ind++] = "image/fits";
                         values[ind++] = p.url;// url
-
                         values[ind++] = "J2000";// epoch
                         values[ind++] = "2";// naxes
                         values[ind++] = p.wcs.NAXIS1 + "," + p.wcs.NAXIS2; // naxis
-                        values[ind++] = p.wcs.CTYPE2 + "," + p.wcs.CTYPE1;// crtype
+                        values[ind++] = p.wcs.CTYPE1 + "," + p.wcs.CTYPE2;// crtype
                         values[ind++] = p.wcs.CRPIX2 + "," + p.wcs.CRPIX1; // crpix
-                        values[ind++] = p.wcs.CRVAL2 + "," + p.wcs.CRVAL1;//crval
+                        values[ind++] = p.wcs.CRVAL1 + "," + p.wcs.CRVAL2;//crval
                         values[ind++] = p.wcs.CD2_1 + "," + p.wcs.CD2_2 + "," + p.wcs.CD1_1 + "," + p.wcs.CD1_2;//cdval
 
                         count++;
@@ -539,6 +528,55 @@ namespace Sciserver_webService.sdssSIAP
                 t.TD[i].Text = new string[1];
                 t.TD[i].Text[0] = values[i];
             }
+        }
+
+
+
+
+        /*
+        * This is used to run SDSSFields Added by Deoyani Nandrekar-Heinis
+        */
+        public Field[] fieldArray;
+
+        public async void runSDSSFields(double ra, double dec, double sr)
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(KeyWords.casjobsREST + "contexts/" + datarelease + "/query");
+            NewSDSSFields newsdss = new NewSDSSFields(ra, dec, sr);
+            String query = newsdss.getFieldsArrayQuery();
+            StringContent content = new StringContent(this.getJsonContent(query, casjobstaskname));
+            content.Headers.ContentType = new MediaTypeHeaderValue(KeyWords.contentJson);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(KeyWords.contentDataset));
+            System.IO.Stream stream = await client.PostAsync(client.BaseAddress, content).Result.Content.ReadAsStreamAsync();
+            BinaryFormatter formatter = new BinaryFormatter();
+            DataSet ds;
+            try
+            {
+                ds = (DataSet)formatter.Deserialize(stream);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
+            fieldArray = newsdss.FieldArray(ds);
+        }
+
+        private String getJsonContent(String query, String casjobsTaskName)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.WriteStartObject();
+                writer.WritePropertyName("Query");
+                writer.WriteValue(query);
+                writer.WritePropertyName("TaskName");
+                writer.WriteValue(casjobsTaskName);
+                writer.WriteEndObject();
+            }
+            return sb.ToString();
         }
     }
 }

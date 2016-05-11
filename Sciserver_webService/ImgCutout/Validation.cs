@@ -32,8 +32,6 @@ namespace Sciserver_webService.ImgCutout
                 throw new ArgumentException("The input values are not in correct format. ra must be in [0,360], dec must be in [-90,90], scale must be in [0.015, 60.0], height and width must be in [64,2048]. \n Detail Error Message: "+e.Message);
             }
         }
-       
-
   
         public double getRa() {
             return this.ra;

@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Web.Http;
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.QueryTools;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
@@ -15,16 +14,16 @@ namespace Sciserver_webService.Controllers
     {
         [ExceptionHandleAttribute]
         public IHttpActionResult get() 
-        {   
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone,"ImagingQuery:ConeSearch");
+        {
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.ConeSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "ImagingQuery:ConeSearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ImagingQuery.ConeSearch");
+            return request.runquery(this, KeyWords.imagingQuery, KeyWords.cone, "SkyserverWS.ImagingQuery.ConeSearch");
         }
     }
 }

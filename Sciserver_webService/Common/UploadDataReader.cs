@@ -28,25 +28,29 @@ namespace Sciserver_webService.Common
         string[] columnNames;
         string type;
         string nearBy;
+        string radiusDefault = "1";// in arcminutes
 
-        public UploadDataReader() { }
-        public UploadDataReader(TextReader s)
+        public UploadDataReader(string RadiusDefault) { this.radiusDefault = RadiusDefault; }
+        public UploadDataReader(TextReader s, string RadiusDefault)
         {
             origReader = s;
+            this.radiusDefault = RadiusDefault;
         }
 
 
-        public string UploadTo(string radecText,string type, string nearBy)
+        public string UploadTo(string radecText, string type, string nearBy)
         {
             this.type = type;
             this.nearBy = nearBy;
-            string CommandText = createUploadTable();
+            //string CommandText = createUploadTable();
+            string CommandText = ""; 
             CommandText += loadUpload(radecText);
             CommandText += createXtable();
             return CommandText;
         }
 
-        public string UploadTo(string type, string nearBy) {
+        public string UploadTo(string type, string nearBy)
+        {
             this.type = type;
             this.nearBy = nearBy;
             ///string CommandText = createUploadTable();
@@ -54,25 +58,6 @@ namespace Sciserver_webService.Common
             CommandText += loadUpload();
             CommandText += createXtable();
             return CommandText;
-        }
-        
-
-        private string createUploadTable() {
-
-            string qry = "create table #upload ( up_id int, ";
-            for (int i = 0; i < columnNames.Length; i++)
-            {
-                qry += " up_" + columnNames[i] + " ";
-                //qry += " " + GetSqlType(i);
-                //if (GetSqlType(i) == SqlDbType.VarChar)
-                //    qry += "(MAX)";
-
-                qry += " " + SqlDbType.Float;
-                qry += ",";
-            }
-            qry = qry.Trim(',');
-            qry += ")";
-            return qry;            
         }
 
         private string loadUpload()
@@ -84,57 +69,120 @@ namespace Sciserver_webService.Common
             cmdQuery = createUploadTable();
             
             
-            cmdQuery += " Insert into #upload values ";
+            cmdQuery += " \nINSERT INTO #upload values ";
             
             int cnt = 0;
             line = origReader.ReadLine();
-            while (line != null)
+            if (columnNames.Length == 2)
             {
-                cnt++;
-                //string[] data = line.Split(',');
-                cmdQuery += "( " + cnt + "," + line + " ),";
-                line = origReader.ReadLine();
+                while (line != null)
+                {
+                    cnt++;
+                    //string[] data = line.Split(',');
+                    cmdQuery += "( " + cnt + "," + line + "," + radiusDefault  + " ),";
+                    line = origReader.ReadLine();
+                }
             }
+            else
+            {
+                while (line != null)
+                {
+                    cnt++;
+                    //string[] data = line.Split(',');
+                    cmdQuery += "( " + cnt + "," + line + " ),";
+                    line = origReader.ReadLine();
+                }
+            }
+
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
             
         }
 
+      
         private string loadUpload(string radecText)
         {
-            string cmdQuery = "";
-            cmdQuery += " Insert into #upload values ";
-            string[] lines = radecText.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
+            string[] lines = radecText.Split(new string[] { "\n", "\r\n", "\\n", "\\r\\n" }, StringSplitOptions.None);
+            columnNames = lines[0].Split(','); 
 
-            for (int i = 1; i < lines.Length; i++) {
-                cmdQuery += "( " + i + "," + lines[i] + " ),";
+            string cmdQuery = "";
+            cmdQuery = createUploadTable();
+            cmdQuery += " \nINSERT INTO #upload values ";
+
+            if (columnNames.Length == 2)
+            {
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (lines[i] != "")
+                    {
+                        cmdQuery += "( " + i + "," + lines[i] + "," + radiusDefault + " ),";
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (lines[i] != "")
+                    {
+                        cmdQuery += "( " + i + "," + lines[i] + " ),";
+                    }
+                }
+
+
             }
             cmdQuery = cmdQuery.Trim(',');
             return cmdQuery;
         }
 
-        private string createXtable() {
+        private string createUploadTable()
+        {
+
+            string qry = "\nCREATE TABLE #upload ( up_id int, ";
+            for (int i = 0; i < columnNames.Length; i++)
+            {
+                qry += " up_" + columnNames[i] + " ";
+                //qry += " " + GetSqlType(i);
+                //if (GetSqlType(i) == SqlDbType.VarChar)
+                //    qry += "(MAX)";
+
+                qry += " " + SqlDbType.Float;
+                qry += ",";
+            }
+            if(columnNames.Length == 2)
+            {
+                qry += " up_sep ";
+                qry += " " + SqlDbType.Float;
+                qry += ",";
+            }
+            qry = qry.Trim(',');
+            qry += ")";
+            return qry;
+        }
+
+        private string createXtable()
+        {
             string cmd = "";
             if (type == "spec")
             {
                 if (nearBy == "nearby")
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select SpecObjid from " + fun + ") S ";
+                    cmd += " \nINSERT INTO #x \nSELECT U.up_id, S.* \nFROM #upLoad U CROSS APPLY (SELECT SpecObjid from " + fun + ") S ";
                 }
                 else
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as SpecobjId ";
-                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    cmd += " \nINSERT INTO #x \nSELECT up_id," + fun + "as SpecobjId ";
+                    cmd += " \nFROM #upload \nWHERE" + fun + "IS NOT NULL ";
                 }
             }
             else
@@ -142,20 +190,20 @@ namespace Sciserver_webService.Common
                 if (nearBy == "nearby")
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,objID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,objID bigint) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearbyObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
-                    cmd += " INSERT INTO #x Select U.up_id, S.* from #upLoad U Cross Apply (select Objid from " + fun + ") S ";
+                    cmd += " \nINSERT INTO #x \nSELECT U.up_id, S.* \nFROM #upLoad U CROSS APPLY (SELECT Objid FROM " + fun + ") S ";
                 }
                 else
                 {
                     cmd = " ";
-                    cmd += " CREATE TABLE #x (up_id int,objID bigint) ";                    
+                    cmd += " \nCREATE TABLE #x (up_id int,objID bigint) ";                    
                     var fun = " ";
                     fun += " dbo.fGetNearestObjIdEq( up_ra,up_dec,up_sep ) ";
-                    cmd += " INSERT INTO #x SELECT up_id," + fun + "as objId ";
-                    cmd += " FROM #upload WHERE" + fun + "IS NOT NULL ";
+                    cmd += " \nINSERT INTO #x \nSELECT up_id," + fun + "as objId ";
+                    cmd += " \nFROM #upload \nWHERE" + fun + "IS NOT NULL ";
                 }
             }
             return cmd;
@@ -169,7 +217,7 @@ namespace Sciserver_webService.Common
         /// <param name="tableName"></param>
         /// <returns></returns>
         private string GetCreateTableQry(string tableName) {
-            string qry = "create table " + tableName + " (\n";
+            string qry = "\nCREATE TABLE " + tableName + " (\n";
             for (int i = 0; i < columnNames.Length; i++) {
                 qry += "\n[" + columnNames[i] + "]";
                 qry += " " + GetSqlType(i);

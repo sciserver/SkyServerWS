@@ -425,7 +425,7 @@ namespace Sciserver_webService.QueryTools
                 }
                 else
                 {
-                    joinClause += " JOIN ";
+                    joinClause += " \nJOIN ";
                     if (targdb)
                         joinClause += " TARG" + KeyWords.Release + ".";
                     joinClause += "dbo.fGetObjFromRect(" + raMin + "," + raMax + "," + decMin + "," + decMax + ") AS b ON ";
@@ -442,7 +442,7 @@ namespace Sciserver_webService.QueryTools
 
         private static string getConeJoin(string type, bool targdb, string raCenter, string decCenter, string radius)
         {
-            string joinClause = " JOIN ";
+            string joinClause = " \nJOIN ";
             if (targdb)
                 joinClause += " TARG" + KeyWords.Release + ".";
             double ra = Utilities.parseRA(raCenter);
@@ -515,14 +515,14 @@ namespace Sciserver_webService.QueryTools
             if (type == "spec")
             {
                 selectClause += " s.ra,s.dec,";
-                joinClause += " JOIN #x AS x ON x.SpecobjID=s.SpecobjID JOIN #upload AS u ON u.up_id = x.up_id ";
-                orderClause += " ORDER BY x.up_id ";
+                joinClause += " \nJOIN #x AS x ON x.SpecobjID=s.SpecobjID \nJOIN #upload AS u ON u.up_id = x.up_id ";
+                orderClause += " \nORDER BY x.up_id ";
             }
             else
             {
                 selectClause += " p.ra,p.dec, ";
-                joinClause += " JOIN #x AS x ON x.objID=p.objID JOIN #upload AS u ON u.up_id = x.up_id ";
-                orderClause += " ORDER BY x.up_id ";
+                joinClause += " \nJOIN #x AS x ON x.objID=p.objID \nJOIN #upload AS u ON u.up_id = x.up_id ";
+                orderClause += " \nORDER BY x.up_id ";
             }
         }
 
@@ -561,6 +561,25 @@ namespace Sciserver_webService.QueryTools
 
 
 
+        public static string query = "";
+        public static string QueryForUserDisplay = "";
+        public static void buildQueryMaster(string type, Dictionary<string, string> requestDictionary, string positionType)
+        {
+            Int64 limit;
+            try
+            {
+                limit = Convert.ToInt64(requestDictionary["limit"]);
+            }
+            catch { throw (new ArgumentException("Invalid numerical value for maximum number of rows in LIMIT=" + requestDictionary["limit"])); }
+            if (limit > Convert.ToInt64(KeyWords.MaxRows))
+            {
+                throw (new ArgumentException("Numerical value for maximum number of rows is out of range in LIMIT=" + requestDictionary["limit"] + ". Maximum number of rows allowed is " + Convert.ToInt64(KeyWords.MaxRows) + "."));
+            }
+            QueryForUserDisplay = buildQuery(type, requestDictionary, positionType);
+            query = QueryForUserDisplay;
+        }
+
+
         private static bool doStar = false, doGalaxy = false, doSky = false, doUnknown = false;
         private static bool ignoreImg = false, ignoreSpec = false, ignoreIRspec = false;
         private static string specAlias = "s";
@@ -591,11 +610,11 @@ namespace Sciserver_webService.QueryTools
             bool addQA = false;
             string nearBy = "";
             string[] options;
-            string selectClause = "SELECT ";
-            string fromClause = "FROM ";
+            string selectClause = "\nSELECT ";
+            string fromClause = "\nFROM ";
             if ("spec".Equals(type)) fromClause += KeyWords.Database + "..SpecObj as " + specAlias;
             if ("irspec".Equals(type)) fromClause += "apogeeStar as " + apogeeAlias;
-            string whereClause = "WHERE ";
+            string whereClause = "\nWHERE ";
             string filters = "";
             bool bestdb = true, targdb = false;
             string posType = "cone";
@@ -622,8 +641,19 @@ namespace Sciserver_webService.QueryTools
             //double calculatedRA = 0;
             //double calculatedDec = 0;
 
-            selectClause += "TOP " +  dictionary["limit"] + " ";
             
+            Int64 limit;
+            try
+            {
+                limit = Convert.ToInt64(dictionary["limit"]);
+                limit = (limit <= 0) ? Convert.ToInt64(KeyWords.MaxRows) : limit;
+                selectClause += "TOP " + limit.ToString() + " \n";
+            }
+            catch (Exception e) { selectClause += "TOP " + dictionary["limit"] + " \n"; }
+            
+
+
+
             //KeyValuePair<string, string> entry in dictionary
             foreach (string s in dictionary.Keys)
             {
@@ -633,7 +663,7 @@ namespace Sciserver_webService.QueryTools
 
                 switch (name)
                 {
-                    
+
                     case "imgparams":
                         options = getOptions(val);
                         ignoreImg = readImgFields(imgFields, options);
@@ -705,7 +735,7 @@ namespace Sciserver_webService.QueryTools
                             Bval = Utilities.parseDec(dictionary["Bcenter"]);
                             double convertedRA = Utilities.glon2ra(Lval, Bval);
                             double convertedDec = Utilities.glat2dec(Lval, Bval);
-                            joinClause += " JOIN dbo.fgetNearbyApogeeStarEq(" + convertedRA;
+                            joinClause += " \nJOIN dbo.fgetNearbyApogeeStarEq(" + convertedRA;
                             joinClause += "," + convertedDec + ",";
                             joinClause += dictionary["lbRadius"] + ") AS b ON b.apstar_id = " + apogeeAlias + ".apstar_id";
                         }
@@ -746,7 +776,7 @@ namespace Sciserver_webService.QueryTools
                         if (name != "raMin" && name != "raMax" && name != "decMin" && name != "decMax")
                             // all non-pos constraints constitute imaging constraints
                             imgConst = true;	       // so set flag to true
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)// 8 is the length of the initial string "WHERE "
                             whereClause += " AND";
                             whereClause += magLimits(name, val, tableAlias, magType);
                         break;
@@ -765,7 +795,7 @@ namespace Sciserver_webService.QueryTools
                         if (val.Length == 0)
                         break;
                             imgConst = true;
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND";
                             whereClause += magLimits(name, val, tableAlias, magType);
                         break;
@@ -782,7 +812,7 @@ namespace Sciserver_webService.QueryTools
                         if (val.Length == 0)
                             break;
                         imgConst = true;
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND";
                             whereClause += IRspecParamLimits(name, val, tableAlias);
                         break;
@@ -801,7 +831,7 @@ namespace Sciserver_webService.QueryTools
                         if (val.Length == 0)
                             break;
                         imgConst = true;
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND";
                         whereClause += IRspecParamLimits(name, val, tableAlias);
                         break;
@@ -821,23 +851,23 @@ namespace Sciserver_webService.QueryTools
                         // if not, prepend an AND.
                         if (val.Length == 0)
                             break;
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND ";
                         whereClause += "(p.score >= " + val + ")";
                         break;
                     case "redshiftMin":
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND";
                         whereClause += " s.z > " + val;
                         break;
                     case "redshiftMax":
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                             whereClause += " AND";
                         whereClause += " s.z < " + val;
                         break;
 
                     case "zWarning":                        
-                        if (whereClause.Length > 6)
+                        if (whereClause.Length > 8)
                                 whereClause += " AND";
                         whereClause += " s.zWarning = 0";                        
                         break;
@@ -860,7 +890,7 @@ namespace Sciserver_webService.QueryTools
                         }
                         if (specTypes.Length > 0)
                         {
-                            if (whereClause.Length > 6)
+                            if (whereClause.Length > 8)
                                 whereClause += " AND";
                             whereClause += " (" + specTypes + ")";
                         }
@@ -1021,7 +1051,7 @@ namespace Sciserver_webService.QueryTools
                 photoTable = "PhotoObj";
                 if (objType.Count > 0)
                 {
-                    if (whereClause.Length > 6)
+                    if (whereClause.Length > 8)
                         whereClause += " AND";
                     whereClause += " (";
                     for (int i = 0; i < objType.Count; i++)
@@ -1042,61 +1072,61 @@ namespace Sciserver_webService.QueryTools
 
             if (flagsOff.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + tableAlias + ".flags & (" + flagsOff + ") = 0)";
             }
             if (flagsOn.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + tableAlias + ".flags & (" + flagsOn + ") > 0)";
             }
             if (priFlagsOff.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + specAlias + ".primTarget & (" + priFlagsOff + ") = 0)";
             }
             if (priFlagsOn.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + specAlias + ".primTarget & (" + priFlagsOn + ") > 0)";
             }
             if (secFlagsOff.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + specAlias + ".secTarget & (" + secFlagsOff + ") = 0)";
             }
             if (secFlagsOn.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + specAlias + ".secTarget & (" + secFlagsOn + ") > 0)";
             }
             if (irTargetFlagsOff.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + apogeeAlias + ".apogee_target1 & (" + irTargetFlagsOff + ") = 0)";
             }
             if (irTargetFlagsOn.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + apogeeAlias + ".apogee_target1 & (" + irTargetFlagsOn + ") != 0)";
             }
             if (irTargetFlags2Off.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + apogeeAlias + ".apogee_target1 & (" + irTargetFlags2Off + ") = 0)";
             }
             if (irTargetFlags2On.Length > 0)
             {
-                if (whereClause.Length > 6)
+                if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + apogeeAlias + ".apogee_target1 & (" + irTargetFlags2On + ") != 0)";
             }
@@ -1114,11 +1144,11 @@ namespace Sciserver_webService.QueryTools
                 {
                     if (specFields[i] == "ra")
                     {
-                        selectClause += "str(s." + specFields[i] + ",13,8) as ra";
+                        selectClause += "cast(str(s." + specFields[i] + ",13,8) as float) as ra";
                     }
                     else if (specFields[i] == "[dec]")
                     {
-                        selectClause += "str(s." + specFields[i] + ",13,8) as dec";
+                        selectClause += "cast(str(s." + specFields[i] + ",13,8) as float) as dec";
                     }
                     else
                     {
@@ -1131,11 +1161,11 @@ namespace Sciserver_webService.QueryTools
                     specJoin = " ON s.targetObjID = p.objID";
                 else if (!targdb && !ignoreImg)
                     specJoin = " ON s.bestObjID = p.objID";
-                if (imgConst == true && ignoreImg)
+                if ((imgConst == true && ignoreImg) || (flagsOff.Length > 0 || flagsOn.Length > 0))
                 {
                     // if imaging constraints are specified, add a photo table join
                     //joinClause += "\n\tJOIN " + photoTable + " AS " + tableAlias + " ON ";
-                    joinClause += " JOIN " + photoTable + " AS " + tableAlias + " ON ";
+                    joinClause += " \nJOIN " + photoTable + " AS " + tableAlias + " ON ";
                     if (targdb)
                         joinClause += "s.targetobjid=" + tableAlias + ".objid";
                     else
@@ -1151,10 +1181,10 @@ namespace Sciserver_webService.QueryTools
             else if (type == "irspec")
             {
                 selectClause = buildSelectApogee(IRspecFields, specJoin, selectClause);
-                joinClause += " JOIN ";
+                joinClause += " \nJOIN ";
                 joinClause += apogeeObjectTable + " as " + apogeeObjectAlias;
                 joinClause += " ON " + apogeeAlias + ".apogee_id=" + apogeeObjectAlias + ".apogee_id";
-                joinClause += " JOIN ";
+                joinClause += " \nJOIN ";
                 joinClause += aspcapTable + " as " + aspcapAlias;
                 joinClause += " ON " + apogeeAlias + ".apstar_id=" + aspcapAlias + ".apstar_id";
             }
@@ -1164,16 +1194,24 @@ namespace Sciserver_webService.QueryTools
                 fromClause = buildFrom(bestdb, targdb, photoTable, imgFields, "", fromClause);
                 if (!ignoreSpec)
                 {
-                    fromClause += " LEFT OUTER JOIN " + KeyWords.Database + "..SpecObj s ON p.objID = s.bestObjID";
+                    fromClause += " \nLEFT OUTER JOIN " + KeyWords.Database + "..SpecObj s ON p.objID = s.bestObjID";
                     for (int i = 0; i < specFields.Count; i++)
                     {
                         if (specFields[i] == "ra")
                         {
-                            selectClause += ",ISNULL(str(s." + specFields[i] + ",13,8),0) as ra";
+                            selectClause += ",ISNULL(cast(str(s." + specFields[i] + ",13,8) as float),0) as ra";
                         }
                         else if (specFields[i] == "[dec]")
                         {
-                            selectClause += ",ISNULL(str(s." + specFields[i] + ",13,8),0) as dec";
+                            selectClause += ",ISNULL(cast(str(s." + specFields[i] + ",13,8) as float),0) as dec";
+                        }
+                        else if (specFields[i] == "z")
+                        {
+                            selectClause += ",ISNULL(s." + specFields[i] + ",0) as redshift";
+                        }
+                        else if (specFields[i] == "zErr")
+                        {
+                            selectClause += ",ISNULL(s." + specFields[i] + ",0) as redshiftErr";
                         }
                         else
                         {
@@ -1186,7 +1224,7 @@ namespace Sciserver_webService.QueryTools
                 selectClause += ", p.score as score";
             if (filters.Length > 0)
                 selectClause += ", '" + filters + "' as filter";
-            if (whereClause.Length <= 6)
+            if (whereClause.Length <= 8)
                 whereClause = "";
                 cmd += selectClause + " " + fromClause + joinClause + " " + whereClause + " " + orderClause;
             
@@ -1198,14 +1236,14 @@ namespace Sciserver_webService.QueryTools
             string bestAlias = "p", targAlias = "t";
             if (bestdb)
             {
-                if (fromClause.Length > 5)
-                    fromClause += " JOIN ";
+                if (fromClause.Length > 7)// 7 is the length of the initial string "FROM "
+                    fromClause += " \nJOIN ";
                 fromClause += KeyWords.Database + ".." + photoTable + " AS " + bestAlias + joinCond;
             }
             else
             {
-                if (fromClause.Length > 5)
-                    fromClause += " JOIN ";
+                if (fromClause.Length > 7)// 7 is the length of the initial string "FROM "
+                    fromClause += " \nJOIN ";
                 fromClause += " TARG" + KeyWords.Release + ".." + photoTable + " AS " + bestAlias + joinCond;
             }
 
@@ -1226,7 +1264,7 @@ namespace Sciserver_webService.QueryTools
                 }
                 else if (theFields[i] == "glon" | theFields[i] == "glat")
                 {
-                    selectClause += addImgSelect(theFields[i] + ",9,5) " + theFields[i], "str(a");
+                    selectClause += addImgSelect(theFields[i] + ",9,5) as float) " + theFields[i], "cast(str(a");
                 }
                 else { selectClause += addImgSelect(theFields[i], "a"); }
                 if (i < (theFields.Count - 1))
@@ -1268,28 +1306,28 @@ namespace Sciserver_webService.QueryTools
             switch (imgField)
             {
                 case "ra":
-                    selectClause += "str(" + table + "." + imgField + ",13,8) as ra";
+                    selectClause += "cast(str(" + table + "." + imgField + ",13,8) as float) as ra";
                     break;
                 case "[dec]":
-                    selectClause += "str(" + table + "." + imgField + ",13,8) as dec";
+                    selectClause += "cast(str(" + table + "." + imgField + ",13,8) as float) as dec";
                     break;
                 case "model_colors":
-                    selectClause += "str(" + table + ".u - " + table + ".g,11,8) as ugModelColor,";
-                    selectClause += "str(" + table + ".g - " + table + ".r,11,8) as grModelColor,";
-                    selectClause += "str(" + table + ".r - " + table + ".i,11,8) as riModelColor,";
-                    selectClause += "str(" + table + ".i - " + table + ".z,11,8) as izModelColor";
+                    selectClause += "cast(str(" + table + ".u - " + table + ".g,11,8) as float) as ugModelColor,";
+                    selectClause += "cast(str(" + table + ".g - " + table + ".r,11,8) as float) as grModelColor,";
+                    selectClause += "cast(str(" + table + ".r - " + table + ".i,11,8) as float) as riModelColor,";
+                    selectClause += "cast(str(" + table + ".i - " + table + ".z,11,8) as float) as izModelColor";
                     break;
                 case "ugModelColor":
-                    selectClause += "str(" + table + ".u - " + table + ".g,11,8) as ugModelColor";
+                    selectClause += "cast(str(" + table + ".u - " + table + ".g,11,8) as float) as ugModelColor";
                     break;
                 case "grModelColor":
-                    selectClause += "str(" + table + ".g - " + table + ".r,11,8) as grModelColor";
+                    selectClause += "cast(str(" + table + ".g - " + table + ".r,11,8) as float) as grModelColor";
                     break;
                 case "riModelColor":
-                    selectClause += "str(" + table + ".r - " + table + ".i,11,8) as riModelColor";
+                    selectClause += "cast(str(" + table + ".r - " + table + ".i,11,8) as float) as riModelColor";
                     break;
                 case "izModelColor":
-                    selectClause += "str(" + table + ".i - " + table + ".z,11,8) as izModelColor";
+                    selectClause += "cast(str(" + table + ".i - " + table + ".z,11,8) as float) as izModelColor";
                     break;
                 case "SDSSname":
                     selectClause += "dbo.fIAUFromEq(" + table + ".ra," + table + ".[dec]) as SDSSname";

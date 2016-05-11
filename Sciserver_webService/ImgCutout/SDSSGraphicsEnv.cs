@@ -59,7 +59,8 @@ namespace Sciserver_webService.ImgCutout
         /// <summary>
         /// for Apoggee objects
         /// </summary>
-        private Pen apoPen = new Pen(Color.MintCream, 2);	
+        
+        private Pen apoPen = new Pen(Color.SeaShell, 1);	
         //-----------------------------------
 		// label formats
         //-----------------------------------
@@ -584,12 +585,13 @@ namespace Sciserver_webService.ImgCutout
             //PointF p = proj.EqToScreen(oRa, oDec, 0.0F);
             
             //gc.DrawEllipse(apoPen, p.X - size / 2, p.Y - size / 2, size, size);
-            float b = 0.55F * size;
+            float b = 0.95F * size;
             PointF p = proj.EqToScreen(oRa, oDec, 0.0F);
-            PointF[] tri = new PointF[3];
-            tri[0] = new PointF(p.X - b, p.Y - b);
-            tri[1] = new PointF(p.X + b, p.Y - b);
+            PointF[] tri = new PointF[4];
+            tri[0] = new PointF(p.X, p.Y - b);
+            tri[1] = new PointF(p.X + b, p.Y );
             tri[2] = new PointF(p.X, p.Y + b);
+            tri[3] = new PointF(p.X - b, p.Y );
             gc.DrawPolygon(apoPen, tri);
 
         }

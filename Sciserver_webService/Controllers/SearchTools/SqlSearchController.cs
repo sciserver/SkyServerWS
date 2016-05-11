@@ -7,7 +7,6 @@ using System.Web.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Sciserver_webService.ExceptionFilter;
-using Sciserver_webService.UseCasjobs;
 using net.ivoa.VOTable;
 using Sciserver_webService.Common;
 using SciServer.Logging;
@@ -24,14 +23,14 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Searcg Tool.");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.SqlSearch");
+            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "SkyserverWS.SearchTools.SqlSearch");
         }
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "Simple SQL Searcg Tool.");
-        }     
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SearchTools.SqlSearch");
+            return request.runquery(this, KeyWords.sqlSearchQuery, KeyWords.sqlSearchQuery, "SkyserverWS.SearchTools.SqlSearch");
+        }
     }
 }

@@ -15,18 +15,32 @@ namespace Sciserver_webService.Common
         //// Authentication Token
         public static string XAuthToken = "X-Auth-Token";
 
+        //// Name of variable that stores token in the cookie present in the header (if this cookie exists)
+        public static string CookieToken = "Keystone=token";
+
+        
         // this is data release and target setting for all the different services, eg. DR10
         public static string DR = ConfigurationManager.AppSettings["TARGET"];
         /// <summary>
         /// Authentication settings used for the KeyStone authentication settings
         /// </summary>
         public static string xauth = "X-Auth-Token";
+        public static string contentHTML = "text/html";
         public static string contentJson = "application/json";
         public static string contentXML = "application/xml";
         public static string contentCSV = "text/plain";
         public static string contentVOTable = "application/x-votable+xml";// – VOTABLE XML
         public static string contentFITS = "application/fits"; // – FITS
         public static string contentDataset = "application/x-dataset";// – serialized .NET DataSet
+
+
+        /// <summary>
+        /// Types of Logging messages
+        /// </summary>
+        public static string CustomMessage = "CustomMessage";
+
+        public static string DoLogWithSpExecuteSQL = ConfigurationManager.AppSettings["DoLogWithSpExecuteSQL"] == "yes" ? "1" : "0";
+
 
         /// <summary>
         /// Casjobs setting for REST api
@@ -43,9 +57,33 @@ namespace Sciserver_webService.Common
         /// <summary>
         /// 
         /// </summary>
-        public static string ConeSelect = ConfigurationSettings.AppSettings["ConeSelect"];
+        public static string ConeSelect = ConfigurationManager.AppSettings["ConeSelect"];
         
+        ///Maximum number of rows returned by SQExecuteSQL
+        public static string MaxRows = ConfigurationManager.AppSettings["MaxRows"];
+
+        ///skyversion
+        public static string skyVersion = ConfigurationManager.AppSettings["skyVersion"];
         
+
+        ///Data Release
+        public static string DataRelease = ConfigurationManager.AppSettings["Release"];
+
+        ///dasUrlBase URL
+        public static string dasUrlBase = ConfigurationManager.AppSettings["dasUrlBase"];
+
+        ///dasUrlBase URL
+        public static string defaultSpRerun = ConfigurationManager.AppSettings["defaultSpRerun"];
+
+        public static string[] TasksInUserHistory = ConfigurationManager.AppSettings["TasksInUserHistory"].ToString().Split(',');
+
+
+        public static string DBconnectionString = ConfigurationManager.AppSettings["DBconnectionString"];
+        public static string SciserverLogDBconnection = ConfigurationManager.AppSettings["SciserverLogDBconnection"];
+        public static string DatabaseSearchTimeout = ConfigurationManager.AppSettings["DatabaseSearchTimeout"] ?? "600";//in seconds
+
+        public static string NameResolverURL = ConfigurationManager.AppSettings["nameResolverURL"];
+
         ///Casjob messages for VOServices
         public static string ConeSearch = "FOR CONE SEARCH";
         public static string SIAPMessage = "FOR SIAP";
@@ -63,10 +101,14 @@ namespace Sciserver_webService.Common
         /// <summary>
         /// Imaging Query
         /// </summary>
-        public static string Database = ConfigurationManager.AppSettings["database"];
+        public static string Database = ""; // the reason of Database = "" is that there is no need of database context included in the query. The context is given to the CasJObsAPI in the URL /contextx/{context_name}/tables
+        //public static string Database = "BEST" + ConfigurationManager.AppSettings["Release"].ToString();
+        //public static string Database = ConfigurationManager.AppSettings["database"];
         public static string Release = DR;
-        public static int DefTimeout = Int32.Parse(ConfigurationManager.AppSettings["defTimeout"]);
+        public static int TimeoutCASJobs = Int32.Parse(ConfigurationManager.AppSettings["TimeoutCASJobs"] ?? "100000");// default is 100000ms
         
+
+
         /// <summary>
         /// For different web service type names 
         /// </summary>
@@ -74,11 +116,18 @@ namespace Sciserver_webService.Common
         public static string spectroQuery = "spec";
         public static string irspectroQuery = "irspec";
         public static string sqlSearchQuery = "SqlSearch";
+        public static string databaseSearchQuery = "DatabaseSearch";
         public static string RectangularQuery = "RectangularSearch";
         public static string RadialQuery = "RadialSearch";
         public static string ConeSearchQuery = "ConeSearch";
         public static string SIAP = "SIAP";
         public static string SDSSFields = "SDSSFields";
+        public static string CrossIdQuery = "CrossIdSearch";
+        public static string ObjectQuery = "ObjectSearch";
+        public static string UserHistoryQuery = "UserHistory";
+
+
+        public static float EqSearchRadius = float.Parse(ConfigurationManager.AppSettings["eqSearchRadius"] ?? "0.75");
         
 
         public static string limit = "limit";
@@ -106,8 +155,8 @@ namespace Sciserver_webService.Common
         public static string conelb = "conelb";       
         //SIAP
         public static string getSIAP = "getSIAP";
-        public static string getSIAPInfo = "getSIAP";
-        public static string getSIAPInfoAll = "getSIAP";        
+        public static string getSIAPInfo = "getSIAPInfo";
+        public static string getSIAPInfoAll = "getSIAPInfoAll";        
         //SDSSFields
         public static string FieldArray = "FieldArray";
         public static string FieldArrayRect = "FieldArrayRect";
@@ -185,7 +234,7 @@ namespace Sciserver_webService.Common
 
 
         // this skyserver url
-        //public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
+        public static string skyserverUrl = ConfigurationManager.AppSettings["skyserverUrl"];
         
         
     }

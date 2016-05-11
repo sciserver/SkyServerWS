@@ -3,6 +3,7 @@
 [Oo]bj
 
 # User-specific Files
+/.vs
 *.suo
 *.user
 *.sln.docstates

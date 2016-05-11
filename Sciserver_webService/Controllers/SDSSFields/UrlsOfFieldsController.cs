@@ -21,15 +21,15 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.UrlsOfFields");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SkyserverWS.SDSSFields.UrlsOfFields");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SDSSFields:UrlsOfFields");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SDSSFields.UrlsOfFields");
+            return request.runquery(this, KeyWords.SDSSFields, KeyWords.UrlsOfFields, "SkyserverWS.SDSSFields.UrlsOfFields");
         }
         ///*** input parameters are [FromUri] String ra, [FromUri] String dec, [FromUri] String radius, [FromUri] String band
     }

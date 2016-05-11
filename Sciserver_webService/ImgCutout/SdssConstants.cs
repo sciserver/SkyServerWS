@@ -1,8 +1,6 @@
-// #define DR2PATCH
-///Current version
-///ID:          $Id: SdssConstants.cs,v 1.10 2007/07/23 17:10:30 nieto Exp $
-///Revision:    $Revision: 1.10 $
-///Date:        $Date: 2007/07/23 17:10:30 $
+/// Updated SDSSConstants.cs many iterations since August 2009
+/// @Deoyani Nandrekar-Heinis
+
 using System;
 using System.Configuration;
 using System.Drawing;
@@ -36,7 +34,7 @@ namespace Sciserver_webService.ImgCutout
         //public static string survey = "sdss";
         public static Boolean isSdss = true;
 
-
+        public static int highestDR = 12;
         private static string _DataRelease = 
             ConfigurationManager.AppSettings["DataRelease"].ToUpper();
 
@@ -253,19 +251,11 @@ namespace Sciserver_webService.ImgCutout
         {
             get
             {
-                if(
-                    (_DataRelease=="EDR") ||
-                    (_DataRelease=="DR1") ||
-                    (_DataRelease=="DR2") ||
-                    (_DataRelease=="DR3") ||
-                    (_DataRelease=="DR4") ||
-                    (_DataRelease=="DR5") ||
-                    (_DataRelease=="DR6") ||
-                    (_DataRelease=="DR7") ||
-                    (_DataRelease=="DR8") ||
-                    (_DataRelease=="DR9") ||
-                    (_DataRelease=="DR10") 
-                  ) return _DataRelease;
+                for (int i = 0; i <= highestDR; i++)
+                {                    
+                    if((_DataRelease == "DR"+i)||(_DataRelease == "EDR"))
+                        return _DataRelease;
+                }
                 return null;
             }
         }
@@ -282,19 +272,10 @@ namespace Sciserver_webService.ImgCutout
                 else
                     _DR = int.Parse(sDataRelease.Remove(0,2));
                 
-                if (
-                    (_DR == 0) ||
-                    (_DR == 1) ||
-                    (_DR == 2) ||
-                    (_DR == 3) ||
-                    (_DR == 4) ||
-                    (_DR == 5) ||
-                    (_DR == 6) ||
-                    (_DR == 7) ||
-                    (_DR == 8) ||
-                    (_DR == 9) ||
-                    (_DR == 10)
-                  ) return _DR;
+                for (int i = 0; i <= highestDR; i++ )
+                    if(_DR == i)  
+                        return _DR;
+
                 return -1;
             }
         }
@@ -365,4 +346,7 @@ namespace Sciserver_webService.ImgCutout
         Trying to include projection.cs class in project
         Revision 1.2  2003/03/19 18:49:55  nieto
         more clean up
+ * 
+ * Revision
+ * Lot of changes done since August 2009 by Deoyani for DR8 onwards/.
 */

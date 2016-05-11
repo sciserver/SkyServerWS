@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Text.RegularExpressions;
 using System.Data.SqlTypes;
 using System.Globalization;
@@ -220,8 +216,8 @@ namespace Sciserver_webService.Common
 
         public static double glon2ra(double L, double B)
         {
-            // function to convert from a galactic longitude (b) to right ascension
-            // input: the galactic latitude (l) and longitude (b) of a point in degrees
+            // function to convert from a galactic longitude (l) to right ascension
+            // input: the galactic latitude (b) and longitude (l) of a point in degrees
             // output: the celestial RA in degrees
 
             double i = 192.859508;
@@ -250,8 +246,8 @@ namespace Sciserver_webService.Common
 
         public static double glat2dec(double L, double B)
         {
-            // function to convert from a galactic latitude (L) to declination
-            // input: the galactic latitude (L) and longitude (B) of a point in degrees
+            // function to convert from a galactic latitude (B) to declination
+            // input: the galactic latitude (B) and longitude (L) of a point in degrees
             // output: that point's celestial dec in degrees
 
             double i = 192.859508;
@@ -292,15 +288,17 @@ namespace Sciserver_webService.Common
         {
             if (val > hi)
             {
-                throw new Exception(name + " must be less than " + hi);
+                //throw new Exception(name + " must be less than " + hi);
+                throw new Exception(name + " must be between " + lo.ToString() + " and " + hi.ToString() + ".");
             }
             if (val < lo)
             {
-                throw new Exception(name + " must be more than " + lo);
+                //throw new Exception(name + " must be more than " + lo);
+                throw new Exception(name + " must be between " + lo.ToString() + " and " + hi.ToString() + ".");
             }
             if (double.IsNaN(val))
             {
-                throw new Exception("Please enter numerical values for " + name);
+                throw new Exception("Please enter numerical values for " + name + ".");
             }
         }
 
@@ -308,19 +306,21 @@ namespace Sciserver_webService.Common
         {
             if (min > max)
             {
-                throw new Exception("Minimum " + name + " value must be less than maximum");
+                throw new Exception("Minimum " + name + " magnitude must be less than maximum "+name+" magnitude.");
             }
             if (max > hi)
             {
-                throw new Exception("Max " + name + " must be less than " + hi);
+                //throw new Exception("Max " + name + " must be less than " + hi);
+                throw new Exception(name + " magnitude must be between " + lo.ToString() + " and " + hi.ToString());
             }
             if (min < lo)
             {
-                throw new Exception("Min " + name + " must be more than " + lo);
+                //throw new Exception("Min " + name + " must be more than " + lo);
+                throw new Exception(name + " magnitude must be between " + lo.ToString() + " and " + hi.ToString());
             }
             if (double.IsNaN(min) || double.IsNaN(max))
             {
-                throw new Exception("Please enter numerical values for " + name + " min and max");
+                throw new Exception("Please enter numerical values for minimum and maximum " + name + " magnitude.");
             }
         }
     }

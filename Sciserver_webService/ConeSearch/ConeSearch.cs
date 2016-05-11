@@ -17,7 +17,7 @@ namespace Sciserver_webService.ConeSearch
         public ConeSearch() { }
         public ConeSearch(Dictionary<string, string> dictionary) {
             this.validateInput(dictionary);
-            if (!CheckLimits(ra, dec, sr)) throw new Exception("check the values of ra,dec and search radius");
+            if (!CheckLimits(ra, dec, sr)) throw new Exception("Check the values of ra, dec and search radius. Permitted values are -90 <= dec <= 90, 0 <= ra <= 360 and sr > 0.");
         }
 
         private bool CheckLimits(System.Double ra, System.Double dec, System.Double sr)

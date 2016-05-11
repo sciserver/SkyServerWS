@@ -7,7 +7,6 @@ using Sciserver_webService.ConeSearch;
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.casjobs;
 using Sciserver_webService.Models;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 using net.ivoa.VOTable;
@@ -20,15 +19,16 @@ namespace Sciserver_webService.Controllers
         [ExceptionHandleAttribute]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);            
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
 
         [ExceptionHandleAttribute]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, KeyWords.ConeSearch);
+
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.ConesearchService");
+            return request.runquery(this, KeyWords.ConeSearchQuery, KeyWords.cone, "SkyserverWS.ConesearchService");
         }
         //[ExceptionHandleAttribute]
         //public VOTABLE Get([FromUri] String ra = null, [FromUri] String dec = null, [FromUri] String sr = null)

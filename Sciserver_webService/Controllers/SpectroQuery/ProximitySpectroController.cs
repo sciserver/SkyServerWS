@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Web.Http;
 using Sciserver_webService.ExceptionFilter;
 using Sciserver_webService.QueryTools;
-using Sciserver_webService.UseCasjobs;
 using Sciserver_webService.Common;
 
 namespace Sciserver_webService.Controllers
@@ -17,16 +16,16 @@ namespace Sciserver_webService.Controllers
         [HttpPost]
         public IHttpActionResult post()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.ProximitySearch");
+            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
 
         [ExceptionHandleAttribute]
-        [HttpPost]
+        //[HttpPost]
         public IHttpActionResult get()
         {
-            ProcessRequest request = new ProcessRequest();
-            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SpectroQuery:ProximitySearch");
+            ProcessRequest request = new ProcessRequest(this.Request, "SkyserverWS.SpectroQuery.ProximitySearch");
+            return request.proximityQuery(this, KeyWords.spectroQuery, KeyWords.proximity, "SkyserverWS.SpectroQuery.ProximitySearch");
         }
     }
 }

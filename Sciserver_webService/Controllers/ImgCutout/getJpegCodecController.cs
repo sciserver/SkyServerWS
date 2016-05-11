@@ -22,42 +22,14 @@ namespace Sciserver_webService.Controllers
         //// Get The cone search results
         [ExceptionHandleAttribute]
 
-        public HttpResponseMessage Get([FromUri] string  R= null, [FromUri] string C = null, [FromUri] string F = null, [FromUri] string Z = "0")
+        public HttpResponseMessage Get([FromUri] string  R= null, [FromUri] string C = null, [FromUri] string F = null, [FromUri] string Z = "0", [FromUri]String token = "")
         {
 
+            RequestMisc rm = new RequestMisc(this.Request, "SkyserverWS.ImgCutout.getJpegCodec");
+            this.Request.RequestUri = rm.AddTaskNameToURI(this.Request.RequestUri);
+            LoggedInfo ActivityInfo = rm.ActivityInfo;
+
             HttpResponseMessage resp = new HttpResponseMessage();
-            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
-            string token = "";
-            string userid = "unknown";
-            IEnumerable<string> values;
-            if (ControllerContext.Request.Headers.TryGetValues(KeyWords.XAuthToken, out values))
-            {
-                try
-                {
-                    // Keystone authentication
-                    token = values.First();
-                    var userAccess = Keystone.Authenticate(token);
-
-                    Message message = log.CreateCustomMessage("Auth-SQlSearchRequest", JsonConvert.SerializeObject(Request));
-                    userid = userAccess.User.Id;
-                    message.UserId = userAccess.User.Id;
-                    log.SendMessage(message);
-                }
-                catch (Exception ex)
-                {
-
-                    Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, ex.Message);
-                    message.UserId = userid;
-                    log.SendMessage(message);
-                    throw new UnauthorizedAccessException("Given token is not authorized.");
-                }
-            }
-            else
-            {
-                Message message = log.CreateCustomMessage(KeyWords.loggingMessageType, ControllerContext.Request.ToString());
-                message.UserId = userid;
-                log.SendMessage(message);
-            }
            
             Validation valid = new Validation();
 
@@ -68,6 +40,13 @@ namespace Sciserver_webService.Controllers
                 resp.Content = new ByteArrayContent(img.GetJpegImg(valid.getRun(), valid.getCamcol(), valid.getField(),valid.getZoom(), token));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                 resp.StatusCode = HttpStatusCode.OK;
+
+                //logging
+                SciserverLogging logger = new SciserverLogging();
+                ActivityInfo.Message = rm.GetLoggedMessage("");
+                ActivityInfo.DoShowInUserHistory = false;
+                logger.LogActivity(ActivityInfo, "SkyserverMessage");
+
                 return resp;
             }
 

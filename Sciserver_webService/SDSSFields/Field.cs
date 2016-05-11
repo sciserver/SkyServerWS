@@ -58,31 +58,6 @@ namespace Sciserver_webService.SDSSFields
 
             this.bandUrls = urls;
 		}
-
-        //******** For SIAP etc added by deoyani
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="row"></param>
-        public Field(Hashtable row)
-        {
-            this.stripe = Convert.ToInt16(row["stripe"]);
-            this.fieldId = Convert.ToUInt64(row["fieldId"]);
-            this.run = Convert.ToInt16(row["run"]);
-            this.rerun = Convert.ToInt16(row["rerun"]);
-            this.camcol = Convert.ToInt16(row["camcol"]);
-            this.field = Convert.ToInt16(row["field"]);
-            this.node =Convert.ToDouble(row["node"]); // only for display
-            this.incl = Convert.ToDouble(row["incl"]); //  -"-
-           
-            string[] bands = { "u", "g", "r", "i", "z" };
-
-            passband = new Band[bands.Length];
-            for (int i = 0; i < passband.Length; i++)
-            {
-                passband[i] = new Band(row,bands[i]);
-            }
-        }
 	}
 }
 
