@@ -85,10 +85,10 @@ namespace Sciserver_webService.ToolsSearch
 
             try
             {
-                this.ra = Convert.ToDouble(requestDir["min_ra"]);
-                this.dec = Convert.ToDouble(requestDir["min_dec"]);
-                this.ra_max = Convert.ToDouble(requestDir["max_ra"]);
-                this.dec_max = Convert.ToDouble(requestDir["max_dec"]);
+                this.ra = Utilities.parseRA(requestDir["min_ra"]);
+                this.dec = Utilities.parseDec(requestDir["min_dec"]);
+                this.ra_max = Utilities.parseRA(requestDir["max_ra"]);
+                this.dec_max = Utilities.parseDec(requestDir["max_dec"]);
             }
             catch (FormatException fx) { throw new ArgumentException("Error: Input RA and Dec should be valid numerical values."); }
             catch (Exception e) { throw new ArgumentException("There are not enough parameters to process your request."); }
@@ -209,8 +209,8 @@ namespace Sciserver_webService.ToolsSearch
 
             try
             {
-                this.ra = Convert.ToDouble(requestDir["ra"]);
-                this.dec = Convert.ToDouble(requestDir["dec"]);
+                this.ra = Utilities.parseRA(requestDir["ra"]);
+                this.dec = Utilities.parseDec(requestDir["dec"]);
                 this.radius = Convert.ToDouble(requestDir["radius"]);
                 try
                 {
