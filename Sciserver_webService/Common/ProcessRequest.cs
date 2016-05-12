@@ -136,7 +136,7 @@ namespace Sciserver_webService.Common
             DataSet ResultsDataSet = new DataSet();
 
             HttpResponseMessage resp = new HttpResponseMessage();
-            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
+            Logger log = MvcApplication.Log;
 /*
             try
             {
@@ -376,7 +376,7 @@ namespace Sciserver_webService.Common
 
                 /// 
                 HttpResponseMessage resp = new HttpResponseMessage();
-                Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
+                Logger log = MvcApplication.Log;
                 String query = "";
                 /*
                 try

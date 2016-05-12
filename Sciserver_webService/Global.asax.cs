@@ -13,12 +13,21 @@ namespace Sciserver_webService
     // visit http://go.microsoft.com/?LinkId=9394801
     public class MvcApplication : System.Web.HttpApplication
     {
-        public Logger Log = Logger.FromConfig();
+        private static object _lock = new object();
+        private static bool _connected = false;
+
+        public static Logger Log = Logger.FromConfig();
 
         public MvcApplication()
             : base()
         {
-            Log.Connect();
+            lock(_lock) {
+                if (!_connected)
+                { 
+                    Log.Connect();
+                    _connected = true;
+                }
+            }
         }
 
         protected void Application_Start()
