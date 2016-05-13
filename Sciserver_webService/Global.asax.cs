@@ -13,21 +13,11 @@ namespace Sciserver_webService
     // visit http://go.microsoft.com/?LinkId=9394801
     public class MvcApplication : System.Web.HttpApplication
     {
-        private static object _lock = new object();
-        private static bool _connected = false;
+        public Logger Log = Logger.FromConfig();
 
-        public static Logger Log = Logger.FromConfig();
-
-        public MvcApplication()
-            : base()
+        public MvcApplication() : base()
         {
-            lock(_lock) {
-                if (!_connected)
-                { 
-                    Log.Connect();
-                    _connected = true;
-                }
-            }
+            Log.Connect();
         }
 
         protected void Application_Start()
@@ -42,6 +32,12 @@ namespace Sciserver_webService
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+        }
+
+        public override void Dispose()
+        {
+            Log.Dispose();
+            base.Dispose();
         }
     }
 }

@@ -79,7 +79,7 @@ namespace Sciserver_webService.Common
                 AthenticateUser(ActivityInfo);
 
 
-            Logger log = MvcApplication.Log;
+            Logger log = (HttpContext.Current.ApplicationInstance as MvcApplication).Log;
 
             if (TypeOfLogging == "CustomMessage")
             {
