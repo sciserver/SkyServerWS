@@ -15,8 +15,7 @@ namespace Sciserver_webService
     {
         public Logger Log = Logger.FromConfig();
 
-        public MvcApplication()
-            : base()
+        public MvcApplication() : base()
         {
             Log.Connect();
         }
@@ -33,6 +32,12 @@ namespace Sciserver_webService
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+        }
+
+        public override void Dispose()
+        {
+            Log.Dispose();
+            base.Dispose();
         }
     }
 }
