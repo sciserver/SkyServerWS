@@ -321,6 +321,22 @@ namespace Sciserver_webService.Common
             return sb.ToString();
         }
 
+        public string getTableReSubmitHTMLresult(string TableName, string Token)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("<html><head>\n");
+            sb.AppendFormat("<title>SDSS Query Results</title>\n");
+            sb.AppendFormat("</head><body bgcolor=white>\n");
+            sb.AppendFormat("<h2>SDSS query Results </h2>");
+            sb.AppendFormat("<form method =\"POST\" id=\"form1\" target=\"GoToMyDB\" name=\"casjobsform\" action=\"" + ConfigurationManager.AppSettings["CASJobs"] + "MyDB.aspx\">");
+            sb.AppendFormat("<h3><font color=green> Table \"" + TableName + "\" already exists in MyDB. Try changing the table name or </font>   <input type=\"hidden\" name=\"token\" id=\"token\" value=\"" + Token + "\" />");
+            sb.AppendFormat("<input id=\"submit\" type=\"submit\" value=\"see table in MyDB\"></h3>");
+            sb.AppendFormat("</form>");
+            sb.AppendFormat("<h3>Your SQL command was: <br><pre>" + WebUtility.HtmlEncode(ExtraInfo["QueryForUserDisplay"]) + "</pre></h3><hr>"); // writes command
+            sb.AppendFormat("</BODY></HTML>\n");
+            return sb.ToString();
+        }
+
         public string getGenericCasJobsHTMLerror(string ErrorMessage)
         {
             string HtmlContent = "";

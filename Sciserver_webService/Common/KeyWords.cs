@@ -68,6 +68,7 @@ namespace Sciserver_webService.Common
 
         ///Data Release
         public static string DataRelease = ConfigurationManager.AppSettings["Release"];
+        public static int ReleaseNumber = int.Parse(ConfigurationManager.AppSettings["Release"].ToLower().Replace("dr",""));
 
         ///dasUrlBase URL
         public static string dasUrlBase = ConfigurationManager.AppSettings["dasUrlBase"];

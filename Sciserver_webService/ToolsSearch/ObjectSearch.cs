@@ -731,8 +731,16 @@ namespace Sciserver_webService.ToolsSearch
                     string FIND_APSTAR_ID = @"where a.apstar_id = @id";
                     string FIND_APOGEE_ID = @"where a.apogee_id = @id";
 
-                    if (id.StartsWith("apogee")) { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APSTAR_ID; }
-                    else { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APOGEE_ID; }
+                    if (KeyWords.ReleaseNumber < 13)
+                    {
+                        if (id.StartsWith("apogee")) { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APSTAR_ID; }
+                        else { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APOGEE_ID; }
+                    }
+                    else
+                    {
+                        if (id.StartsWith("apogee")) { cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR13 + FIND_APSTAR_ID; }
+                        else { cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR13 + FIND_APOGEE_ID; }
+                    }
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@id", id);
                     //cmd2 = cmd2.Replace("@id", "'" + id + "'");
 
@@ -757,6 +765,32 @@ namespace Sciserver_webService.ToolsSearch
                 ds.Merge(dt);
                 dt.TableName = "ApogeeVisits";
                 ds.Merge(dt);
+            }
+
+
+            // now add any Manga objects matching.------------------------------------------
+
+            if (KeyWords.ReleaseNumber >= 13)
+            {
+                cmd = ExploreQueries.getMangaFromEq;
+                cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
+                cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
+                //cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                cmd = cmd.Replace("@searchRadius", "60");
+                cmd = cmd.Replace("@ObjRadius", "60");// this radius should be very small (e.g. 10.0/60 arcmin), since it measures the distance between the centers of 2 objects that are actually the same galaxy.
+
+                dt = GetDataTableFromQuery(oConn, cmd);
+                if (dt.Rows.Count > 0)
+                {
+                    dt.TableName = "MangaData";
+                    ds.Merge(dt);
+                }
+                else
+                {
+                    dt.Reset();
+                    dt.TableName = "MangaData";
+                    ds.Merge(dt);
+                }
             }
 
             return ds;

@@ -203,7 +203,21 @@ namespace Sciserver_webService.DoDatabaseQuery
                     {
                         values = JsonConvert.DeserializeObject<Dictionary<string, string>>(array[i].ToString());
                         if (values["Name"] == TableName)
-                            throw (new Exception("Table \"" + TableName + "\" already exists in MyDB. Try changing the table name."));
+                        {
+                            if (ExtraInfo["DoReturnHtml"].ToLower() == "false")
+                            {
+                                throw (new Exception("Table \"" + TableName + "\" already exists in MyDB. Try changing the table name or see it in MyDB"));
+                            }
+                            else
+                            {
+                                ProcessDataSet proc = new ProcessDataSet(query, format, TaskName, ExtraInfo, null, true, positionType, queryType, null, null);
+                                string queryResult1 = proc.getTableReSubmitHTMLresult(TableName, logger.Token);
+                                response.Content = new StringContent(queryResult1, tCode, KeyWords.contentHTML);
+                                response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
+                            }
+                            return response;
+                        }
+                            //throw (new Exception("Table \"" + TableName + "\" already exists in MyDB. Try changing the table name or  <a target=INFO href=\"" + ConfigurationManager.AppSettings["CASJobs"] + "MyDB.aspx" + "\">LINK</a> "));
                     }
                 }
                 else// create a table name
