@@ -775,9 +775,9 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = ExploreQueries.getMangaFromEq;
                 cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
                 cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
-                //cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
-                cmd = cmd.Replace("@searchRadius", "60");
-                cmd = cmd.Replace("@ObjRadius", "60");// this radius should be very small (e.g. 10.0/60 arcmin), since it measures the distance between the centers of 2 objects that are actually the same galaxy.
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                //cmd = cmd.Replace("@searchRadius", "0.75");
+                cmd = cmd.Replace("@ObjRadius", "1.0/60");// this radius should be very small (e.g. 1.0/60 arcmin), since it measures the distance between the centers of 2 objects that are actually the same galaxy.
 
                 dt = GetDataTableFromQuery(oConn, cmd);
                 if (dt.Rows.Count > 0)
