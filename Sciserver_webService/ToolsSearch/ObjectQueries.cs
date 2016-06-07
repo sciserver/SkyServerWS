@@ -423,6 +423,19 @@ namespace Sciserver_webService.ToolsSearch
                                                from apogeeStar p, dbo.fGetNearestApogeeStarEq(@qra , @qdec , @searchRadius) n 
                                                where p.apstar_id=n.apstar_id";
 
+        public static string getMangaFromEq1 = @" select f.*,m.plate,m.ifudsgn,m.versdrp3  from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
+                                                join mangaDrpAll m on m.plateifu = f.plateIFU 
+                                                where (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 32.0/2.0/60.0 and m.ifudesignsize = 127)
+                                                       or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 27.0/2.0/60.0 and m.ifudesignsize = 91)
+                                                       or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 22.0/2.0/60.0 and m.ifudesignsize = 61)
+                                                       or (dbo.fDistanceArcMinEq(@qra , @qdec,m.ifura,m.ifudec) <= 17.0/2.0/60.0 and m.ifudesignsize = 37)
+                                                       or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 12.0/2.0/60.0 and m.ifudesignsize = 19)
+                                                       or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= .0/2.0/60.0 and m.ifudesignsize =  7)
+                                                       or (m.ifudesignsize <  0) order by f.redsn2 desc";
+
+        public static string getMangaFromEq2 = @" select f.*,m.plate,m.ifudsgn,m.versdrp3  from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
+                                                 join mangaDrpAll m on m.plateifu = f.plateIFU where dbo.fDistanceArcMinEq(@qra, @qdec ,m.objra,m.objdec) < @ObjRadius order by f.redsn2 desc";
+
         public static string getMangaFromEq = @" select f.*,m.plate,m.ifudsgn,m.versdrp3  from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
                                                  join mangaDrpAll m on m.plateifu = f.plateIFU where dbo.fDistanceArcMinEq(@qra, @qdec ,m.objra,m.objdec) < @ObjRadius order by f.redsn2 desc";
 
