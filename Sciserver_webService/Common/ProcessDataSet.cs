@@ -483,7 +483,21 @@ namespace Sciserver_webService.Common
 
                         sb.AppendFormat("<tr align=center BGCOLOR=#eeeeff>");
                         for (int c = 0; c < NumColumns; c++)
-                            sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                        {
+                            var val = ds.Tables[t].Rows[r][c];
+                            if (val.GetType() == typeof(System.Byte[]))// if column is of binary datatype, follow some estra steps to convert to string.
+                            {
+                                string res = BitConverter.ToString((byte[])(val));
+                                int maxlen = 128+128/2-1;// 128 is the maximum length of the binary string shown to the user.
+                                if (res.Length > maxlen)
+                                    res = res.Substring(0, maxlen).Replace("-","") + "...";
+                                else
+                                    res = res.Replace("-","");
+                                sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", res);
+                            }
+                            else// easily convert ot string.
+                                sb.AppendFormat("<td nowrap><font size=-1>{0}</font></td>", val.ToString());
+                        }
                         sb.AppendFormat("</tr>");
 
                         if (dasFields == true)

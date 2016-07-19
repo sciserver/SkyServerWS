@@ -775,17 +775,17 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = "";
                 if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null)
                 {// case when only a [RA,Dec] pair is given by the user for searching
-                    cmd = ExploreQueries.getMangaFromEq1;
+                    cmd = ExploreQueries.getMangaFromEq;
                     cmd = cmd.Replace("@qra", qra.ToString());
                     cmd = cmd.Replace("@qdec", qdec.ToString());
                     cmd = cmd.Replace("@searchRadius", "16.0/60.0");
                 }
                 else
                 {
-                    cmd = ExploreQueries.getMangaFromEq1;
+                    cmd = ExploreQueries.getMangaFromEq;
                     cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
                     cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
-                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");
+                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");// 16 is the radius in arcsec of the biggest manga IFU
                     //cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
                     //cmd = cmd.Replace("@ObjRadius", "1.0/60");// this radius should be very small (e.g. 1.0/60 arcmin), since it measures the distance between the centers of 2 objects that are actually the same galaxy.
                 }
