@@ -349,7 +349,7 @@ namespace Sciserver_webService.ToolsSearch
              WHEN 'segue2' THEN (select dbo.fSEGUE2target1N(segue2_target1)+','+ dbo.fSEGUE2target2N(segue2_target2) )             
              ELSE ' No Data ' 
              END 
-             as 'targeting_flags' 
+             as 'targeting_flags', s.run2d 
              from  PlateX p ,SpecObjAll s 
              join (select bestobjid, count(*) as nspec from specobjall where bestobjid=@objId
              group by bestobjid) x on s.bestobjid=x.bestobjid  where p.plateId=s.plateId and  s.specObjId=@specId";
@@ -399,7 +399,7 @@ namespace Sciserver_webService.ToolsSearch
                     dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN  
                     from apogeeStar a join aspcapStar b on a.apstar_id = b.apstar_id join apogeeObject c on a.apogee_id = c.apogee_id ";
 
-        public static string APOGEEVISITS_BASE_QUERY = "select visit_id, plate,  mjd, fiberid, dateobs, vrel from apogeeVisit where apogee_id = @id order by dateobs";
+        public static string APOGEEVISITS_BASE_QUERY = "select visit_id, plate,  mjd, fiberid, dateobs, vrel, apred_version from apogeeVisit where apogee_id = @id order by dateobs";
 
 
         #endregion
@@ -553,7 +553,7 @@ namespace Sciserver_webService.ToolsSearch
                         "s.mjd,s.plate,cast(s.plateId as binary(8)) as plateId,s.fiberid,cast(p.fieldId as binary(8)) as fieldId,p.run,p.rerun,p.camcol,p.field," +
                         "str(p.modelMag_u,7,2) as u, str(p.modelMag_g,7,2) as g, str(p.modelMag_r,7,2) as r, str(p.modelMag_i,7,2) as i, str(p.modelMag_z,7,2) as z," +
                         "str(modelMagErr_u,7,2) as err_u, str(modelMagErr_g,7,2) as err_g, str(modelMagErr_r,7,2) as err_r, str(modelMagErr_i,7,2) as err_i, str(modelMagErr_z,7,2) as err_z," +
-                        "dbo.fPhotoFlagsN(flags) as flags, class as spectralClass, dbo.fPhotoTypeN(p.type) as otype, s.z as redshift ";
+                        "dbo.fPhotoFlagsN(flags) as flags, class as spectralClass, dbo.fPhotoTypeN(p.type) as otype, s.z as redshift, s.run2d ";
 
 
         public static string getParamsFromPlateFiberMjd = QueryHeader + " from PhotoTag p JOIN SpecObjAll s ON s.bestobjid=p.objid where s.mjd = @mjd and s.fiberId = @fiberId  and s.plate = @plate";
