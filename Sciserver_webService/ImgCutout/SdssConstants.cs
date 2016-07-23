@@ -34,7 +34,7 @@ namespace Sciserver_webService.ImgCutout
         //public static string survey = "sdss";
         public static Boolean isSdss = true;
 
-        public static int highestDR = 12;
+        public static int highestDR = 30;// seems that this value was originally hardcoded (!) to be 12. Changing it to 30 for now to make imagecutout work for DR13. Later to rewrite the code to something more suitable.
         private static string _DataRelease = 
             ConfigurationManager.AppSettings["DataRelease"].ToUpper();
 
