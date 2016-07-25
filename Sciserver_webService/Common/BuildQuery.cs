@@ -182,13 +182,17 @@ namespace Sciserver_webService.QueryTools
                             addField(IRspecFields, "vscatter");
                             addField(IRspecFields, "teff");
                             addField(IRspecFields, "logg");
-                            if(datarelease >= 12)
+                            if(datarelease == 12)
                                 addField(IRspecFields, "param_m_h");
+                            else if(datarelease > 12)
+                                addField(IRspecFields, "m_h");
                             else
                                 addField(IRspecFields, "metals");
 
-                            if(datarelease >= 12)
+                            if(datarelease == 12)
                                 addField(IRspecFields, "param_alpha_m");
+                            else if (datarelease > 12)
+                                addField(IRspecFields, "alpha_m");
                             else
                                 addField(IRspecFields, "alphafe");
                         }
@@ -1254,7 +1258,7 @@ namespace Sciserver_webService.QueryTools
         {
             for (int i = 0; i < theFields.Count; i++)
             {
-                if (theFields[i] == "teff" | theFields[i] == "logg" | theFields[i] == "metals" | theFields[i]=="param_m_h" | theFields[i] == "cfe" | theFields[i] == "nfe" | theFields[i] == "alphafe" | theFields[i] == "param_alpha_m")
+                if (theFields[i] == "teff" | theFields[i] == "logg" | theFields[i] == "metals" | theFields[i] == "param_m_h" | theFields[i] == "m_h" | theFields[i] == "cfe" | theFields[i] == "nfe" | theFields[i] == "alphafe" | theFields[i] == "param_alpha_m" | theFields[i] == "alpha_m")
                 {
                     selectClause += addImgSelect(theFields[i], "q");
                 }
