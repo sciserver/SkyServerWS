@@ -74,6 +74,8 @@ namespace Sciserver_webService.ToolsSearch
                 TaskName = ExtraInfo["TaskName"];
                 server_name = ExtraInfo["server_name"];
                 windows_name = ExtraInfo["windows_name"];
+                Format = requestDir["format"];
+                url = requestDir["skyserverUrl"];
             }
             catch (Exception e) { throw new Exception(e.Message); };
 
@@ -518,7 +520,7 @@ namespace Sciserver_webService.ToolsSearch
             }
             this.QueryForUserDisplay += cmd + uquery;
             if (spec == "" && Format == "html")
-                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
+                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "en/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
 
             this.query += cmd + " " + "\nEXEC spExecuteSQL '" + uquery + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";
         }
@@ -544,7 +546,7 @@ namespace Sciserver_webService.ToolsSearch
 
             this.QueryForUserDisplay += cmd + uquery;
             if (Format == "html")
-                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
+                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "en/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
             this.query += cmd + " " + "\nEXEC spExecuteSQL '" + uquery + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";
             
         }
@@ -624,7 +626,7 @@ namespace Sciserver_webService.ToolsSearch
 
             this.QueryForUserDisplay += cmd + uquery;
             if (spec == "" && Format == "html")
-                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
+                uquery = Regex.Replace(uquery, rePobjid, "''<a target=INFO href=" + url + "en/tools/explore/obj.aspx?id='' + cast(x.objId as varchar(20)) + ''>''+ cast(x.objId as varchar(20)) + ''</a>'' as objID,", RegexOptions.IgnoreCase);
 
             this.query += cmd + " " + "\nEXEC spExecuteSQL '" + uquery + "','" + KeyWords.MaxRows + "', @log=0, @filter=1";
         }
