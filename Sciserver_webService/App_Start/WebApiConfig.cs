@@ -15,7 +15,8 @@ namespace Sciserver_webService
             //Consearch 
             config.Routes.MapHttpRoute(
                 name: "ConeSearch",
-                routeTemplate: "{anything}/ConeSearch/{controller}/",
+                //routeTemplate: "{anything}/ConeSearch/{controller}/",
+                routeTemplate: "ConeSearch/{controller}/",
                 defaults: new { controller = "ConeSearch" }
             );
             //config.Routes.MapHttpRoute(
@@ -32,7 +33,8 @@ namespace Sciserver_webService
             //);
             config.Routes.MapHttpRoute(
                 name: "ListOfFields",
-                routeTemplate: "{anything}/SDSSFields/{controller}",
+                //routeTemplate: "{anything}/SDSSFields/{controller}",
+                routeTemplate: "SDSSFields/{controller}",
                 defaults: new { controller = "ListOfFields" }
             );           
 
@@ -47,14 +49,16 @@ namespace Sciserver_webService
             //// SIAP 
             config.Routes.MapHttpRoute(
                 name: "getSIAPInfo",
-                routeTemplate: "{anything}/SIAP/{controller}",
+                //routeTemplate: "{anything}/SIAP/{controller}",
+                routeTemplate: "SIAP/{controller}",
                 defaults: new { controller = "getSIAP"}
             );
 
             //// SDSS ImageCutout
             config.Routes.MapHttpRoute(
                 name: "getJpeg",
-                routeTemplate: "{anything}/ImgCutout/{controller}",
+                //routeTemplate: "{anything}/ImgCutout/{controller}",
+                routeTemplate: "ImgCutout/{controller}",
                 defaults: new { controller = "getJpeg" }
             );
 
@@ -62,28 +66,32 @@ namespace Sciserver_webService
             /// Radial Search
             config.Routes.MapHttpRoute(
                 name: "RadialSearch",
-                routeTemplate: "{anything}/SearchTools/{controller}",
+                //routeTemplate: "{anything}/SearchTools/{controller}",
+                routeTemplate: "SearchTools/{controller}",
                 defaults: new { controller = "RadialSearch" }
             );
 
             /// Rectangular Search
             config.Routes.MapHttpRoute(
                 name: "RectangularSearch",
-                routeTemplate: "{anything}/SearchTools/{controller}",
+                //routeTemplate: "{anything}/SearchTools/{controller}",
+                routeTemplate: "SearchTools/{controller}",
                 defaults: new { controller = "RectangularSearch" }
             );
 
             /// SQL Search
             config.Routes.MapHttpRoute(
                 name: "SqlSearch",
-                routeTemplate: "{anything}/SearchTools/{controller}",
+                //routeTemplate: "SearchTools/{controller}",
+                routeTemplate: "SearchTools/{controller}",
                 defaults: new { controller = "SqlSearch" }
             );
 
             /// TESTing new casjobs REST client 
             config.Routes.MapHttpRoute(
                 name: "NewRectangular",
-                routeTemplate: "{anything}/SearchTools/{controller}",
+                //routeTemplate: "{anything}/SearchTools/{controller}",
+                routeTemplate: "SearchTools/{controller}",
                 defaults: new { controller = "NewRectangular" }
             );
 
@@ -91,7 +99,8 @@ namespace Sciserver_webService
             /// Imaging Query
             config.Routes.MapHttpRoute(
                 name: "Cone",
-                routeTemplate: "{anything}/ImagingQuery/{controller}",
+                //routeTemplate: "{anything}/ImagingQuery/{controller}",
+                routeTemplate: "ImagingQuery/{controller}",
                 defaults: new { controller = "Cone" }
             );
 
@@ -99,14 +108,16 @@ namespace Sciserver_webService
             /// Spectro Query
             config.Routes.MapHttpRoute(
                 name: "ConeSpectro",
-                routeTemplate: "{anything}/SpectroQuery/{controller}",
+                //routeTemplate: "{anything}/SpectroQuery/{controller}",
+                routeTemplate: "SpectroQuery/{controller}",
                 defaults: new { controller = "ConeSpectro" }
             );
 
             /// IR-Spectro Query
             config.Routes.MapHttpRoute(
                 name: "ConeIR",
-                routeTemplate: "{anything}/IRSpectraQuery/{controller}",
+                //routeTemplate: "{anything}/IRSpectraQuery/{controller}",
+                routeTemplate: "IRSpectraQuery/{controller}",
                 defaults: new { controller = "ConeIR" }
             );
 

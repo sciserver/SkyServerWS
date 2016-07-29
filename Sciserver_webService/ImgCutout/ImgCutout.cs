@@ -321,7 +321,8 @@ namespace Sciserver_webService.ImgCutout
                 try
                 {
                     // to get datarelease
-                    datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                    //datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                    datarelease = ConfigurationManager.AppSettings["DataRelease"];
                     
                     //To get client IP
                     if (!ip_.Equals("")) clientIP = ip_;

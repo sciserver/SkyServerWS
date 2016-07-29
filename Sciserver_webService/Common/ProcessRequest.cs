@@ -71,7 +71,8 @@ namespace Sciserver_webService.Common
                 this.ActivityInfo = rm.ActivityInfo;
                 this.IsDirectUserConnection = rm.IsDirectUserConnection;
 
-                datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                //datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string; /// which SDSS Data release is to be accessed
+                datarelease = ConfigurationManager.AppSettings["DataRelease"];
                 /// this is temporary read from the web.config
                 string skyserverUrl = ConfigurationManager.AppSettings["skyServerUrl"];
 

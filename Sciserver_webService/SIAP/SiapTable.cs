@@ -42,7 +42,8 @@ namespace Sciserver_webService.sdssSIAP
             ///******
             ///This part is added to get any data release working with thsi DR1 to DRxx
             ///******
-            datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
+            //datarelease = HttpContext.Current.Request.RequestContext.RouteData.Values["anything"] as string;
+            datarelease = ConfigurationManager.AppSettings["DataRelease"];
             //this.datarelease = datarelease;
             this.casjobstaskname = "SDSSFields For SIAP";
 
