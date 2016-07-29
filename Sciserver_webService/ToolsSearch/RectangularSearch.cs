@@ -137,7 +137,8 @@ namespace Sciserver_webService.ToolsSearch
             sql2 += "   p.apogee_id,p.ra, p.dec, p.glon, p.glat,\n";
             sql2 += "   p.vhelio_avg,p.vscatter,\n";
             sql2 += "   a.teff,a.logg,\n";
-            if (datarelease >= 12) sql2 += " a.param_m_h \n";
+            if (datarelease == 12) sql2 += " a.param_m_h \n";
+            else if (datarelease >= 12) sql2 += " a.m_h \n";
             else sql2 += " a.metals\n";
             sql2 += "   FROM apogeeStar p\n";
             sql2 += "   JOIN aspcapStar a on a.apstar_id = p.apstar_id\n";
