@@ -840,9 +840,39 @@ namespace Sciserver_webService.QueryTools
                         whereClause += IRspecParamLimits(name, val, tableAlias);
                         break;
 
+                    case "doGalaxy":
+                        if (val == "on")
+                        {
+                            doGalaxy = true;
+                            objType.Add("3");
+                        }
+                        break;
+                    case "doStar":
+                        if (val == "on")
+                        {
+                            doStar = true;
+                            objType.Add("6");
+                        }
+                        break;
+                    case "doSky":
+                        if (val == "on")
+                        {
+                            doSky = true;
+                            objType.Add("8");
+                        }
+                        break;
+                    case "doUnknown":
+                        if (val == "on")
+                        {
+                            doUnknown = true;
+                            objType.Add("0");
+                        }
+                        break;
+                    /*
                     case "objType":
                         objType = getObjtype(val);
                         break;
+                    */
 
                     case "addQA":
                         if (val == "on")
