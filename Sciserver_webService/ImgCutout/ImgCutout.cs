@@ -795,8 +795,8 @@ namespace Sciserver_webService.ImgCutout
             {
 
                 SqlCommand cmd = new SqlCommand("spExecuteSql", SqlConn);
-                cmd.Parameters.AddWithValue("@cmd", originalQ);
-                cmd.Parameters.AddWithValue("@limit", 5000);
+                cmd.Parameters.AddWithValue("@cmd", query.ToString());
+                cmd.Parameters.AddWithValue("@limit", KeyWords.MaxRows.ToString());
                 cmd.Parameters.AddWithValue("@winname", serverName);
                 cmd.Parameters.AddWithValue("@webserver", httpHost);
                 cmd.Parameters.AddWithValue("@clientIP", clientIP);
@@ -804,8 +804,7 @@ namespace Sciserver_webService.ImgCutout
                 cmd.Parameters.AddWithValue("@access", "SkyserverWS.ImgCutout.getJpeg.MarkedObjects");
                 cmd.Parameters.AddWithValue("@log", KeyWords.DoLogWithSpExecuteSQL);
                 cmd.Parameters.AddWithValue("@filter", 1);
-                
-                
+
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 //set up the data adapter to get our data...
@@ -924,8 +923,8 @@ namespace Sciserver_webService.ImgCutout
                     /// If the query contains SELECT, the query is considered correct and the validation 
                     /// is postponed to be run by spExecute store procedure.
                     query = new StringBuilder();
-                    query.AppendFormat("EXEC spExecuteSQL @cmd='{0}', @limit='{1}', @webserver='{2}', @winname='{3}', @log={4}, @clientIP='{5}', @access='SkyserverWS.ImgCutout.getJpeg', @filter=1", myq, KeyWords.MaxRows.ToString(), httpHost, serverName, KeyWords.DoLogWithSpExecuteSQL,clientIP);
-
+                    //query.AppendFormat("EXEC spExecuteSQL @cmd='{0}', @limit='{1}', @webserver='{2}', @winname='{3}', @log={4}, @clientIP='{5}', @access='SkyserverWS.ImgCutout.getJpeg', @filter=1", myq, KeyWords.MaxRows.ToString(), httpHost, serverName, KeyWords.DoLogWithSpExecuteSQL,clientIP);
+                    query.Append(myq);
                     //This needs to be clarify
                     // EXEC spExecuteSQL '" + c +"  ', 100000,'" + server_name + "','" + windows_name + "','" + remote_addr + "','" + access + "'";
                     break;
