@@ -228,6 +228,12 @@ namespace Sciserver_webService.ToolsSearch
                 if (lines[i] != "")
                 {
                     string[] RowElements = Regex.Split(lines[i], reSplit, RegexOptions.ExplicitCapture).Where(str => !str.Equals(String.Empty)).ToArray();
+                    if (i % 1000 == 0)
+                    {
+                        cmdQuery = cmdQuery.Trim(','); 
+                        cmdQuery += " \nINSERT INTO #upload values ";
+                    }
+                    
                     cmdQuery += "( " + i;
                     if(IsGalactic)
                     {
