@@ -519,7 +519,7 @@ namespace Sciserver_webService.Common
                         }
 
                     }
-                    if (KeyWords.dasUrlBase.Length > 1 && (dasFields == true || dasSpectra == true))
+                    if (KeyWords.dasUrlBaseImaging.Length > 1 && KeyWords.dasUrlBaseSpec.Length > 1 && (dasFields == true || dasSpectra == true))
                     {
                         sb.AppendFormat("<p><table><tr>\n");
                         var str = "";
@@ -528,7 +528,7 @@ namespace Sciserver_webService.Common
                         sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
                         if (dasFields == true)
                         {
-                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkFields/runCamcolFields'/>\n");
+                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseImaging + "bulkFields/runCamcolFields'/>\n");
                             //				Response.Write( "<input type='hidden' name='search' value ='runcamcolfield'/>\n" );
                             sb.AppendFormat("<input type='hidden' name='runcamcolfields' value='");
                             for (int i = 0; i < NumRows; i++)
@@ -539,8 +539,8 @@ namespace Sciserver_webService.Common
                         }
                         if (dasSpectra == true)
                         {
-                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBase + "bulkSpectra/plateMJDFiber'/>\n");
-                            sb.AppendFormat("<input type='hidden' name='platemjdfibers' value='");
+                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "optical/spectrum/search'/>\n");
+                            sb.AppendFormat("<input type='hidden' name='plate_mjd_fiberid_csv' value='");
                             for (int i = 0; i < NumRows; i++)
                                 sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
                             sb.AppendFormat("'/>\n");

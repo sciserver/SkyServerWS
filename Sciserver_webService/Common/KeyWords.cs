@@ -71,7 +71,10 @@ namespace Sciserver_webService.Common
         public static int ReleaseNumber = int.Parse(ConfigurationManager.AppSettings["Release"].ToLower().Replace("dr",""));
 
         ///dasUrlBase URL
-        public static string dasUrlBase = ConfigurationManager.AppSettings["dasUrlBase"];
+        //public static string dasUrlBase = ConfigurationManager.AppSettings["dasUrlBase"];
+        public static string dasUrlBaseImaging = ConfigurationManager.AppSettings["dasUrlBaseImaging"];
+        public static string dasUrlBaseSpec = ConfigurationManager.AppSettings["dasUrlBaseSpec"];
+
 
         ///dasUrlBase URL
         public static string defaultSpRerun = ConfigurationManager.AppSettings["defaultSpRerun"];
