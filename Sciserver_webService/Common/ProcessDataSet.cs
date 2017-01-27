@@ -539,7 +539,7 @@ namespace Sciserver_webService.Common
                         }
                         if (dasSpectra == true)
                         {
-                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "optical/spectrum/search'/>\n");
+                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "optical/spectrum/search?tab=bulk&run2d=any'/>\n");
                             sb.AppendFormat("<input type='hidden' name='plate_mjd_fiberid_csv' value='");
                             for (int i = 0; i < NumRows; i++)
                                 sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
