@@ -525,9 +525,9 @@ namespace Sciserver_webService.Common
                         var str = "";
                         if (dasFields == true && dasSpectra == true)
                             str = "(s)";
-                        sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
                         if (dasFields == true)
                         {
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
                             sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseImaging + "bulkFields/runCamcolFields'/>\n");
                             //				Response.Write( "<input type='hidden' name='search' value ='runcamcolfield'/>\n" );
                             sb.AppendFormat("<input type='hidden' name='runcamcolfields' value='");
@@ -539,6 +539,7 @@ namespace Sciserver_webService.Common
                         }
                         if (dasSpectra == true)
                         {
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and from there  click <i>Search</i> to download or view the spectra:</h3></td></tr>"); 
                             sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "optical/spectrum/search?tab=bulk&run2d=any'/>\n");
                             sb.AppendFormat("<input type='hidden' name='plate_mjd_fiberid_csv' value='");
                             for (int i = 0; i < NumRows; i++)
