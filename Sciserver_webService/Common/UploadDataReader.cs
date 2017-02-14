@@ -78,8 +78,10 @@ namespace Sciserver_webService.Common
                 while (line != null)
                 {
                     cnt++;
-                    //string[] data = line.Split(',');
-                    cmdQuery += "( " + cnt + "," + line + "," + radiusDefault  + " ),";
+                    string[] data = line.Split(',');
+                    string ra = Utilities.parseRA(data[0]).ToString();
+                    string dec = Utilities.parseDec(data[1]).ToString();
+                    cmdQuery += "( " + cnt + "," + ra + "," + dec + "," + radiusDefault  + " ),";
                     line = origReader.ReadLine();
                 }
             }
@@ -88,8 +90,11 @@ namespace Sciserver_webService.Common
                 while (line != null)
                 {
                     cnt++;
-                    //string[] data = line.Split(',');
-                    cmdQuery += "( " + cnt + "," + line + " ),";
+                    string[] data = line.Split(',');
+                    string ra = Utilities.parseRA(data[0]).ToString();
+                    string dec = Utilities.parseDec(data[1]).ToString();
+                    string radius = data[2];
+                    cmdQuery += "( " + cnt + "," + ra + "," + dec + "," + radius + " ),";
                     line = origReader.ReadLine();
                 }
             }
@@ -115,7 +120,10 @@ namespace Sciserver_webService.Common
                 {
                     if (lines[i] != "")
                     {
-                        cmdQuery += "( " + i + "," + lines[i] + "," + radiusDefault + " ),";
+                        string[] data = lines[i].Split(',');
+                        string ra = Utilities.parseRA(data[0]).ToString();
+                        string dec = Utilities.parseDec(data[1]).ToString();
+                        cmdQuery += "( " + i + "," + ra + "," + dec + "," + radiusDefault + " ),";
                     }
                 }
             }
@@ -125,7 +133,11 @@ namespace Sciserver_webService.Common
                 {
                     if (lines[i] != "")
                     {
-                        cmdQuery += "( " + i + "," + lines[i] + " ),";
+                        string[] data = lines[i].Split(',');
+                        string ra = Utilities.parseRA(data[0]).ToString();
+                        string dec = Utilities.parseDec(data[1]).ToString();
+                        string radius = data[2];
+                        cmdQuery += "( " + i + "," + ra + "," + dec + "," + radius + " ),";
                     }
                 }
 
