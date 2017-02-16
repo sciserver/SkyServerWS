@@ -637,6 +637,8 @@ namespace Sciserver_webService.QueryTools
             string flagsOn = "", flagsOff = "", priFlagsOn = "", priFlagsOff = "", secFlagsOn = "", secFlagsOff = "";
             string irTargetFlagsOn = "", irTargetFlagsOff = "";
             string irTargetFlags2On = "", irTargetFlags2Off = "";
+            string bossFlagsOn = "", bossFlagsOff = "";
+            string ebossFlagsOn = "", ebossFlagsOff = "";
             string specJoin = "";
 
             // these variables are used to convert from (L,B) to (RA,dec)
@@ -1052,6 +1054,56 @@ namespace Sciserver_webService.QueryTools
                         }
                         break;
 
+                    case "bossFlagsOnList":
+                        options = getOptions(val);
+                        foreach (string j in options)
+                        {
+                            if (j != "ignore")
+                            {
+                                if (bossFlagsOn.Length > 0)
+                                    bossFlagsOn += " + ";
+                                bossFlagsOn += "dbo.fBossTarget1('" + j + "')";
+                            }
+                        }
+                        break;
+                    case "bossFlagsOffList":
+                        options = getOptions(val);
+                        foreach (string j in options)
+                        {
+                            if (j != "ignore")
+                            {
+                                if (bossFlagsOff.Length > 0)
+                                    bossFlagsOff += " + ";
+                                bossFlagsOff += "dbo.fBossTarget1('" + j + "')";
+                            }
+                        }
+                        break;
+
+                    case "ebossFlagsOnList":
+                        options = getOptions(val);
+                        foreach (string j in options)
+                        {
+                            if (j != "ignore")
+                            {
+                                if (ebossFlagsOn.Length > 0)
+                                    ebossFlagsOn += " + ";
+                                ebossFlagsOn += "dbo.fEbossTarget0('" + j + "')";
+                            }
+                        }
+                        break;
+                    case "ebossFlagsOffList":
+                        options = getOptions(val);
+                        foreach (string j in options)
+                        {
+                            if (j != "ignore")
+                            {
+                                if (ebossFlagsOff.Length > 0)
+                                    ebossFlagsOff += " + ";
+                                ebossFlagsOff += "dbo.fEbossTarget0('" + j + "')";
+                            }
+                        }
+                        break;
+
                     case "searchNearBy":
                         if (val == "nearby")
                         {
@@ -1163,6 +1215,30 @@ namespace Sciserver_webService.QueryTools
                 if (whereClause.Length > 8)
                     whereClause += " AND";
                 whereClause += " (" + apogeeAlias + ".apogee_target1 & (" + irTargetFlags2On + ") != 0)";
+            }
+            if (bossFlagsOff.Length > 0)
+            {
+                if (whereClause.Length > 8)
+                    whereClause += " AND";
+                whereClause += " (" + specAlias + ".boss_target1 & (" + bossFlagsOff + ") = 0)";
+            }
+            if (bossFlagsOn.Length > 0)
+            {
+                if (whereClause.Length > 8)
+                    whereClause += " AND";
+                whereClause += " (" + specAlias + ".boss_target1 & (" + bossFlagsOn + ") != 0)";
+            }
+            if (ebossFlagsOff.Length > 0)
+            {
+                if (whereClause.Length > 8)
+                    whereClause += " AND";
+                whereClause += " (" + specAlias + ".eboss_target0 & (" + ebossFlagsOff + ") = 0)";
+            }
+            if (ebossFlagsOn.Length > 0)
+            {
+                if (whereClause.Length > 8)
+                    whereClause += " AND";
+                whereClause += " (" + specAlias + ".eboss_target0 & (" + ebossFlagsOn + ") != 0)";
             }
             // Put the pieces of the query together.
                 
