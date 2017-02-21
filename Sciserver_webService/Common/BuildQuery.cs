@@ -721,6 +721,12 @@ namespace Sciserver_webService.QueryTools
                             decMin = Utilities.parseDec(dictionary["decMin"]);
                             decMax = Utilities.parseDec(dictionary["decMax"]);
 
+                            if(  raMax < raMin)
+                                throw (new ArgumentException("raMax should be greater or equal than raMin."));
+                            if (decMax < decMin)
+                                throw (new ArgumentException("decMax should be greater or equal than decMin."));
+
+
                             joinClause += getRectangularJoin(ref cmd, targdb, type, tableAlias, raMin, raMax, decMin, decMax);
                         }
                         else if(posType.Equals("proximity")){                            
