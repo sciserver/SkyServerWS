@@ -424,8 +424,7 @@ namespace Sciserver_webService.QueryTools
 
                 if (!checkRect(raMin, raMax, decMin, decMax))
                 {
-                    cmd = "ERROR: Illegal rectangular search values: " + raMin + "," + raMax + "," + decMin + "," + decMax + ".";
-                    return cmd;
+                    throw (new ArgumentException("Illegal rectangular search values: raMin=" + raMin + ", raMax=" + raMax + ", decMin=" + decMin + ", decMax=" + decMax + "."));
                 }
                 else
                 {
