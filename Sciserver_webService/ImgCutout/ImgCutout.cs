@@ -165,6 +165,13 @@ namespace Sciserver_webService.ImgCutout
         private string httpHost = "";
         private string remoteAdd = "";
         private string localip = "";
+
+        //for storing the info that and exception was thrown in the process of creating the image.
+        public bool hasGenericError = false;
+        public bool hasOutOfFooprintError = false;
+
+
+
         /// <summary>
         /// Constructor and getting connection strings for databases
         /// </summary> 
@@ -271,6 +278,7 @@ namespace Sciserver_webService.ImgCutout
 
                 canvas.addDebugMessage(e.Message);
                 canvas.drawDebugMessage(width,height);
+                this.hasGenericError = true;
             }
             
             return (canvas.getBuffer());							// return image
@@ -444,6 +452,7 @@ namespace Sciserver_webService.ImgCutout
                             {//throw new Exception("Requested (ra, dec) is outside the 2MASS footprint. \n");
                                 canvas.addDebugMessage("Requested (ra, dec) is outside the 2MASS footprint. \n");
                                 canvas.drawDebugMessage(width, height);
+                                this.hasOutOfFooprintError = true;
                                 return;
                             }
 
@@ -514,6 +523,7 @@ namespace Sciserver_webService.ImgCutout
                                 //throw new Exception("Requested (ra, dec) is outside the SDSS footprint. \n");
                                 canvas.addDebugMessage("Requested (ra, dec) is outside the SDSS footprint. \n");
                                 canvas.drawDebugMessage(width, height);
+                                this.hasOutOfFooprintError = true;
                                 return;
                             }
 

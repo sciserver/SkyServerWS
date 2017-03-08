@@ -46,7 +46,15 @@ namespace Sciserver_webService.Controllers
 
                 resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, ClientIP));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                resp.StatusCode = HttpStatusCode.OK;
+                if (img.hasOutOfFooprintError && img.hasGenericError)
+                    resp.StatusCode = HttpStatusCode.OK;
+                else
+                    if (img.hasOutOfFooprintError)
+                        resp.StatusCode = HttpStatusCode.NotFound;
+                    else if (img.hasGenericError)
+                        resp.StatusCode = HttpStatusCode.InternalServerError;
+                    else
+                        resp.StatusCode = HttpStatusCode.InternalServerError;
 
                 //logging
                 SciserverLogging logger = new SciserverLogging();

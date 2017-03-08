@@ -39,7 +39,15 @@ namespace Sciserver_webService.Controllers
                 ImgCutout.ImgCutout img = new ImgCutout.ImgCutout();            
                 resp.Content = new ByteArrayContent(img.GetJpegImg(valid.getRun(), valid.getCamcol(), valid.getField(),valid.getZoom(), token));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                resp.StatusCode = HttpStatusCode.OK;
+                if (img.hasOutOfFooprintError && img.hasGenericError )
+                    resp.StatusCode = HttpStatusCode.OK;
+                else
+                    if(img.hasOutOfFooprintError)
+                        resp.StatusCode = HttpStatusCode.NotFound;
+                    else if(img.hasGenericError)
+                        resp.StatusCode = HttpStatusCode.InternalServerError;
+                    else
+                        resp.StatusCode = HttpStatusCode.InternalServerError;
 
                 //logging
                 SciserverLogging logger = new SciserverLogging();
