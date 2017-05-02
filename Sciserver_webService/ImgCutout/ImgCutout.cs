@@ -366,7 +366,7 @@ namespace Sciserver_webService.ImgCutout
                     //---------------------------------------------------
                     if (drawQuery) validateQuery(query_);
 
-                    canvas = new SDSSGraphicsEnv(width, height, imageScale, ppd, debug, imgtype);
+                    canvas = new SDSSGraphicsEnv(height, width, imageScale, ppd, debug, imgtype);
                     
                     connectToDataBase();
 
