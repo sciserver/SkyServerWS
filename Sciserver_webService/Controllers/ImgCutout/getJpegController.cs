@@ -53,7 +53,7 @@ namespace Sciserver_webService.Controllers
                     if (!String.IsNullOrEmpty(img.errorMessage_Generic))
                     {
                         resp.StatusCode = HttpStatusCode.InternalServerError;
-                        resp.ReasonPhrase = "INTERNAL SERVER ERROR. " + img.errorMessage_Generic;
+                        resp.ReasonPhrase = "INTERNAL SERVER ERROR. " +img.errorMessage_Generic.Replace("\n",". ");
                     }
                     else if (!String.IsNullOrEmpty(img.errorMessage_OutOfFootprint))
                     {
