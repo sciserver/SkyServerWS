@@ -32,7 +32,7 @@ namespace Sciserver_webService.ToolsSearch
 
         long? id = null;
         string apid;
-        long? specId = null;
+        decimal? specId = null;
         string sidstring = null;
         double? qra = null;
         double? qdec = null;
@@ -115,12 +115,12 @@ namespace Sciserver_webService.ToolsSearch
                         if (s != null & !"".Equals(s) & (s.StartsWith("APOGEE") || s.StartsWith("2M")))
                             apid = HttpUtility.UrlEncode(Request.QueryString[key]); //sidstring = s;
                         else
-                            sidstring = (string.Equals(s, "")) ? s : Utilities.ParseId(Request.QueryString[key]).ToString();
+                            sidstring = (string.Equals(s, "")) ? s : Utilities.ParseSpecObjId(Request.QueryString[key]).ToString();
                     }
                     if (keyL == "spec" || keyL == "specobjid")
                     {
                         string s = Request.QueryString[key];
-                        sidstring = (string.Equals(s, "")) ? s : Utilities.ParseId(s).ToString();
+                        sidstring = (string.Equals(s, "")) ? s : Utilities.ParseSpecObjId(s).ToString();
                     }
                     if (keyL == "apid")
                     {
@@ -228,7 +228,7 @@ namespace Sciserver_webService.ToolsSearch
                 objectInfo.objId = id.ToString();
             if (sidstring != null && sidstring != "")
             {
-                objectInfo.specId = Int64.Parse(sidstring);
+                objectInfo.specId = decimal.Parse(sidstring);
                 objectInfo.specObjId = sidstring;
             }
             if (apid != null) 
@@ -402,7 +402,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -440,7 +440,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -480,7 +480,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -517,7 +517,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -555,7 +555,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -603,7 +603,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -662,7 +662,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name});
             dt.TableName = "objectInfo";
@@ -820,7 +820,7 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specObjId", typeof(string));
             dt.Columns.Add("apid", typeof(string));
             dt.Columns.Add("id", typeof(long));
-            dt.Columns.Add("specId", typeof(long));
+            dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name });
             dt.TableName = "objectInfo";
@@ -919,7 +919,7 @@ namespace Sciserver_webService.ToolsSearch
                 objectInfo.id = Utilities.ParseId(objectInfo.objId);
 
             if (objectInfo.specObjId != null && !objectInfo.specObjId.Equals(""))
-                objectInfo.specId = Utilities.ParseId(objectInfo.specObjId);
+                objectInfo.specId = Utilities.ParseSpecObjId(objectInfo.specObjId);
 
         }
 
@@ -947,8 +947,8 @@ namespace Sciserver_webService.ToolsSearch
             {
                 if (reader.Read())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                     objectInfo.ra = (double)reader["ra"];
                     objectInfo.dec = (double)reader["dec"];
                 }
@@ -1005,8 +1005,8 @@ namespace Sciserver_webService.ToolsSearch
             {
                 if (reader.Read())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                 }
             }
         }
@@ -1023,8 +1023,8 @@ namespace Sciserver_webService.ToolsSearch
             {
                 if (reader.Read())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                 }
             }
             if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
@@ -1040,7 +1040,7 @@ namespace Sciserver_webService.ToolsSearch
 
         private void pmtsFromSpec(string sidstring)
         {
-            long? sidnumber = 0;
+            decimal? sidnumber = 0;
 
             // sidstring no longer stores apogee IDs, so there is no need to run pmtsFromSpecWithApogeeID(sidstring)
 /*            try
@@ -1055,7 +1055,7 @@ namespace Sciserver_webService.ToolsSearch
  */
             try
             {
-                sidnumber = Convert.ToInt64(sidstring);
+                sidnumber = Convert.ToDecimal(sidstring);
                 pmtsFromSpecWithSpecobjID(sidnumber);
                 if (objectInfo.specObjId != null && objectInfo.specObjId != ZERO_ID)
                 {
@@ -1090,7 +1090,7 @@ namespace Sciserver_webService.ToolsSearch
 
         }
 
-        private void pmtsFromSpecWithSpecobjID(long? sid)
+        private void pmtsFromSpecWithSpecobjID(decimal? sid)
         {
             string cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
             cmd = cmd.Replace("@sid", sid.ToString());
@@ -1102,8 +1102,8 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.ra = (double)reader["ra"];
                     objectInfo.dec = (double)reader["dec"];
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                     objectInfo.plateId = reader["plateId"] is DBNull ? null : Utilities.ParseId(Functions.BytesToHex((byte[])reader["plateId"]));
                     objectInfo.mjd = (int)reader["mjd"];
                     objectInfo.fiberId = (short)reader["fiberId"];
@@ -1132,8 +1132,8 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.camcol = (byte)reader["camcol"];
                     objectInfo.field = (short)reader["field"];
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
 
                 }
             }
@@ -1141,9 +1141,10 @@ namespace Sciserver_webService.ToolsSearch
             // get the plateId and fiberId from the specObj, if it exists
             if (objectInfo.specObjId != null && !ZERO_ID.Equals(objectInfo.specObjId))
             {
-                long specId = long.Parse(objectInfo.specObjId.Substring(2), NumberStyles.AllowHexSpecifier);
+                //decimal specId = decimal.Parse(objectInfo.specObjId.Substring(2), NumberStyles.AllowHexSpecifier);
+                //decimal specId = decimal.Parse(objectInfo.specObjId);
                 cmd = ExploreQueries.getPlateFiberFromSpecObj;
-                cmd = cmd.Replace("@specId", specId.ToString());
+                cmd = cmd.Replace("@specId", objectInfo.specObjId);
 
                 ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
@@ -1204,8 +1205,8 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.camcol = (byte)reader["camcol"];
                     objectInfo.field = (short)reader["field"];
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
 
                 }
             }
@@ -1213,7 +1214,7 @@ namespace Sciserver_webService.ToolsSearch
             // get the plateId and fiberId from the specObj, if it exists
             if (objectInfo.specObjId != null && !ZERO_ID.Equals(objectInfo.specObjId))
             {
-                long specId = long.Parse(objectInfo.specObjId.Substring(2), NumberStyles.AllowHexSpecifier);
+                decimal specId = decimal.Parse(objectInfo.specObjId);
                 cmd = ExploreQueries.getPlateFiberFromSpecObj;
                 cmd = cmd.Replace("@specId", specId.ToString());
 
@@ -1292,8 +1293,8 @@ namespace Sciserver_webService.ToolsSearch
             {
                 if (reader.Read())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["objId"]);
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["specObjId"]);
+                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                 }
             }
 

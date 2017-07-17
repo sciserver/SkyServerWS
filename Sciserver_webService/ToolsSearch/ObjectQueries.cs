@@ -314,7 +314,7 @@ namespace Sciserver_webService.ToolsSearch
         public static String getImagingQuery = @" select " +
             //--phototag
              "dbo.fPhotoFlagsN(pt.flags) as 'flags',pt.ra, pt.dec, pt.run, pt.rerun, pt.camcol, pt.field, " +
-             "cast(pt.fieldId as binary(8)) as fieldId, cast(pt.objId as binary(8)) as objId, " +
+             "cast(pt.fieldId as binary(8)) as fieldId, pt.objId as objId, " +
             //--PhotoObjall
              "pa.clean,  dbo.fPhotoTypeN(pa.type) as otype, " +
              "pa.u as u, pa.g  as g, pa.r as r, pa.i as i, pa.z as z, " +
@@ -407,7 +407,7 @@ namespace Sciserver_webService.ToolsSearch
 
         #region Summary.aspx
 
-        public static string getObjIDFromPlatefiberMjd = @" select cast(p.objId as binary(8)) as objId,cast(s.specObjId as binary(8)) as specObjId
+        public static string getObjIDFromPlatefiberMjd = @" select p.objId as objId, s.specObjId as specObjId
                             ,p.ra,p.dec
                             from SpecObjAll s JOIN PhotoTag p ON s.bestobjid=p.objid JOIN PlateX q ON s.plateId=q.plateId
                             where s.mjd = @mjd and s.fiberId = @fiberId  and q.plate = @plate";
@@ -433,13 +433,13 @@ namespace Sciserver_webService.ToolsSearch
                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 7.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) =  7)
                                                        or (m.ifudesignsize <  0) order by f.redsn2 desc";
 
-        public static string getPhotoFromEq = @" select top 1 cast(p.objId as binary(8)) as objId, cast(p.specObjId as binary(8)) as specObjId
+        public static string getPhotoFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId
                                              from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n 
                                              where p.objId=n.objId order by n.mode asc, n.distance asc";
 
 
 
-        public static string getpmtsFromEq = @" select top 1 cast(p.objId as binary(8)) as objId, cast(p.specObjId as binary(8)) as specObjId 
+        public static string getpmtsFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId 
                             from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n
                             where p.objId=n.objId order by n.mode asc, n.distance asc";
 
@@ -452,8 +452,8 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string getpmtsFromSpecWithSpecobjID = @" select p.ra, p.dec,
                     cast(p.fieldId as binary(8)) as fieldId,
-                    cast(s.specObjId as binary(8)) as specObjId,
-                    cast(p.objId as binary(8)) as objId,
+                    s.specObjId as specObjId,
+                    p.objId as objId,
                     cast(s.plateId as binary(8)) as plateId, s.mjd, s.fiberId, q.plate
                     from SpecObjAll s JOIN PhotoTag p ON s.bestobjId=p.objid JOIN PlateX q ON s.plateId=q.plateId
                     where s.specObjId= @sid";
@@ -461,8 +461,8 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string getpmtsFromPhoto = @" select p.ra, p.dec, p.run, p.rerun, p.camcol, p.field,
                      cast(p.fieldId as binary(8)) as fieldId,
-                     cast(s.specobjid as binary(8)) as specObjId,
-                     cast(p.objId as binary(8)) as objId 
+                     s.specobjid as specObjId,
+                     p.objId as objId 
                      from PhotoTag p 
                      left outer join SpecObjAll s ON s.bestobjid=p.objid AND s.scienceprimary=1
                      where p.objId=dbo.fObjId(@objid)";
@@ -470,8 +470,8 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string getpmtsFrom5PartSDSS = @"select p.ra, p.dec, p.run, p.rerun, p.camcol, p.field,
                      cast(p.fieldId as binary(8)) as fieldId,
-                     cast(s.specobjid as binary(8)) as specObjId,
-                     cast(p.objId as binary(8)) as objId 
+                     s.specobjid as specObjId,
+                     p.objId as objId 
                      from PhotoTag p 
                      left outer join SpecObjAll s ON s.bestobjid=p.objid AND s.scienceprimary=1
                      where p.objId=dbo.fObjidFromSDSS(@skyversion,@run,@rerun,@camcol,@field,@obj)";
@@ -548,7 +548,7 @@ namespace Sciserver_webService.ToolsSearch
     {
 
 
-        public static string QueryHeader = @"select cast(p.objId as binary(8)) as objId,cast(s.specObjId as binary(8)) as specObjId " +
+        public static string QueryHeader = @"select p.objId as objId,s.specObjId as specObjId " +
                         ",p.ra,p.dec," +
                         "s.mjd,s.plate,cast(s.plateId as binary(8)) as plateId,s.fiberid,cast(p.fieldId as binary(8)) as fieldId,p.run,p.rerun,p.camcol,p.field," +
                         "str(p.modelMag_u,7,2) as u, str(p.modelMag_g,7,2) as g, str(p.modelMag_r,7,2) as r, str(p.modelMag_i,7,2) as i, str(p.modelMag_z,7,2) as z," +

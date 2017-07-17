@@ -32,6 +32,25 @@ namespace Sciserver_webService.Common
             return id;
         }
 
+        public static decimal? ParseSpecObjId(string s)
+        {
+            decimal? id = null;
+            if (s != null & !"".Equals(s))
+            {
+                s = s.ToLower();
+                try
+                {
+                    if (s.StartsWith("0x"))
+                        id = decimal.Parse(s.Substring(2), NumberStyles.AllowHexSpecifier);
+                    else
+                        id = decimal.Parse(s);
+                }
+                catch (Exception) { }
+            }
+
+            return id;
+        }
+
         public static bool valueCheck(string name, double val, double lo, double hi)
         {
             //var err = false;
