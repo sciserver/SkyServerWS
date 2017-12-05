@@ -83,7 +83,7 @@
     </Reference>
     <Reference Include="SciServer.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\SciServer.Logging.dll</HintPath>
+      <HintPath>..\..\sciserver-logging\SciServer.Logging\bin\Debug\SciServer.Logging.dll</HintPath>
     </Reference>
     <Reference Include="SimpleRESTServices">
       <HintPath>..\packages\SimpleRESTServices.1.3.0.1\lib\net40\SimpleRESTServices.dll</HintPath>
