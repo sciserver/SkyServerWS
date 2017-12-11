@@ -119,6 +119,7 @@ namespace Sciserver_webService.Common
             message.ClientIP = ActivityInfo.ClientIP ?? "";
             message.TaskName = ActivityInfo.TaskName ?? "";
             message.UserName = user_name;
+            message.UserToken = String.IsNullOrEmpty(this.Token) ? null : Token;
             log.SendMessage(message);
         }
 
@@ -232,6 +233,7 @@ namespace Sciserver_webService.Common
             {
                 try
                 {
+                    Token = token;
                     var userAccess = Keystone.Authenticate(token);
                     userid = userAccess.User.Id;
                     user_name = userAccess.User.Name;
