@@ -136,7 +136,15 @@ namespace net.ivoa.data
                 {
                     vot.RESOURCE[0].TABLE[t].Items[c] = new FIELD();
                     ((FIELD)vot.RESOURCE[0].TABLE[t].Items[c]).name = dw.ColName(c);
-                    ((FIELD)vot.RESOURCE[0].TABLE[t].Items[c]).datatype = (dataType)dataTypes[dw.MSColType(c)];
+                    try
+                    {
+                        ((FIELD)vot.RESOURCE[0].TABLE[t].Items[c]).datatype = (dataType)dataTypes[dw.MSColType(c)];
+                    }
+                    catch
+                    {
+                        //if type does not exist, cast into char
+                        ((FIELD)vot.RESOURCE[0].TABLE[t].Items[c]).datatype = dataType.@char;
+                    }
                 }
                 TABLEDATA data = new TABLEDATA();
                 data.TR = new TR[dw.RowCount];
