@@ -281,12 +281,41 @@ namespace Sciserver_webService.Common
             prim.WriteHeader();
             // Table
             BinaryTableHdu tab = BinaryTableHdu.Create(fits, true);
+            // add special mapping tansforming decimal into string:
+            tab.RegisterTypeMapping(new DecimalTypeMapping());
+
             using (DataTableReader reader = dataSet.CreateDataReader())
             {
-                tab.WriteFromDataReader(reader);
+                tab.WriteFromDataReaderAsync(reader);
             }
             fits.Close();
             stream.Close();
         }
     }
+
+
+
+
+    public class DecimalTypeMapping : FitsDataTypeMapping
+    {
+        public override Type From
+        {
+            get { return typeof(decimal); }
+        }
+
+        public override FitsDataType MapType(int repeat, bool nullable)
+        {
+            return FitsDataType.Create(typeof(string), 25, false);
+        }
+
+        public override object MapValue(object value)
+        {
+            return ((decimal)value).ToString();
+        }
+    }
+
+
+
 }
+
+
