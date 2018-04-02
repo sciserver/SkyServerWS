@@ -201,6 +201,12 @@ namespace Sciserver_webService.Common
                     //Format = objectSearch.Format;
                     break;
 
+                case "MetadataSearch":
+                    MetadataSearch metadataSearch = new MetadataSearch(dictionary, ExtraInfo, HttpContext.Current.Request);
+                    ResultsDataSet = metadataSearch.ResultDataSet;
+                    //Format = objectSearch.Format;
+                    break;
+
                 case "RectangularSearch":
                     RectangularSearch rectangular = new RectangularSearch(dictionary, ExtraInfo);
                     query = rectangular.query;
@@ -338,6 +344,7 @@ namespace Sciserver_webService.Common
                 case "SqlSearch":
                     return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo, queryType, positionType);// queries are sent through direct database connection.
                 case "ObjectSearch":
+                case "MetadataSearch":
                 case "UserHistory":
                     return new SendTables(ResultsDataSet, format, ActivityInfo, ExtraInfo);
                 default:

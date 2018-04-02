@@ -159,8 +159,11 @@
     <Compile Include="Common\RequestMisc.cs" />
     <Compile Include="Common\SciserverLogging.cs" />
     <Compile Include="Controllers\SciserverLog\UserHistoryController.cs" />
+    <Compile Include="Controllers\SearchTools\MetadataSearchController.cs" />
     <Compile Include="ExceptionFilter\AuthException.cs" />
     <Compile Include="ExceptionFilter\NotFoundException.cs" />
+    <Compile Include="ToolsSearch\MetadataQueries.cs" />
+    <Compile Include="ToolsSearch\MetadataSearch.cs" />
     <Compile Include="ToolsSearch\UserHistory.cs" />
     <Compile Include="DataWrapper\DataSetWrapper.cs" />
     <Compile Include="DataWrapper\DataWrapper.cs" />

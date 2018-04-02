@@ -124,6 +124,7 @@ namespace Sciserver_webService.Common
         public static string RectangularQuery = "RectangularSearch";
         public static string RadialQuery = "RadialSearch";
         public static string ConeSearchQuery = "ConeSearch";
+        public static string metadataSearchQuery = "MetadataSearch";
         public static string SIAP = "SIAP";
         public static string SDSSFields = "SDSSFields";
         public static string CrossIdQuery = "CrossIdSearch";
