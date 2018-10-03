@@ -423,7 +423,7 @@ namespace Sciserver_webService.ToolsSearch
                                                from apogeeStar p, dbo.fGetNearestApogeeStarEq(@qra , @qdec , @searchRadius) n 
                                                where p.apstar_id=n.apstar_id";
 
-        public static string getMangaFromEq = @" select f.*,m.plate,m.ifudsgn,m.versdrp3  from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
+        public static string getMangaFromEq = @" select f.*,m.plate,m.ifudsgn,m.versdrp3,m.srvymode from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
                                                 join mangaDrpAll m on m.plateifu = f.plateIFU 
                                                 where (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 32.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 127)
                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 27.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 91)
@@ -432,6 +432,23 @@ namespace Sciserver_webService.ToolsSearch
                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 12.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 19)
                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 7.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) =  7)
                                                        or (m.ifudesignsize <  0) order by f.redsn2 desc";
+
+
+        public static string getMastarFromEq = @"select distinct gs.mangaid,gs.objra,gs.objdec,gs.catalogra,gs.catalogdec,gs.nvisits,gs.nplates,
+                                                                 gs.photocat,gs.cat_epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
+                                                                 gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
+                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source,
+                                                                 f.redsn2,m.srvymode
+                                                from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
+                                                join mangaDrpAll m on m.plateifu = f.plateIFU
+                                                join mastar_goodstars gs on gs.mangaid = m.mangaid
+                                                where (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 32.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 127)
+                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 27.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 91)
+                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 22.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 61)
+                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec,m.ifura,m.ifudec) <= 17.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 37)
+                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 12.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 19)
+                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 7.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) =  7)
+                                                        or (m.ifudesignsize <  0) order by f.redsn2 desc";
 
         public static string getPhotoFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId
                                              from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n 

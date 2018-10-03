@@ -805,6 +805,44 @@ namespace Sciserver_webService.ToolsSearch
                 }
             }
 
+            // now add any MaStar objects matching.------------------------------------------
+
+            if (KeyWords.ReleaseNumber >= 15)
+            {
+                cmd = "";
+                if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null)
+                {// case when only a [RA,Dec] pair is given by the user for searching
+                    cmd = ExploreQueries.getMastarFromEq;
+                    cmd = cmd.Replace("@qra", qra.ToString());
+                    cmd = cmd.Replace("@qdec", qdec.ToString());
+                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");
+                }
+                else
+                {
+                    cmd = ExploreQueries.getMastarFromEq;
+                    cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
+                    cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
+                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");// 16 is the radius in arcsec of the biggest manga IFU
+                }
+
+                dt = GetDataTableFromQuery(oConn, cmd);
+                if (dt.Rows.Count > 0)
+                {
+                    dt.TableName = "MastarData";
+                    ds.Merge(dt);
+                }
+                else
+                {
+                    dt.Reset();
+                    dt.TableName = "MastarData";
+                    ds.Merge(dt);
+                }
+            }
+
+
+
+
+
             return ds;
         }
 
