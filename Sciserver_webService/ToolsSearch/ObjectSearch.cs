@@ -37,6 +37,8 @@ namespace Sciserver_webService.ToolsSearch
         double? qra = null;
         double? qdec = null;
 
+        string mangaId = null;
+
         int? mjd = null;
         short? plate = null;
         short? fiber = null;
@@ -189,6 +191,12 @@ namespace Sciserver_webService.ToolsSearch
                         else
                             plateIdApogee = null;
                     }
+                    if (keyL == "mangaid")
+                    {
+                        string s = Request.QueryString[key];
+                        mangaId = string.Equals(s, "") ? null : s;
+                    }
+
                 }
             }
 
@@ -259,6 +267,8 @@ namespace Sciserver_webService.ToolsSearch
                 objectInfo.zoom = zoom;
             if (plateIdApogee != null)
                 objectInfo.plateIdApogee = plateIdApogee;
+            if (mangaId != null)
+                objectInfo.mangaId = mangaId;
         }
 
         public DataTable GetDataTableFromQuery(SqlConnection oConn, string query, Dictionary<String, String> StringParameterValuePairs)
@@ -773,12 +783,19 @@ namespace Sciserver_webService.ToolsSearch
             if (KeyWords.ReleaseNumber >= 13)
             {
                 cmd = "";
-                if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null)
+                if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null && mangaId == null)
                 {// case when only a [RA,Dec] pair is given by the user for searching
                     cmd = ExploreQueries.getMangaFromEq;
                     cmd = cmd.Replace("@qra", qra.ToString());
                     cmd = cmd.Replace("@qdec", qdec.ToString());
                     cmd = cmd.Replace("@searchRadius", "16.0/60.0");
+                    dt = GetDataTableFromQuery(oConn, cmd);
+                }
+                else if (mangaId != null)
+                {
+                    cmd = ExploreQueries.getMangaFromMangaId;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
+                    dt = GetDataTableFromQuery(oConn, cmd, ParameterValuePairs);
                 }
                 else
                 {
@@ -786,12 +803,13 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
                     cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
                     cmd = cmd.Replace("@searchRadius", "16.0/60.0");// 16 is the radius in arcsec of the biggest manga IFU
+                    dt = GetDataTableFromQuery(oConn, cmd);
                     //cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
                     //cmd = cmd.Replace("@ObjRadius", "1.0/60");// this radius should be very small (e.g. 1.0/60 arcmin), since it measures the distance between the centers of 2 objects that are actually the same galaxy.
                 }
                 //cmd = cmd.Replace("@searchRadius", "0.75");
 
-                dt = GetDataTableFromQuery(oConn, cmd);
+                
                 if (dt.Rows.Count > 0)
                 {
                     dt.TableName = "MangaData";
@@ -810,22 +828,29 @@ namespace Sciserver_webService.ToolsSearch
             if (KeyWords.ReleaseNumber >= 15)
             {
                 cmd = "";
-                if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null)
+                if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null && mangaId == null)
                 {// case when only a [RA,Dec] pair is given by the user for searching
                     cmd = ExploreQueries.getMastarFromEq;
                     cmd = cmd.Replace("@qra", qra.ToString());
                     cmd = cmd.Replace("@qdec", qdec.ToString());
                     cmd = cmd.Replace("@searchRadius", "16.0/60.0");
+                    dt = GetDataTableFromQuery(oConn, cmd);
+                }
+                else if (mangaId != null)
+                {
+                    cmd = ExploreQueries.getMastarFromMangaId;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
+                    dt = GetDataTableFromQuery(oConn, cmd, ParameterValuePairs);
                 }
                 else
                 {
                     cmd = ExploreQueries.getMastarFromEq;
                     cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
                     cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
-                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");// 16 is the radius in arcsec of the biggest manga IFU
+                    cmd = cmd.Replace("@searchRadius", "16.0/60.0");
+                    dt = GetDataTableFromQuery(oConn, cmd);
                 }
 
-                dt = GetDataTableFromQuery(oConn, cmd);
                 if (dt.Rows.Count > 0)
                 {
                     dt.TableName = "MastarData";
@@ -963,12 +988,20 @@ namespace Sciserver_webService.ToolsSearch
 
         private void getObjPmts()
         {
-            if (fiber.HasValue && plate.HasValue && mjd.HasValue) ObjIDFromPlfib(plate, mjd, fiber);
-            else if (qra.HasValue && qdec.HasValue) pmtsFromEq(qra, qdec);
-            else if (specId.HasValue || !String.IsNullOrEmpty(sidstring)) pmtsFromSpec(sidstring);
-            else if (id.HasValue && !specId.HasValue) pmtsFromPhoto(id);
-            else if (!id.HasValue && !specId.HasValue && (run.HasValue && rerun.HasValue && camcol.HasValue && field.HasValue && obj.HasValue)) pmtsFrom5PartSDSS(run, rerun, camcol, field, obj);
-            else if (!String.IsNullOrEmpty(apid)) parseApogeeID(apid);
+            if (fiber.HasValue && plate.HasValue && mjd.HasValue)
+                ObjIDFromPlfib(plate, mjd, fiber);
+            else if (qra.HasValue && qdec.HasValue)
+                pmtsFromEq(qra, qdec);
+            else if (specId.HasValue || !String.IsNullOrEmpty(sidstring))
+                pmtsFromSpec(sidstring);
+            else if (id.HasValue && !specId.HasValue)
+                pmtsFromPhoto(id);
+            else if (!id.HasValue && !specId.HasValue && (run.HasValue && rerun.HasValue && camcol.HasValue && field.HasValue && obj.HasValue))
+                pmtsFrom5PartSDSS(run, rerun, camcol, field, obj);
+            else if (!String.IsNullOrEmpty(apid))
+                parseApogeeID(apid);
+            else if (!String.IsNullOrEmpty(mangaId))
+                parseMangaID(mangaId);
         }
 
         private void ObjIDFromPlfib(short? plate, int? mjd, short? fiber)
@@ -1063,13 +1096,15 @@ namespace Sciserver_webService.ToolsSearch
                 {
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                    objectInfo.ra  = (double)(reader["ra"]);
+                    objectInfo.dec = (double)(reader["dec"]);
                 }
             }
             if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
             {
                 // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
                 pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
-                apogeeFromEq(qra, qdec);
+                apogeeFromEq(objectInfo.ra, objectInfo.dec);
             }
 
 
@@ -1095,7 +1130,7 @@ namespace Sciserver_webService.ToolsSearch
             {
                 sidnumber = Convert.ToDecimal(sidstring);
                 pmtsFromSpecWithSpecobjID(sidnumber);
-                if (objectInfo.specObjId != null && objectInfo.specObjId != ZERO_ID)
+                if (objectInfo.ra != null && objectInfo.ra != null)
                 {
                     apogeeFromEq(objectInfo.ra, objectInfo.dec);
                 }
@@ -1333,10 +1368,62 @@ namespace Sciserver_webService.ToolsSearch
                 {
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                    objectInfo.ra = (double)(reader["ra"]);
+                    objectInfo.dec = (double)(reader["dec"]);
+                    objectInfo.run = (short)reader["run"];
+                    objectInfo.rerun = (short)reader["rerun"];
+                    objectInfo.camcol = (byte)reader["camcol"];
+                    objectInfo.field = (short)reader["field"];
+                    objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
                 }
             }
+        }
+
+        private void parseMangaID(string mangaId)
+        {
+            double qra = 0, qdec = 0;
+            objectInfo.apid = apid;
+            string cmd = "";
+            string taskname = "";
+
+            cmd = ExploreQueries.getManga; taskname = "Skyserver.Explore.Summary.getManga";
+            ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
+            DataSet ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                {
+                    if (reader.Read())
+                    {
+                        qra = (double)reader["ra"];
+                        qdec = (double)reader["dec"];
+                        objectInfo.mangaId = mangaId;
+
+                    }
+                }
+            }
+            else
+            {
+                cmd = ExploreQueries.getMastar; taskname = "Skyserver.Explore.Summary.getMastar";
+                ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
+                ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                {
+                    if (reader.Read())
+                    {
+                        qra = (double)reader["ra"];
+                        qdec = (double)reader["dec"];
+                        objectInfo.mangaId = mangaId;
+                    }
+                }
+            }
+            pmtsFromEq(qra, qdec);
 
         }
+
+
+
+
 
         public DataSet SetTableResult(string QueryName)
         {

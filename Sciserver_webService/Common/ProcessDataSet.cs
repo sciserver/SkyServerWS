@@ -395,11 +395,11 @@ namespace Sciserver_webService.Common
 
             for (int t = 0; t < Math.Min(NumTables, Queries.Length); t++)
             {
-                string[] runs = null, reruns = null, camcols = null, fields = null, plates = null, mjds = null, spreruns = null, fibers = null;
+                string[] runs = null, reruns = null, camcols = null, fields = null, plates = null, mjds = null, spreruns = null, fibers = null, mangaIDs = null;
                 bool run = false, rerun = false, camcol = false, field = false, dasFields = false;
-                bool plate = false, mjd = false, sprerun = false, fiber = false, dasSpectra = false;
+                bool plate = false, mjd = false, sprerun = false, fiber = false, dasSpectra = false, hasManga = false;
                 int runI = -1, rerunI = -1, camcolI = -1, fieldI = -1;
-                int plateI = -1, mjdI = -1, sprerunI = -1, fiberI = -1;
+                int plateI = -1, mjdI = -1, sprerunI = -1, fiberI = -1, mangaI = -1;
                 int DefaultSpRerun = int.Parse(KeyWords.defaultSpRerun);
 
                 sb.AppendFormat("<h1>" + QueryTitle[t] + "</h1>");
@@ -458,6 +458,10 @@ namespace Sciserver_webService.Common
                                         fiber = true;
                                         fiberI = c;
                                         break;
+                                    case "mangaid":
+                                        hasManga = true;
+                                        mangaI = c;
+                                        break;
                                     default:
                                         break;
                                 }
@@ -479,6 +483,11 @@ namespace Sciserver_webService.Common
                                 spreruns = new string[NumRows];
                                 fibers = new string[NumRows];
                             }
+                            if (hasManga)
+                            {
+                                mangaIDs = new string[NumRows];
+                            }
+
                         }
 
                         sb.AppendFormat("<tr align=center BGCOLOR=#eeeeff>");
@@ -517,9 +526,14 @@ namespace Sciserver_webService.Common
                             mjds[r] = ds.Tables[t].Rows[r][mjdI].ToString();
                             fibers[r] = ds.Tables[t].Rows[r][fiberI].ToString();
                         }
+                        if (hasManga == true)
+                        {
+                            mangaIDs[r] = ds.Tables[t].Rows[r][mangaI].ToString();
+                        }
+
 
                     }
-                    if (KeyWords.dasUrlBaseImaging.Length > 1 && KeyWords.dasUrlBaseSpec.Length > 1 && (dasFields == true || dasSpectra == true))
+                    if (KeyWords.dasUrlBaseImaging.Length > 1 && KeyWords.dasUrlBaseSpec.Length > 1 && (dasFields == true || dasSpectra == true || hasManga == true))
                     {
                         sb.AppendFormat("<p><table><tr>\n");
                         var str = "";
@@ -546,6 +560,17 @@ namespace Sciserver_webService.Common
                                 sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
                             sb.AppendFormat("'/>\n");
                             sb.AppendFormat("<input type='submit' name='submitPMF' value='Submit'/>Upload list of spectra to SAS\n");
+                            sb.AppendFormat("</form></td>");
+                        }
+                        if (hasManga == true)
+                        {
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and from there  click <i>Search</i> to download or view the MaStar objects:</h3></td></tr>");
+                            sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "mastar/spectrum/search?tab=bulk'/>\n");
+                            sb.AppendFormat("<input type='hidden' name='mangaid_csv' value='");
+                            for (int i = 0; i < NumRows; i++)
+                                sb.AppendFormat(mangaIDs[i] + "\n");
+                            sb.AppendFormat("'/>\n");
+                            sb.AppendFormat("<input type='submit' name='submitMangaId' value='Submit'/>Upload list of MaStar objects to SAS\n");
                             sb.AppendFormat("</form></td>");
                         }
                         sb.AppendFormat("</tr></table>");

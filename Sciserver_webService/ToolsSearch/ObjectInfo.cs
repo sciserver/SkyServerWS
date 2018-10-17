@@ -32,5 +32,7 @@ namespace Sciserver_webService.ToolsSearch
         public int? zoom = null;
         public string plateIdApogee = null;
 
+        public string mangaId = null;
+
     }
 }

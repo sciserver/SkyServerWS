@@ -419,9 +419,13 @@ namespace Sciserver_webService.ToolsSearch
 
 
 
-        public static string getApogeeFromEq = @" select top 1 p.apstar_id                     
+        public static string getApogeeFromEq = @" select top 1 p.apstar_id
                                                from apogeeStar p, dbo.fGetNearestApogeeStarEq(@qra , @qdec , @searchRadius) n 
                                                where p.apstar_id=n.apstar_id";
+
+        public static string getMangaFromMangaId = @"select plateIFU,mangaid,objra,objdec,ifura,ifudec,drp3qual,bluesn2,redsn2,mjdmax,mngtarg1,mngtarg2,mngtarg3,
+                                                            htmID,plate,ifudsgn,versdrp3,srvymode from mangaDrpAll where mangaid=@mangaId";
+
 
         public static string getMangaFromEq = @" select f.*,m.plate,m.ifudsgn,m.versdrp3,m.srvymode from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
                                                 join mangaDrpAll m on m.plateifu = f.plateIFU 
@@ -434,21 +438,23 @@ namespace Sciserver_webService.ToolsSearch
                                                        or (m.ifudesignsize <  0) order by f.redsn2 desc";
 
 
-        public static string getMastarFromEq = @"select distinct gs.mangaid,gs.objra,gs.objdec,gs.catalogra,gs.catalogdec,gs.nvisits,gs.nplates,
+        public static string getMastarFromEq = @"select distinct gv.plate,gv.ifudesign,gv.mjd,gv.nexp,gv.heliov,gv.verr,gv.v_errcode,gv.mjdqual,
+                                                                 gs.mangaid,gs.objra,gs.objdec,gs.catalogra,gs.catalogdec,gs.nvisits,gs.nplates,
                                                                  gs.photocat,gs.cat_epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
                                                                  gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
-                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source,
-                                                                 f.redsn2,m.srvymode
-                                                from dbo.fGetNearbyMangaObjEq(@qra , @qdec , @searchRadius) f 
-                                                join mangaDrpAll m on m.plateifu = f.plateIFU
-                                                join mastar_goodstars gs on gs.mangaid = m.mangaid
-                                                where (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 32.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 127)
-                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 27.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 91)
-                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 22.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 61)
-                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec,m.ifura,m.ifudec) <= 17.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 37)
-                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 12.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) = 19)
-                                                        or (dbo.fDistanceArcMinEq(@qra , @qdec ,m.ifura,m.ifudec) <= 7.0/2.0/60.0 and LEFT(m.ifudsgn,DATALENGTH(m.ifudsgn)-2) =  7)
-                                                        or (m.ifudesignsize <  0) order by f.redsn2 desc";
+                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
+                                                 from dbo.fGetNearbyMastarObjEq(@qra , @qdec , @searchRadius) f
+                                                 join mastar_goodstars as gs on f.mangaid=gs.mangaid
+                                                 join mastar_goodvisits as gv on f.mangaid=gv.mangaid order by gs.mangaid";
+
+        public static string getMastarFromMangaId = @"select     gv.plate,gv.ifudesign,gv.mjd,gv.nexp,gv.heliov,gv.verr,gv.v_errcode,gv.mjdqual,
+                                                                 gs.mangaid,gs.objra,gs.objdec,gs.catalogra,gs.catalogdec,gs.nvisits,gs.nplates,
+                                                                 gs.photocat,gs.cat_epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
+                                                                 gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
+                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
+                                                    from mastar_goodstars gs join mastar_goodvisits as gv on gs.mangaid=gv.mangaid where m.mangaid=@mangaId  order by gs.mangaid";
+
+
 
         public static string getPhotoFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId
                                              from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n 
@@ -456,7 +462,7 @@ namespace Sciserver_webService.ToolsSearch
 
 
 
-        public static string getpmtsFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId 
+        public static string getpmtsFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId, p.ra ,p.dec 
                             from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n
                             where p.objId=n.objId order by n.mode asc, n.distance asc";
 
@@ -514,6 +520,9 @@ namespace Sciserver_webService.ToolsSearch
         public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat,location_id,commiss
                                             from apogeeStar
                                             where apogee_id=@apogeeId";// note that @apogeeId is a string, and has to be checked against sql injection before sending the query.
+
+        public static string getManga = @"select top 1 objra as ra, objdec as dec from mangadrpall where mangaid=@mangaId order by redsn2 desc";
+        public static string getMastar = @"select top 1 objra as ra, objdec as dec from mastar_goodstars where mangaid=@mangaId";
 
 
         public static string getPlateFromApogee = @"select  top 1   a.ra,    a.dec,   a.apstar_id,    a.apogee_id, v.plate,v.fiberId,v.mjd 
