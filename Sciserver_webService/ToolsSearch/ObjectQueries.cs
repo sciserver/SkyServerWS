@@ -452,7 +452,7 @@ namespace Sciserver_webService.ToolsSearch
                                                                  gs.photocat,gs.cat_epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
                                                                  gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
                                                                  gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
-                                                    from mastar_goodstars gs join mastar_goodvisits as gv on gs.mangaid=gv.mangaid where m.mangaid=@mangaId  order by gs.mangaid";
+                                                    from mastar_goodstars gs join mastar_goodvisits as gv on gs.mangaid=gv.mangaid where gs.mangaid=@mangaId  order by gs.mangaid";
 
 
 
