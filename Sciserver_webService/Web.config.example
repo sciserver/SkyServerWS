@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+  <system.web>
+    <compilation debug="true" targetFramework="4.5" />
+    <!--High values of maxQueryStringLength (default value=2048 characters) and maxUrlLength (default value=260 characters) make possible to take a long request string, such as those produced in imaging and spectro queries in SkyServer -->
+    <httpRuntime targetFramework="4.5" maxQueryStringLength="8192" maxUrlLength="8192"/>
+  </system.web>
+  
+  <system.webServer>
+    <security>
+      <requestFiltering>
+        <!--High values of maxQueryString (default value=2048 characters) make possible to take a long request string, such as those produced in imaging and spectro queries in SkyServer -->
+        <requestLimits maxQueryString="8192"/>
+      </requestFiltering>
+    </security>
+    <httpProtocol>
+      <customHeaders>
+        <add name="Access-Control-Allow-Origin" value="*" />
+        <add name="Access-Control-Allow-Headers" value="Content-Type, X-Auth-Token, Accept" />
+        <add name="Access-Control-Allow-Methods" value="*" />
+      </customHeaders>
+    </httpProtocol>
+  </system.webServer>
+
+
+  <appSettings>
+
+    <!-- misc -->
+    <add key="webpages:Version" value="2.0.0.0" />
+    <add key="webpages:Enabled" value="false" />
+    <add key="PreserveLoginUrl" value="true" />
+    <add key="ClientValidationEnabled" value="true" />
+    <add key="UnobtrusiveJavaScriptEnabled" value="true" />
+    
+    <!--Authentication System: KeyStone and Login portal-->
+    <add key="Keystone" value="true" />
+    <add key="Keystone.Portal" value="http://apps.sciserver.org/login-portal/" />
+    <add key="Keystone.Uri" value="http://***/" />
+    <add key="Keystone.AdminUser" value="***" />
+    <add key="Keystone.AdminTenant" value="***" />
+    <add key="Keystone.AdminPassword" value="***" />
+
+    <!--Sciserver-Logging Database-->
+    <add key="Log.ApplicationHost" value="***" />
+    <add key="Log.ApplicationName" value="***" />
+    <add key="Log.MessagingHost" value="***" />
+    <add key="Log.ExchangeName" value="***" />
+    <add key="Log.DatabaseQueueName" value="***" />
+    <add key="Log.Enabled" value="false"/>
+    <!-- <add key="SciserverLogDBconnection" value="Initial Catalog=SciServerLog;Data Source=sdss4d;User ID=webuser;Password=read4w3now!" /> -->
+    <add key="SciserverLogDBconnection" value="Initial Catalog=***;Data Source=***;User ID=***;Password=***" />
+
+    <!-- dasUrlBase and defaultSpRerun are used for creating the link that uploads the list of fields (if they exist in the html resultset) to SAS  -->
+    <add key="dasUrlBaseImaging" value="https://dr12.sdss.org/" />
+    <add key="dasUrlBaseSpec" value="https://dr15.sdss.org/" />
+    <add key="defaultSpRerun" value="26"/>
+
+    <!--For ConeSearch -->
+    <add key="ConeSelect" value="top 1000 p.objid,p.ra,p.dec,dbo.fPhotoTypeN(p.type) as type,u,g,r,i,z,Err_u,Err_g,Err_r,Err_i,Err_z,psfMag_u,psfMagErr_u,psfMag_g,psfMagErr_g,psfMag_r,psfMagErr_r,psfMag_i,psfMagErr_i,psfMag_z,psfMagErr_z" />
+
+    <!-- For SDSSFields -->
+    <add key="UrlSdssGetJpeg" value="http://skyserver.sdss.org/*DataRelease*/SkyServerWS/ImgCutout/getjpeg" />
+
+    <!--ImageCutout database connections and parameters-->
+    <add key="SkyServer"      value="Initial Catalog=***;Data Source=***;User ID=skyuser;Password=***" />
+    <add key="SkyServer2Mass" value="Initial Catalog=***;Data Source=***;User ID=skyuser;Password=***" />
+    <add key="SkyServerImage" value="Initial Catalog=***;Data Source=***;User ID=skyuser;Password=***" />
+    <add key="DataRelease" value="DR15" />
+    <!--Image-cutout's variable "DoLogWithSpExecuteSQL" decides whether spExecuteSQL does log the user query to weblog database (values are "yes" or "no")  >-->
+    <add key="DoLogWithSpExecuteSQL" value="no"/>
+
+    
+    <add key="Release" value="DR15" />
+    <!--CasJobs and New CASJobs REST API base address-->
+    <add key="CASJobs"     value="http://skyserver.sdss.org/casjobs/" />
+    <add key="CASJobsREST" value="http://skyserver.sdss.org/casjobs/RestApi/" />
+    <!--Timeout (milliseconds) for CasJobs Rest calls. Default value is 100000ms for HttpClient and HttpWebRequest-->
+    <add key="TimeoutCASJobs" value="600000"/>
+
+    <!--Common URLs that define Skyserver's webservice and web app-->
+    <add key="skyServerUrl" value="http://skyserver.sdss.org/DR15/" /><!-- Note that the skyservere URL for the production site has to end in .sdss.org/DRXX/ -->
+    <add key="skyServerWS" value="http://skyserver.sdss.org/DR15/SkyServerWS/" />
+    
+    <!-- Tasks that are displayed in the user history. These names are derived from the names of the webservice's entry points.-->
+    <add key="TasksInUserHistory" value="ConesearchService,ImagingQuery,IRSpectroQuery,SpectroQuery,SIAP,SqlSearch,RadialSearch,RectangularSearch,CrossId,SDSSFields"/>
+    
+    <!--parameters for database queries. Used by by the search tools. -->
+    <add key="DatabaseSearchTimeout" value="600" />
+    <add key="DBconnectionString" value="Initial Catalog=***;Data Source=***;User ID=***;Password=***" />
+    <!--MaxRows is the maximum number of rows returned by queries in user tools-->
+    <add key="MaxRows" value="500000" />
+
+    <!--Misc parameters for running search tools queries -->
+    <add key="skyVersion" value="2" />
+    <add key="eqSearchRadius" value="0.75"/>
+
+    <!-- for resolving the name of an astronomical object-->
+    <add key="nameResolverUrl" value="http://simbad.u-strasbg.fr/simbad/sim-script?script="/>
+
+    <!-- parameters defining the names of the keywords storing the ClientIP and referrer name in the header of the request sent from Skyserver-web-app to SkyserverWS. Must match the same names as defined in the Skyserver-web-app's web.config file-->
+    <add key="IpHeaderName" value="SkyserverClientIP" />
+    <add key="RefererHeaderName" value="SkyserverReferrer" />
+
+    <!-- Bug report url-->
+    <!-- 
+    <add key="BugReportURL" value="http://www.sciserver.org/bug-report/" /> 
+    -->
+    <add key="BugReportURL" value="http://www.sciserver.org/support/bug-report-and-suggestion-form/" />
+
+  </appSettings>
+
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="Newtonsoft.Json" publicKeyToken="30ad4fe6b2a6aeed" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-6.0.0.0" newVersion="6.0.0.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="RabbitMQ.Client" publicKeyToken="89e7d7c5feba84ce" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.6.1.0" newVersion="3.6.1.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+  
+</configuration>
