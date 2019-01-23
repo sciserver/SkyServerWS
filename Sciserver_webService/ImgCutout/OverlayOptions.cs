@@ -167,7 +167,8 @@ namespace Sciserver_webService.ImgCutout
             };
 
             StringBuilder sQ = new StringBuilder("SELECT \n");
-            sQ.Append("	(q.objid & 0xFFFFFFFFFFFF0000) as fieldid,\n");
+            //sQ.Append("	(q.objid & 0xFFFFFFFFFFFF0000) as fieldid,\n");
+            sQ.Append("	( cast(q.objid as bigint) & 0xFFFFFFFFFFFF0000) as fieldid,\n");
             sQ.Append("	m.rmin, m.rmax, m.cmin, m.cmax, m.span\n from ");
             sQ.Append(SdssConstants.OutlineTable);
             sQ.Append(" m \n JOIN (select min(f.objid) as objid \n");

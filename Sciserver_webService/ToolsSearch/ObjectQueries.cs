@@ -462,7 +462,7 @@ namespace Sciserver_webService.ToolsSearch
 
 
 
-        public static string getpmtsFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId, p.ra ,p.dec 
+        public static string getpmtsFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId, p.ra ,p.dec, p.run, p.rerun, p.camcol,p.field,cast(p.fieldId as binary(8)) as fieldid  
                             from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n
                             where p.objId=n.objId order by n.mode asc, n.distance asc";
 
