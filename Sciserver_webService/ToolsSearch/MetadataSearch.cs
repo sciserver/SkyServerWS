@@ -73,6 +73,11 @@ namespace Sciserver_webService.ToolsSearch
         public decimal? plateID = null;
         public string apogeeplateid = null;
         public char? type = null;
+        public decimal? objid = null;
+        public double? ra = null;
+        public double? dec = null;
+        public double? radius = null;
+
 
         public MetadataSearch(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo, HttpRequest Request)
         {
@@ -103,20 +108,32 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         query = Request.QueryString[key];
                     }
-                    if (keyL == "name")
+                    else if (keyL == "name")
                         try { name = Request.QueryString[key]; }// 
                         catch { }
-                    if (keyL == "tablename")
+                    else if (keyL == "tablename")
                         try { tablename = Request.QueryString[key]; }// 
                         catch { }
-                    if (keyL == "plateID")
+                    else if (keyL == "plateID")
                         try { plateID = decimal.Parse(Request.QueryString[key]); }//
                         catch { }
-                    if (keyL == "apogeeplateid")
+                    else if (keyL == "apogeeplateid")
                         try { apogeeplateid = Request.QueryString[key]; }// 
                         catch { }
-                    if (keyL == "type")
+                    else if (keyL == "type")
                         try { type = char.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "ra")
+                        try { ra = double.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "dec")
+                        try { dec = double.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "radius")
+                        try { radius = double.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "objid")
+                        try { objid = decimal.Parse(Request.QueryString[key]); }// 
                         catch { }
 
                 }
@@ -201,7 +218,10 @@ namespace Sciserver_webService.ToolsSearch
                 var Adapter = new SqlDataAdapter(Cmd);
                 Adapter.Fill(DataSet);
             }
-            catch { }
+            catch(Exception ex)
+            {
+                var a = ex;
+            }
             return DataSet;
         }
 
@@ -310,6 +330,26 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = MetadataQueries.schema_enum;
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+
+                case "nearestobj":
+                    if (ra == null || dec == null || radius == null)
+                        throw new ArgumentException("Unspecified value of either ra, dec or radius.");
+                    cmd = MetadataQueries.nearestobj;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "nearestspecobjid":
+                    cmd = MetadataQueries.nearestspecobjid;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@objid", objid.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@objid", SqlDbType.NVarChar);
+                    break;
+                case "nearestapogee":
+                    if (ra == null || dec == null || radius == null)
+                        throw new ArgumentException("Unspecified value of either ra, dec or radius.");
+                    cmd = MetadataQueries.nearestapogee;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
                     break;
                 default:
                     cmd = ""; break;

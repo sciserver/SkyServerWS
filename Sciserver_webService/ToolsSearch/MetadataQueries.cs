@@ -101,5 +101,27 @@ namespace Sciserver_webService.ToolsSearch
         public static string schema_access = "select name, type, description from DBObjects where type in ('F','P') and access='U' and UPPER(name) like @name";
         public static string schema_enum = "exec spDocEnum @name";
 
+
+
+
+
+        public static string nearestobj = "SELECT TOP 1 P.objID AS 'objId', " +
+                                            "  LTRIM(STR(P.ra,10,5))as 'ra', LTRIM(STR(P.dec,8,5)) as 'dec', " +
+                                            "  dbo.fPhotoTypeN(P.type) as 'type', LTRIM(STR(P.u,6,2)) AS 'u', LTRIM(STR(P.g,6,2)) AS 'g', " +
+                                            "  LTRIM(STR(P.r,6,2)) AS 'r', LTRIM(STR(P.i,6,2)) AS 'i', LTRIM(STR(P.z,6,2)) AS 'z'" +
+                                            "  FROM dbo.fGetNearestObjEq (@ra,@dec,@radius) as N, " +
+                                            "  PhotoObjAll as P" +
+                                            "  WHERE N.objID = P.objID AND P.i>0 ";
+
+
+        public static string nearestspecobjid = "select s.specObjId as specObjId from PhotoObjAll p LEFT OUTER JOIN SpecObj s ON s.bestobjid=p.objid where p.objId=@objid";
+
+        public static string nearestapogee = " SELECT TOP 1 P.apstar_id AS 'apogee_Id', LTRIM(STR(P.ra,10,5))as 'ra', LTRIM(STR(P.dec,8,5)) as 'dec' ,  'apogee' as 'type'," +
+                                                   " '' AS 'u', '' AS 'g',   '' AS 'r', '' AS 'i', '' AS 'z' " +
+                                                   " FROM dbo.fGetNearestApogeeStarEq (@ra,@dec,@radius) as N,   ApogeeStar as P  WHERE N.apogee_id = P.apogee_id  ";
+
+
+
+
     }
 }
