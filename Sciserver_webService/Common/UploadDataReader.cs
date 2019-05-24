@@ -180,7 +180,7 @@ namespace Sciserver_webService.Common
                 if (nearBy == "nearby")
                 {
                     cmd = " ";
-                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID numeric(20)) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearbySpecObjEq( U.up_ra ,U.up_dec ,U.up_sep )";
@@ -189,7 +189,7 @@ namespace Sciserver_webService.Common
                 else
                 {
                     cmd = " ";
-                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID bigint) ";
+                    cmd += " \nCREATE TABLE #x (up_id int,SpecobjID numeric(20)) ";
                     
                     var fun = " ";
                     fun += " dbo.fGetNearestSpecObjIdEq( up_ra,up_dec,up_sep ) ";
