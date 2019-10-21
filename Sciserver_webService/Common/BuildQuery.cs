@@ -355,7 +355,7 @@ namespace Sciserver_webService.QueryTools
                     constraint = " " + prefix + ".snr > " + val;
                     break;
                 case "snrMax":
-                    constraint = " " + prefix + ".snr > " + val;
+                    constraint = " " + prefix + ".snr < " + val;
                     break;
                 case "vhelioMin":
                     constraint = " " + prefix + ".vhelio_avg > " + val;
