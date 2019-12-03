@@ -496,7 +496,7 @@ namespace Sciserver_webService.QueryTools
                 case "spec" :
                     dictionary.Add("imgparams", "none");
                     dictionary.Add("specparams", "minimal");
-                    dictionary.Add("zWarning", "0");
+                    //dictionary.Add("zWarning", "0");
                     break;
                 case "irspec":
                     dictionary.Add("irspecparams", "typical");
