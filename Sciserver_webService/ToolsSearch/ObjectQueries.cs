@@ -343,10 +343,10 @@ namespace Sciserver_webService.ToolsSearch
             , dbo.fSpecZWarningN(zWarning) as 'redshift_flags',s.survey, s.programname, s.scienceprimary as 'primary', 
             (x.nspec-1) as 'otherspec',s.sourcetype, velDisp as 'veldisp', velDispErr as 'veldisp_err' 
              ,case s.survey 
-             WHEN 'sdss' THEN (select(dbo.fPrimtargetN(s.legacy_target1)+' '+dbo.fPrimTargetN(s.legacy_target2)+' '+dbo.fSpecialTarget1N(s.special_target1)))
-             WHEN 'boss' THEN (select cast(boss_target1 as varchar)+','+cast(ancillary_target1 as varchar)+','+cast(ancillary_target2 as varchar))
-             WHEN 'segue1' THEN (select dbo.fSEGUE1target1N(segue1_target1)+','+dbo.fSEGUE1target2N(segue1_target2)) 
-             WHEN 'segue2' THEN (select dbo.fSEGUE2target1N(segue2_target1)+','+ dbo.fSEGUE2target2N(segue2_target2) )             
+              WHEN 'sdss'   THEN (select('legacy_target1: ' + dbo.fPrimtargetN(s.legacy_target1)+', legacy_target2: '+dbo.fPrimTargetN(s.legacy_target2)+', special_target1: '+dbo.fSpecialTarget1N(s.special_target1)))
+              WHEN 'boss'   THEN (select 'boss_target1: '   + dbo.fBossTarget1N(boss_target1) + ', ancillary_target1: '+dbo.fAncillaryTarget1N(ancillary_target1)+', ancillary_target2: '+dbo.fAncillaryTarget2N(ancillary_target2))
+              WHEN 'segue1' THEN (select 'segue1_target1: ' + dbo.fSEGUE1target1N(segue1_target1)+', segue1_target2: '+dbo.fSEGUE1target2N(segue1_target2))
+              WHEN 'segue2' THEN (select 'segue2_target1: ' + dbo.fSEGUE2target1N(segue2_target1)+', segue2_target2: '+ dbo.fSEGUE2target2N(segue2_target2) )
              ELSE ' No Data ' 
              END 
              as 'targeting_flags', s.run2d 
