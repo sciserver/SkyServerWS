@@ -344,7 +344,7 @@ namespace Sciserver_webService.ToolsSearch
             (x.nspec-1) as 'otherspec',s.sourcetype, velDisp as 'veldisp', velDispErr as 'veldisp_err' 
              ,case s.survey 
              WHEN 'sdss' THEN (select(dbo.fPrimtargetN(s.legacy_target1)+' '+dbo.fPrimTargetN(s.legacy_target2)+' '+dbo.fSpecialTarget1N(s.special_target1)))
-             WHEN 'boss' THEN (select str(boss_target1)+','+str(ancillary_target1)+','+str(ancillary_target2))
+             WHEN 'boss' THEN (select cast(boss_target1 as varchar)+','+ cast(ancillary_target1 as varchar)+','+cast(ancillary_target2 as varchar))
              WHEN 'segue1' THEN (select dbo.fSEGUE1target1N(segue1_target1)+','+dbo.fSEGUE1target2N(segue1_target2)) 
              WHEN 'segue2' THEN (select dbo.fSEGUE2target1N(segue2_target1)+','+ dbo.fSEGUE2target2N(segue2_target2) )             
              ELSE ' No Data ' 
