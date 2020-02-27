@@ -114,7 +114,7 @@ namespace Sciserver_webService.ToolsSearch
                                             "  WHERE N.objID = P.objID AND P.i>0 ";
 
 
-        public static string nearestspecobjid = "select s.specObjId as specObjId from PhotoObjAll p LEFT OUTER JOIN SpecObj s ON s.bestobjid=p.objid where p.objId=@objid";
+        public static string nearestspecobjid = "select cast(s.specObjId as varchar) as specObjId from PhotoObjAll p LEFT OUTER JOIN SpecObj s ON s.bestobjid=p.objid where p.objId=@objid";
 
         public static string nearestapogee = " SELECT TOP 1 P.apstar_id AS 'apogee_Id', LTRIM(STR(P.ra,10,5))as 'ra', LTRIM(STR(P.dec,8,5)) as 'dec' ,  'apogee' as 'type'," +
                                                    " '' AS 'u', '' AS 'g',   '' AS 'r', '' AS 'i', '' AS 'z' " +
