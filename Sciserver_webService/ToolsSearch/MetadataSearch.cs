@@ -351,6 +351,31 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
                     break;
+                case "fieldfromname":
+                    cmd = MetadataQueries.fieldfromname;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+                case "photoflags":
+                    cmd = MetadataQueries.photoflags; break;
+                case "imgparams":
+                    cmd = MetadataQueries.imgparams; break;
+                case "specparams":
+                    cmd = MetadataQueries.specparams; break;
+                case "irspecparams":
+                    cmd = MetadataQueries.irspecparams; break;
+                case "primtargetflags":
+                    cmd = MetadataQueries.primtargetflags; break;
+                case "sectargetflags":
+                    cmd = MetadataQueries.sectargetflags; break;
+                case "bosstargetflags":
+                    cmd = MetadataQueries.bosstargetflags; break;
+                case "ebosstargetflags":
+                    cmd = MetadataQueries.ebosstargetflags; break;
+                case "apogeetarget1flags":
+                    cmd = MetadataQueries.apogeetarget1flags; break;
+                case "apogeetarget2flags":
+                    cmd = MetadataQueries.apogeetarget2flags; break;
                 default:
                     cmd = ""; break;
             }

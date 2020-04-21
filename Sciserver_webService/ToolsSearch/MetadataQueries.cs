@@ -105,7 +105,7 @@ namespace Sciserver_webService.ToolsSearch
 
 
 
-        public static string nearestobj = "SELECT TOP 1 P.objID AS 'objId', " +
+        public static string nearestobj = "SELECT TOP 1 cast(P.objID as varchar) AS 'objId', " +
                                             "  LTRIM(STR(P.ra,10,5))as 'ra', LTRIM(STR(P.dec,8,5)) as 'dec', " +
                                             "  dbo.fPhotoTypeN(P.type) as 'type', LTRIM(STR(P.u,6,2)) AS 'u', LTRIM(STR(P.g,6,2)) AS 'g', " +
                                             "  LTRIM(STR(P.r,6,2)) AS 'r', LTRIM(STR(P.i,6,2)) AS 'i', LTRIM(STR(P.z,6,2)) AS 'z'" +
@@ -120,6 +120,18 @@ namespace Sciserver_webService.ToolsSearch
                                                    " '' AS 'u', '' AS 'g',   '' AS 'r', '' AS 'i', '' AS 'z' " +
                                                    " FROM dbo.fGetNearestApogeeStarEq (@ra,@dec,@radius) as N,   ApogeeStar as P  WHERE N.apogee_id = P.apogee_id  ";
 
+
+        public static string imgparams = "SELECT [name] FROM DBColumns WHERE tableName='PhotoObjAll'";
+        public static string specparams = "SELECT[name] FROM DBColumns WHERE tableName = 'SpecObjAll'";
+        public static string irspecparams = "SELECT [name] FROM DBColumns WHERE tableName='apogeeStar'";
+        public static string photoflags = "SELECT [name] FROM DataConstants WHERE field='PhotoFlags' ORDER BY value";
+        public static string primtargetflags = "SELECT [name] FROM DataConstants WHERE field='PrimTarget' ORDER BY value";
+        public static string sectargetflags = "SELECT [name] FROM DataConstants WHERE field='SecTarget' ORDER BY value";
+        public static string bosstargetflags = "SELECT [name] FROM DataConstants WHERE field='BossTarget1' ORDER BY value";
+        public static string ebosstargetflags = "SELECT [name] FROM DataConstants WHERE field='EbossTarget0' ORDER BY value";
+        public static string apogeetarget1flags = "SELECT [name] FROM DataConstants WHERE field='ApogeeTarget1' AND [name] != '' AND [name] NOT IN ('APOGEE_FAINT', 'APOGEE_MEDIUM', 'APOGEE_BRIGHT', 'APOGEE_CHECKED') ORDER BY field,value";
+        public static string apogeetarget2flags = "SELECT [name] FROM DataConstants WHERE field='ApogeeTarget2' AND [name] != '' AND [name] NOT IN ('APOGEE_EMBEDDEDCLUSTER_STAR', 'APOGEE_LONGBAR', 'APOGEE_EMISSION_STAR', 'APOGEE_KEPLER_COOLDWARF', 'APOGEE_MIRCLUSTER_STAR', 'APOGEE_CHECKED') ORDER BY field,value";
+        public static string fieldfromname = "SELECT [name] FROM DataConstants WHERE field=@name ORDER BY value";
 
 
 
