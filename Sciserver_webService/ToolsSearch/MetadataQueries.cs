@@ -133,6 +133,42 @@ namespace Sciserver_webService.ToolsSearch
         public static string apogeetarget2flags = "SELECT [name] FROM DataConstants WHERE field='ApogeeTarget2' AND [name] != '' AND [name] NOT IN ('APOGEE_EMBEDDEDCLUSTER_STAR', 'APOGEE_LONGBAR', 'APOGEE_EMISSION_STAR', 'APOGEE_KEPLER_COOLDWARF', 'APOGEE_MIRCLUSTER_STAR', 'APOGEE_CHECKED') ORDER BY field,value";
         public static string fieldfromname = "SELECT [name] FROM DataConstants WHERE field=@name ORDER BY value";
 
+        // implementing TAP schema:
+
+        public static string allTables = "select  'dbo' as 'schema_name', name as 'table_name', case when type='U' then 'table' else 'view' end as 'table_type', null as 'utype', description, rank as 'table_index',text " +
+                                      "FROM DBObjects where type = 'V' or type = 'U' order by rank, name";
+
+        public static string onlyTables = "select  'dbo' as 'schema_name', name as 'table_name', case when type='U' then 'table' else 'view' end as 'table_type', null as 'utype', description, rank as 'table_index',text " +
+                                          "FROM DBObjects where type = 'U' order by rank, name";
+        public static string onlyViews = "select  'dbo' as 'schema_name', name as 'table_name', case when type='U' then 'table' else 'view' end as 'table_type', null as 'utype', description, rank as 'table_index',text " +
+                                          "FROM DBObjects where type = 'V' order by rank, name";
+
+        public static string allColumns = "select o.name as 'table_name', f.name as 'column_name', f.type as 'datatype', " +
+                                          "case when f.type= 'varchar' or f.type= 'nvarchar' or f.type= 'varbinary' then f.length else null end as 'arraysize', " +
+                                          "null as 'xtype', f.length as 'size', f.description as 'description', null as 'utype', f.unit as 'unit', " +
+                                          "f.ucd as 'ucd', null as 'indexed', null as 'principal', null as 'std', f.columnID  as 'column_index',  case when o.type='V' then 1 else 0 end as 'is_view' " +
+                                          "from (SELECT name, type FROM DBObjects where (type = 'V' or type = 'U') ) as o cross apply dbo.fDocColumns(o.name) as f ORDER BY o.name, f.columnID";
+        public static string columnsForTable = "select o.name as 'table_name', f.name as 'column_name', f.type as 'datatype', " +
+                                                  "case when f.type= 'varchar' or f.type= 'nvarchar' or f.type= 'varbinary' then f.length else null end as 'arraysize', " +
+                                                  "null as 'xtype', f.length as 'size', f.description as 'description', null as 'utype', f.unit as 'unit', " +
+                                                  "f.ucd as 'ucd', null as 'indexed', null as 'principal', null as 'std', f.columnID  as 'column_index',  case when o.type='V' then 1 else 0 end as 'is_view' " +
+                                                  "from (SELECT name, type FROM DBObjects where (type = 'V' or type = 'U') and name=@name  ) as o cross apply dbo.fDocColumns(o.name) as f ORDER BY o.name, f.columnID";
+
+
+        public static string allFunctionsData = "select o.name,o.description, o.text,o.rank,f.* from DBObjects as o cross apply fDocFunctionParams(o.name) as f where o.access='U' and o.type='F' order by o.name, f.pnum";
+        public static string allFunctionsDescriptions = "select o.name,o.description, o.text,o.rank from DBObjects as o where o.access='U' and o.type='F' order by o.name";
+        public static string functionParameters = "select o.name,o.description, o.text,o.rank,f.* from DBObjects as o cross apply fDocFunctionParams(o.name) as f where o.access='U' and o.type='F' and o.name=@name order by o.name, f.pnum";
+
+
+        public static string allProceduresData = "select o.name,o.description, o.text,o.rank,f.* from DBObjects as o cross apply fDocFunctionParams(o.name) as f where o.access='U' and o.type='P' order by o.name, f.pnum";
+        public static string allProceduresDescriptions = "select o.name,o.description, o.text,o.rank from DBObjects as o where o.access='U' and o.type='P' order by o.name";
+        public static string proceduresParameters = "select o.name,o.description, o.text,o.rank,f.* from DBObjects as o cross apply fDocFunctionParams(o.name) as f where o.access='U' and o.type='P' and o.name=@name order by o.name, f.pnum";
+
+
+        public static string allIndexes = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap order by[tableName],[indexMapId]";
+        public static string indexesForTable = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap where tableName = @name order by[tableName],[indexMapId]";
+
+
 
 
     }

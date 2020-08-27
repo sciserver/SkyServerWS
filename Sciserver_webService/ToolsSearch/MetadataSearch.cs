@@ -376,6 +376,46 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = MetadataQueries.apogeetarget1flags; break;
                 case "apogeetarget2flags":
                     cmd = MetadataQueries.apogeetarget2flags; break;
+                // implementing TAP schema:
+                case "alltables":
+                    cmd = MetadataQueries.allTables; break;
+                case "onlyviews":
+                    cmd = MetadataQueries.onlyViews; break;
+                case "onlytables":
+                    cmd = MetadataQueries.onlyTables; break;
+                case "allcolumns":
+                    cmd = MetadataQueries.allTablesColumns; break;
+                case "columnsfortable":
+                    cmd = MetadataQueries.columnsForTable;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+                case "allfunctionsdata":
+                    cmd = MetadataQueries.allFunctionsData;break;
+                case "allfunctionsdescriptions":
+                    cmd = MetadataQueries.allFunctionsDescriptions; break;
+                case "functionparameters":
+                    cmd = MetadataQueries.functionParameters;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+                case "allproceduresdata":
+                    cmd = MetadataQueries.allProceduresData; break;
+                case "allproceduresdescriptions":
+                    cmd = MetadataQueries.allFunctionsDescriptions; break;
+                case "procedureparameters":
+                    cmd = MetadataQueries.proceduresParameters;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+                case "allindexes":
+                    cmd = MetadataQueries.allIndexes; break;
+                case "indexesfortable":
+                    cmd = MetadataQueries.indexesForTable;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
+                    break;
+
                 default:
                     cmd = ""; break;
             }
