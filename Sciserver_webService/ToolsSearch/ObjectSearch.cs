@@ -51,7 +51,7 @@ namespace Sciserver_webService.ToolsSearch
         Int16? field = null;
         Int16? obj = null;
         long? fieldId = null;
-        long? plateId = null;
+        decimal? plateId = null;
         int? zoom = null;
         string plateIdApogee = null;
 
@@ -175,7 +175,7 @@ namespace Sciserver_webService.ToolsSearch
                     }
                     if (keyL == "plateid")
                     {
-                        try { string s = Request.QueryString[key]; plateId = string.Equals(s, "") ? plateId : Utilities.ParseId(s); }
+                        try { string s = Request.QueryString[key]; plateId = string.Equals(s, "") ? plateId : Convert.ToDecimal(s); }
                         catch { }
                     }
                     if (keyL == "zoom")
@@ -1177,7 +1177,7 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-                    objectInfo.plateId = reader["plateId"] is DBNull ? null : Utilities.ParseId(Functions.BytesToHex((byte[])reader["plateId"]));
+                    objectInfo.plateId = reader["plateId"] is DBNull ? null : (decimal?)reader["plateId"];
                     objectInfo.mjd = (int)reader["mjd"];
                     objectInfo.fiberId = (short)reader["fiberId"];
                     objectInfo.plate = (short)reader["plate"];
@@ -1224,7 +1224,7 @@ namespace Sciserver_webService.ToolsSearch
                 {
                     if (reader.Read())
                     {
-                        objectInfo.plateId = reader["plateId"] is DBNull ? null : Utilities.ParseId(Functions.BytesToHex((byte[])reader["plateId"]));
+                        objectInfo.plateId = reader["plateId"] is DBNull ? null : (decimal?)reader["plateId"];
                         objectInfo.mjd = (int)reader["mjd"];
                         objectInfo.fiberId = (short)reader["fiberId"];
                         objectInfo.plate = (short)reader["plate"];
@@ -1296,7 +1296,7 @@ namespace Sciserver_webService.ToolsSearch
                 {
                     if (reader.Read())
                     {
-                        objectInfo.plateId = reader["plateId"] is DBNull ? null : Utilities.ParseId(Functions.BytesToHex((byte[])reader["plateId"]));
+                        objectInfo.plateId = reader["plateId"] is DBNull ? null :  (decimal?)reader["plateId"];
                         objectInfo.mjd = (int)reader["mjd"];
                         objectInfo.fiberId = (short)reader["fiberId"];
                         objectInfo.plate = (short)reader["plate"];

@@ -19,7 +19,7 @@ namespace Sciserver_webService.ToolsSearch
 
         public int? mjd = null;
         public short? plate = null;
-        public long? plateId = null;
+        public decimal? plateId = null;
         public short? fiberId = null;
         public string fieldId = null;
 

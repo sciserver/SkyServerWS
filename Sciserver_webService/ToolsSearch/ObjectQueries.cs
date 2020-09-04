@@ -129,7 +129,7 @@ namespace Sciserver_webService.ToolsSearch
         //Plate
         public static string Plate = "select * from PlateX where plateId=@plateId";
 
-        public static string PlateShow = @" select cast(specObjID as binary(8)) as specObjId, fiberId, class as name, str(z,5,3) as z 
+        public static string PlateShow = @" select specObjID as specObjId, fiberId, class as name, str(z,5,3) as z 
                                 from SpecObjAll where plateID=@plateId order by fiberId";
 
         #endregion
@@ -487,7 +487,7 @@ namespace Sciserver_webService.ToolsSearch
                     cast(p.fieldId as binary(8)) as fieldId,
                     s.specObjId as specObjId,
                     p.objId as objId,
-                    cast(s.plateId as binary(8)) as plateId, s.mjd, s.fiberId, q.plate
+                    s.plateId as plateId, s.mjd, s.fiberId, q.plate
                     from SpecObjAll s JOIN PhotoTag p ON s.bestobjId=p.objid JOIN PlateX q ON s.plateId=q.plateId
                     where s.specObjId= @sid";
 
@@ -509,7 +509,7 @@ namespace Sciserver_webService.ToolsSearch
                      left outer join SpecObjAll s ON s.bestobjid=p.objid AND s.scienceprimary=1
                      where p.objId=dbo.fObjidFromSDSS(@skyversion,@run,@rerun,@camcol,@field,@obj)";
 
-        public static string getPlateFiberFromSpecObj = @"select cast(s.plateId as binary(8)) as plateId, s.mjd, s.fiberId, q.plate 
+        public static string getPlateFiberFromSpecObj = @"select s.plateId as plateId, s.mjd, s.fiberId, q.plate 
                            from SpecObjAll s JOIN PlateX q ON s.plateId=q.plateId 
                            where specObjId=@specId";
 
@@ -586,7 +586,7 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string QueryHeader = @"select p.objId as objId,s.specObjId as specObjId " +
                         ",p.ra,p.dec," +
-                        "s.mjd,s.plate,cast(s.plateId as binary(8)) as plateId,s.fiberid,cast(p.fieldId as binary(8)) as fieldId,p.run,p.rerun,p.camcol,p.field," +
+                        "s.mjd,s.plate,plateId as plateId,s.fiberid,cast(p.fieldId as binary(8)) as fieldId,p.run,p.rerun,p.camcol,p.field," +
                         "str(p.modelMag_u,7,2) as u, str(p.modelMag_g,7,2) as g, str(p.modelMag_r,7,2) as r, str(p.modelMag_i,7,2) as i, str(p.modelMag_z,7,2) as z," +
                         "str(modelMagErr_u,7,2) as err_u, str(modelMagErr_g,7,2) as err_g, str(modelMagErr_r,7,2) as err_r, str(modelMagErr_i,7,2) as err_i, str(modelMagErr_z,7,2) as err_z," +
                         "dbo.fPhotoFlagsN(flags) as flags, class as spectralClass, dbo.fPhotoTypeN(p.type) as otype, s.z as redshift, s.run2d ";
