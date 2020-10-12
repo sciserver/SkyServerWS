@@ -51,9 +51,14 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string schema_constants(string name)
         {
-            string cmd = "select * from @name";
-            if (name == "DataConstants") cmd += " order by field, value";
-            return cmd;
+            name = name.ToLower();
+            if(name == "dataconstants" || name == "profiledefs" || name == "sdssconstants" || name == "siteconstants" || name == "stripedefs"){
+                string cmd = "select * from " + name;
+                if (name == "dataconstants") cmd += " order by field, value";
+                return cmd;
+            }else{
+                return "";
+            }
         }
 
         public static string schema_constantsFields = "select distinct c.field, o.description  from DataConstants c, DBObjects o where o.type='V' and o.name = c.field";
@@ -168,6 +173,9 @@ namespace Sciserver_webService.ToolsSearch
         public static string allIndexes = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap order by[tableName],[indexMapId]";
         public static string indexesForTable = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap where tableName = @name order by[tableName],[indexMapId]";
 
+        public static string constants_list = "select name, type, description from DBObjects where name like '%Constants%' or name like '%Defs%'";
+
+        
 
 
 

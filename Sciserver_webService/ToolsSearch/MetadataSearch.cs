@@ -294,10 +294,10 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name);
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
                     break;
+                case "constantslist":
+                    cmd = MetadataQueries.constants_list; break;
                 case "constants":
                     cmd = MetadataQueries.schema_constants(name);
-                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name);
-                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
                     break;
                 case "constantsFields":
                     cmd = MetadataQueries.schema_constantsFields; break;
@@ -415,7 +415,6 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
                     break;
-
                 default:
                     cmd = ""; break;
             }
