@@ -19,6 +19,17 @@ namespace Sciserver_webService.ToolsSearch
         public static string apogeePlate = "select plate,mjd,racen,deccen from apogeePlate where plate_visit_id = @apogeeplateid";
         public static string runs2 = "select distinct stripe, run from Run order by stripe, run";
 
+        //listing plates for survey
+        public static string sdssPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='sdss' order by plateID";
+        public static string seguePlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='segue1' or survey='segue2' order by plateID";
+        public static string bossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='boss' order by plateID";
+        public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by plate,mjd";
+
+        // getting objects in plate:
+
+
+
+
 
         public static string schema_showDropList(string type)
         {

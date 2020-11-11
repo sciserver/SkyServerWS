@@ -415,6 +415,18 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
                     break;
+                case "sdssplatemjd":
+                    cmd = MetadataQueries.sdssPlateMJDList;
+                    break;
+                case "segueplatemjd":
+                    cmd = MetadataQueries.seguePlateMJDList;
+                    break;
+                case "bossplatemjd":
+                    cmd = MetadataQueries.bossPlateMJDList;
+                    break;
+                case "apogeeplatemjd":
+                    cmd = MetadataQueries.apogeePlateMJDList;
+                    break;
                 default:
                     cmd = ""; break;
             }
