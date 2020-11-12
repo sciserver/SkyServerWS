@@ -114,7 +114,7 @@ namespace Sciserver_webService.ToolsSearch
                     else if (keyL == "tablename")
                         try { tablename = Request.QueryString[key]; }// 
                         catch { }
-                    else if (keyL == "plateID")
+                    else if (keyL == "plateid")
                         try { plateID = decimal.Parse(Request.QueryString[key]); }//
                         catch { }
                     else if (keyL == "apogeeplateid")
@@ -284,8 +284,8 @@ namespace Sciserver_webService.ToolsSearch
                     break;
                 case "apogeePlate":
                     cmd = MetadataQueries.apogeePlate;
-                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@apogeeplateid", apogeeplateid);
-                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@apogeeplateid", SqlDbType.Decimal);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@apogeeplateid", apogeeplateid.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@apogeeplateid", SqlDbType.NVarChar);
                     break;
                 case "runs2":
                     cmd = MetadataQueries.runs2; break;
