@@ -114,7 +114,7 @@ namespace Sciserver_webService.ToolsSearch
             //reading the search radius, if ra-dec search is chosen
             this.radius = "1";// in arcminutes
             try {
-                if ("ra-dec".Equals(photoUpType) || apogeeUpType == "ra-dec" || apogeeUpType == "l-b")
+                if ("ra-dec".Equals(photoUpType) || "ra-dec".Equals(spectroUpType)  || apogeeUpType == "ra-dec" || apogeeUpType == "l-b")
                 {
                     this.radius = float.Parse(Request["radius"]).ToString();
                 }
@@ -503,7 +503,22 @@ namespace Sciserver_webService.ToolsSearch
         {
             string cmd = "";
 
-            cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+            if (spec.Equals(""))
+            {
+                if (spec.Equals(""))
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+                }
+                else
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID numeric(20))";
+                }
+            }
+            else
+            {
+                cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID numeric(20))";
+            }
+            
 
             string fun;
             if ((spec == "" && photoScope == "nearObj") || (spec == "Spec" && spectroScope == "nearObj"))
@@ -609,13 +624,27 @@ namespace Sciserver_webService.ToolsSearch
             if ((spec == "" && photoScope == "allPrim") || (spec == "Spec" && spectroScope == "allPrim"))
             {
                 //if (dbg==1) showLine("<h4>Get all nearby primary objects within "+radius+" arcmins</h4>");
-                cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+                if (spec.Equals(""))
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+                }
+                else
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID numeric(20))";
+                }
                 cmd = cmd +"\ninsert into #x \nEXEC dbo.spGet" + spec + "NeighborsPrim " + radius;
             }
             else
             {
                 //if (dbg==1) showLine("<h4>Get all nearby objects within "+radius+" arcmins</h4>");
-                cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+                if (spec.Equals(""))
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID bigint)";
+                }
+                else
+                {
+                    cmd = cmd + "\ncreate table #x (up_id int," + spec + "objID numeric(20))";
+                }
                 cmd = cmd + "\ninsert into #x \nEXEC dbo.spGet" + spec + "NeighborsAll " + radius;
             }
 
