@@ -114,7 +114,7 @@ namespace Sciserver_webService.ToolsSearch
             //reading the search radius, if ra-dec search is chosen
             this.radius = "1";// in arcminutes
             try {
-                if ("ra-dec".Equals(photoUpType) || apogeeUpType == "ra-dec" || apogeeUpType == "l-b")
+                if ("ra-dec".Equals(photoUpType) || "ra-dec".Equals(spectroUpType) || apogeeUpType == "ra-dec" || apogeeUpType == "l-b")
                 {
                     this.radius = float.Parse(Request["radius"]).ToString();
                 }
