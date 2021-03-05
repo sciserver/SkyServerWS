@@ -599,7 +599,7 @@ namespace Sciserver_webService.ImgCutout
             
             SqlCommand cmd = new SqlCommand("spExecuteSql", sqlConnect);
             cmd.Parameters.AddWithValue("@cmd", query);
-            cmd.Parameters.AddWithValue("@limit", 5000);
+            cmd.Parameters.AddWithValue("@limit", 2000000000);
             cmd.Parameters.AddWithValue("@winname",serverName);
             cmd.Parameters.AddWithValue("@webserver", httpHost);
             cmd.Parameters.AddWithValue("@clientIP", clientIP);
