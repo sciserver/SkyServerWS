@@ -1412,7 +1412,7 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = ExploreQueries.sppParamsQuery.Replace("@specId", objectInfo.specId.ToString());break;
                 case "galSpecLineQuery":
                     cmd = ExploreQueries.galSpecLineQuery.Replace("@specId", objectInfo.specId.ToString());break;
-                case "galSpecIndexQuery":
+                case "galSpecIndxQuery":
                     cmd = ExploreQueries.galSpecIndexQuery.Replace("@specId", objectInfo.specId.ToString());break;
                 case "galSpecInfoQuery":
                     cmd = ExploreQueries.galSpecInfoQuery.Replace("@specId", objectInfo.specId.ToString());break;
