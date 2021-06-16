@@ -44,7 +44,7 @@ namespace Sciserver_webService.ToolsSearch
         private HttpCookie cookie;
         private string token = "";
 
-        Int16? run = null;
+        Int32? run = null;
         Int16? rerun = null;
         byte? camcol = null;
         Int16? field = null;
@@ -134,6 +134,9 @@ namespace Sciserver_webService.ToolsSearch
                         catch { }
                     else if (keyL == "objid")
                         try { objid = decimal.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "run")
+                        try { run = Int32.Parse(Request.QueryString[key]); }// 
                         catch { }
 
                 }
@@ -275,6 +278,11 @@ namespace Sciserver_webService.ToolsSearch
                     break;
                 case "runs":
                     cmd = MetadataQueries.runs; break;
+                case "stripeFromRun":
+                    cmd = MetadataQueries.stripeFromRun;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@run", run.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@run", SqlDbType.Int);
+                    break;
                 case "legacyPlates":
                     cmd = MetadataQueries.legacyPlates; break;
                 case "legacyPlate":

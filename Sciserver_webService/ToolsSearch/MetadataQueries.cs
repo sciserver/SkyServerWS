@@ -14,6 +14,7 @@ namespace Sciserver_webService.ToolsSearch
         public static string tableColumns = "SELECT * FROM DBColumns WHERE tableName=@tablename";
         public static string tableColumnNames = "SELECT [name] FROM DBColumns WHERE tableName=@tablename";
         public static string runs = "SELECT run,stripe,startField,endField FROM Run ORDER BY run";
+        public static string stripeFromRun = "SELECT stripe, startField, (endField-startField+1) as nFields FROM Run WHERE run = @run";
         public static string legacyPlates = "SELECT plateID, plate, mjd from PlateX order by plateID";
         public static string legacyPlate= "select plate,mjd,ra,dec from plateX where plateid = @plateID";
         public static string apogeePlate = "select plate,mjd,racen,deccen from apogeePlate where plate_visit_id = @apogeeplateid";
@@ -26,7 +27,7 @@ namespace Sciserver_webService.ToolsSearch
         public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by plate,mjd";
 
         // getting objects in plate:
-
+        
 
 
 
