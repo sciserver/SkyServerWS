@@ -758,12 +758,16 @@ namespace Sciserver_webService.ToolsSearch
                     dt.TableName = "ApogeeData";
                     ds.Merge(dt);
 
-                    string apogee_id = (string)dt.Rows[0]["apogee_id"];
-                    cmd2 = ExploreQueries.APOGEEVISITS_BASE_QUERY;
-                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@id", apogee_id);
-                    //cmd2 = cmd2.Replace("@id", "'" + apogee_id + "'");
-
-                    dt = GetDataTableFromQuery(oConn, cmd2, ParameterValuePairs);
+                    if(dt.Rows.Count > 0) {
+                        string apogee_id = (string)dt.Rows[0]["apogee_id"];
+                        cmd2 = ExploreQueries.APOGEEVISITS_BASE_QUERY;
+                        ParameterValuePairs.Clear(); ParameterValuePairs.Add("@id", apogee_id);
+                        //cmd2 = cmd2.Replace("@id", "'" + apogee_id + "'");
+                        dt = GetDataTableFromQuery(oConn, cmd2, ParameterValuePairs);
+                    }else
+                    {
+                        dt.Reset();
+                    }
                     dt.TableName = "ApogeeVisits";
                     ds.Merge(dt);
                 }
@@ -1090,24 +1094,25 @@ namespace Sciserver_webService.ToolsSearch
             cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
             //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
-            using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+            if(ds.Tables.Count > 0)
             {
-                if (reader.Read())
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-                    objectInfo.ra  = (double)(reader["ra"]);
-                    objectInfo.dec = (double)(reader["dec"]);
+                    if (reader.Read())
+                    {
+                        objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                        objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                        objectInfo.ra = (double)(reader["ra"]);
+                        objectInfo.dec = (double)(reader["dec"]);
+                    }
+                }
+                if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
+                {
+                    // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
+                    pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
+                    apogeeFromEq(objectInfo.ra, objectInfo.dec);
                 }
             }
-            if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
-            {
-                // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
-                pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
-                apogeeFromEq(objectInfo.ra, objectInfo.dec);
-            }
-
-
         }
 
 
@@ -1316,8 +1321,7 @@ namespace Sciserver_webService.ToolsSearch
 
         private void parseApogeeID(string idstring)
         {
-            double qra = 0, qdec = 0;
-            objectInfo.apid = apid;
+            Double? qra = null, qdec = null;
             string cmd = "";
             apid = apid.ToLower();
             string taskname = "";
@@ -1346,13 +1350,16 @@ namespace Sciserver_webService.ToolsSearch
             //cmd = cmd.Replace("@apogeeId", apid);
 
             DataSet ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
-            using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+            if (ds.Tables.Count > 0)
             {
-                if (reader.Read())
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    qra = (double)reader["ra"];
-                    qdec = (double)reader["dec"];
+                    if (reader.Read())
+                    {
+                        qra = (double)reader["ra"];
+                        qdec = (double)reader["dec"];
 
+                    }
                 }
             }
             cmd = ExploreQueries.getpmtsFromEq;
@@ -1362,27 +1369,30 @@ namespace Sciserver_webService.ToolsSearch
             //cmd = cmd.Replace("@searchRadius", (0.5/60).ToString());
 
             ds = GetDataSetFromQuery(oConn, cmd);
-            using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+            if(ds.Tables.Count > 0)
             {
-                if (reader.Read())
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-                    objectInfo.ra = (double)(reader["ra"]);
-                    objectInfo.dec = (double)(reader["dec"]);
-                    objectInfo.run = (short)reader["run"];
-                    objectInfo.rerun = (short)reader["rerun"];
-                    objectInfo.camcol = (byte)reader["camcol"];
-                    objectInfo.field = (short)reader["field"];
-                    objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
+                    if (reader.Read())
+                    {
+                        objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                        objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                        objectInfo.ra = (double)(reader["ra"]);
+                        objectInfo.dec = (double)(reader["dec"]);
+                        objectInfo.run = (short)reader["run"];
+                        objectInfo.rerun = (short)reader["rerun"];
+                        objectInfo.camcol = (byte)reader["camcol"];
+                        objectInfo.field = (short)reader["field"];
+                        objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
+                        objectInfo.apid = apid;
+                    }
                 }
             }
         }
 
         private void parseMangaID(string mangaId)
         {
-            double qra = 0, qdec = 0;
-            objectInfo.apid = apid;
+            Double? qra = null, qdec = null;
             string cmd = "";
             string taskname = "";
 
