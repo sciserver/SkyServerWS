@@ -459,9 +459,13 @@ namespace Sciserver_webService.Common
                                         fiberI = c;
                                         break;
                                     case "mangaid":
-                                        hasManga = true;
-                                        mangaI = c;
-                                        break;
+                                        if (query.ToLower().Contains("mastar"))
+                                        {
+                                            hasManga = true;
+                                            mangaI = c;
+                                            break;
+                                        }
+                                        continue;
                                     default:
                                         break;
                                 }
