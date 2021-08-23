@@ -541,36 +541,36 @@ namespace Sciserver_webService.Common
                             str = "(s)";
                         if (dasFields == true)
                         {
-                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and retrieve the corresponding FITS files:</h3></td></tr>");
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAW and retrieve the corresponding FITS files:</h3></td></tr>");
                             sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseImaging + "bulkFields/runCamcolFields'/>\n");
                             //				Response.Write( "<input type='hidden' name='search' value ='runcamcolfield'/>\n" );
                             sb.AppendFormat("<input type='hidden' name='runcamcolfields' value='");
                             for (int i = 0; i < NumRows; i++)
                                 sb.AppendFormat(runs[i] + "," + camcols[i] + "," + fields[i] + "\n");
                             sb.AppendFormat("'/>\n");
-                            sb.AppendFormat("<input type='submit' name='submit' value='Submit'/>Upload list of fields to SAS\n");
+                            sb.AppendFormat("<input type='submit' name='submit' value='Submit'/>Upload list of fields to SAW\n");
                             sb.AppendFormat("</form></td>");
                         }
                         if (dasSpectra == true)
                         {
-                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and from there  click <i>Search</i> to download or view the spectra:</h3></td></tr>"); 
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAW and from there  click <i>Search</i> to download or view the spectra:</h3></td></tr>"); 
                             sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "optical/spectrum/search?tab=bulk&run2d=any'/>\n");
                             sb.AppendFormat("<input type='hidden' name='plate_mjd_fiberid_csv' value='");
                             for (int i = 0; i < NumRows; i++)
                                 sb.AppendFormat(plates[i] + "," + mjds[i] + "," + fibers[i] + "\n");
                             sb.AppendFormat("'/>\n");
-                            sb.AppendFormat("<input type='submit' name='submitPMF' value='Submit'/>Upload list of spectra to SAS\n");
+                            sb.AppendFormat("<input type='submit' name='submitPMF' value='Submit'/>Upload list of spectra to SAW\n");
                             sb.AppendFormat("</form></td>");
                         }
                         if (hasManga == true)
                         {
-                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAS and from there  click <i>Search</i> to download or view the MaStar objects:</h3></td></tr>");
+                            sb.AppendFormat("<tr><td colspan=2><h3>Use the button" + str + " below to upload the results of the above query to the SAW and from there  click <i>Search</i> to download or view the MaStar objects:</h3></td></tr>");
                             sb.AppendFormat("<td><form method='post' action='" + KeyWords.dasUrlBaseSpec + "mastar/spectrum/search?tab=bulk'/>\n");
                             sb.AppendFormat("<input type='hidden' name='mangaid_csv' value='");
                             for (int i = 0; i < NumRows; i++)
                                 sb.AppendFormat(mangaIDs[i] + "\n");
                             sb.AppendFormat("'/>\n");
-                            sb.AppendFormat("<input type='submit' name='submitMangaId' value='Submit'/>Upload list of MaStar objects to SAS\n");
+                            sb.AppendFormat("<input type='submit' name='submitMangaId' value='Submit'/>Upload list of MaStar objects to SAW\n");
                             sb.AppendFormat("</form></td>");
                         }
                         sb.AppendFormat("</tr></table>");
