@@ -457,6 +457,15 @@ namespace Sciserver_webService.ToolsSearch
                                                  join mastar_goodstars as gs on f.mangaid=gs.mangaid
                                                  join mastar_goodvisits as gv on f.mangaid=gv.mangaid order by gs.mangaid";
 
+        public static string getMastarFromEqDR17 = @"select distinct gv.plate,gv.ifudesign,gv.mjd,gv.nexp_visit,gv.heliov,gv.verr,gv.v_errcode,gv.mjdqual,
+                                                                 gs.mangaid,gs.ra,gs.dec,gs.nvisits,gs.nplates,
+                                                                 gs.photocat,gs.epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
+                                                                 gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
+                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
+                                                 from dbo.fGetNearbyMastarObjEq(@qra , @qdec , @searchRadius) f
+                                                 join mastar_goodstars as gs on f.mangaid=gs.mangaid
+                                                 join mastar_goodvisits as gv on f.mangaid=gv.mangaid order by gs.mangaid";
+
         public static string getMastarFromMangaId = @"select     gv.plate,gv.ifudesign,gv.mjd,gv.nexp,gv.heliov,gv.verr,gv.v_errcode,gv.mjdqual,
                                                                  gs.mangaid,gs.objra,gs.objdec,gs.catalogra,gs.catalogdec,gs.nvisits,gs.nplates,
                                                                  gs.photocat,gs.cat_epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
@@ -464,6 +473,12 @@ namespace Sciserver_webService.ToolsSearch
                                                                  gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
                                                     from mastar_goodstars gs join mastar_goodvisits as gv on gs.mangaid=gv.mangaid where gs.mangaid=@mangaId  order by gs.mangaid";
 
+        public static string getMastarFromMangaIdDR17 = @"select     gv.plate,gv.ifudesign,gv.mjd,gv.nexp_visit,gv.heliov,gv.verr,gv.v_errcode,gv.mjdqual,
+                                                                 gs.mangaid,gs.ra,gs.dec,gs.nvisits,gs.nplates,
+                                                                 gs.photocat,gs.epoch,gs.mngtarg2,gs.minmjd,gs.maxmjd,
+                                                                 gs.psfmag_1,gs.psfmag_2,gs.psfmag_3,gs.psfmag_4,gs.psfmag_5,
+                                                                 gs.input_logg,gs.input_teff,gs.input_fe_h,gs.input_alpha_m,gs.input_source
+                                                    from mastar_goodstars gs join mastar_goodvisits as gv on gs.mangaid=gv.mangaid where gs.mangaid=@mangaId  order by gs.mangaid";
 
 
         public static string getPhotoFromEq = @" select top 1 p.objId as objId, p.specObjId as specObjId
@@ -533,6 +548,7 @@ namespace Sciserver_webService.ToolsSearch
 
         public static string getManga = @"select top 1 objra as ra, objdec as dec from mangadrpall where mangaid=@mangaId order by redsn2 desc";
         public static string getMastar = @"select top 1 objra as ra, objdec as dec from mastar_goodstars where mangaid=@mangaId";
+        public static string getMastarDR17 = @"select top 1 ra, dec from mastar_goodstars where mangaid=@mangaId";
 
 
         public static string getPlateFromApogee = @"select  top 1   a.ra,    a.dec,   a.apstar_id,    a.apogee_id, v.plate,v.fiberId,v.mjd 

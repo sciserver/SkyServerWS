@@ -834,7 +834,7 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = "";
                 if (qra != null && qdec != null && ResolvedName == null && id == null && apid == null && sidstring == null && plate == null && mjd == null && fiber == null && run == null && rerun == null && camcol == null && field == null && obj == null && fieldId == null && plateId == null && plateIdApogee == null && mangaId == null)
                 {// case when only a [RA,Dec] pair is given by the user for searching
-                    cmd = ExploreQueries.getMastarFromEq;
+                    cmd = KeyWords.ReleaseNumber < 17 ? ExploreQueries.getMastarFromEq : ExploreQueries.getMastarFromEqDR17;
                     cmd = cmd.Replace("@qra", qra.ToString());
                     cmd = cmd.Replace("@qdec", qdec.ToString());
                     cmd = cmd.Replace("@searchRadius", "16.0/60.0");
@@ -842,7 +842,7 @@ namespace Sciserver_webService.ToolsSearch
                 }
                 else if (mangaId != null)
                 {
-                    cmd = ExploreQueries.getMastarFromMangaId;
+                    cmd = KeyWords.ReleaseNumber < 17 ? ExploreQueries.getMastarFromMangaId : ExploreQueries.getMastarFromMangaIdDR17;
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
                     dt = GetDataTableFromQuery(oConn, cmd, ParameterValuePairs);
                 }
@@ -1396,7 +1396,7 @@ namespace Sciserver_webService.ToolsSearch
             string cmd = "";
             string taskname = "";
 
-            cmd = ExploreQueries.getManga; taskname = "Skyserver.Explore.Summary.getManga";
+            cmd = ExploreQueries.getManga;  taskname = "Skyserver.Explore.Summary.getManga";
             ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
             DataSet ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
             if (ds.Tables[0].Rows.Count > 0)
@@ -1414,16 +1414,20 @@ namespace Sciserver_webService.ToolsSearch
             }
             else
             {
-                cmd = ExploreQueries.getMastar; taskname = "Skyserver.Explore.Summary.getMastar";
+                cmd = KeyWords.ReleaseNumber < 17 ? ExploreQueries.getMastar : ExploreQueries.getMastarDR17;
+                taskname = "Skyserver.Explore.Summary.getMastar";
                 ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaId", mangaId);
                 ds = GetDataSetFromQuery(oConn, cmd, ParameterValuePairs);
-                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                if (ds.Tables[0].Rows.Count > 0)
                 {
-                    if (reader.Read())
+                    using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                     {
-                        qra = (double)reader["ra"];
-                        qdec = (double)reader["dec"];
-                        objectInfo.mangaId = mangaId;
+                        if (reader.Read())
+                        {
+                            qra = (double)reader["ra"];
+                            qdec = (double)reader["dec"];
+                            objectInfo.mangaId = mangaId;
+                        }
                     }
                 }
             }
