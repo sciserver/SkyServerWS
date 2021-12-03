@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sciserver_webService.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -32,6 +33,7 @@ namespace Sciserver_webService.ToolsSearch
 
     public class ExploreQueries
     {
+        static string commissColumn = KeyWords.ReleaseNumber < 17 ? "a.commiss," : "";
 
         ///Left Side panel of the Explore Page
         //photoObj
@@ -393,7 +395,7 @@ namespace Sciserver_webService.ToolsSearch
 
         #region Apogee_Queries
 
-        public static string APOGEE_BASE_QUERY = @" select   a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,    a.location_id,   a.vhelio_avg,    a.vscatter,     b.teff,
+        public static string APOGEE_BASE_QUERY = @" select   a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,  a.location_id, " + commissColumn +  @" a.vhelio_avg,    a.vscatter,     b.teff,
                     b.teff_err,   b.logg,    b.logg_err,  b.param_m_h,    b.param_m_h_err,     b.param_alpha_m,    b.param_alpha_m_err, c.j,   c.h,   c.k,   c.j_err,   c.h_err,   c.k_err, 
                     case c.src_4_5      when 'none' then NULL      when 'WISE' then c.wise_4_5      when 'IRAC' then c.irac_4_5      end      as mag_4_5,   case c.src_4_5     
                     when 'none' then NULL      when 'WISE' then c.wise_4_5_err      when 'IRAC' then c.irac_4_5_err      end      as mag_4_5_err,   c.src_4_5,  
@@ -401,7 +403,7 @@ namespace Sciserver_webService.ToolsSearch
                     dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN  
                     from apogeeStar a join aspcapStar b on a.apstar_id = b.apstar_id join apogeeObject c on a.apogee_id = c.apogee_id ";
 
-        public static string APOGEE_BASE_QUERY_DR13 = @" select   a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,    a.location_id,   a.vhelio_avg,    a.vscatter,     b.teff,
+        public static string APOGEE_BASE_QUERY_DR13 = @" select   a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,    a.location_id, " + commissColumn + @"  a.vhelio_avg,    a.vscatter,     b.teff,
                     b.teff_err,   b.logg,    b.logg_err,  b.m_h as 'param_m_h',   b.m_h_err as 'param_m_h_err',     b.alpha_m as 'param_alpha_m', b.alpha_m_err as 'param_alpha_m_err', c.j,   c.h,   c.k,   c.j_err,   c.h_err,   c.k_err, 
                     case c.src_4_5      when 'none' then NULL      when 'WISE' then c.wise_4_5      when 'IRAC' then c.irac_4_5      end      as mag_4_5,   case c.src_4_5     
                     when 'none' then NULL      when 'WISE' then c.wise_4_5_err      when 'IRAC' then c.irac_4_5_err      end      as mag_4_5_err,   c.src_4_5,  
@@ -538,11 +540,11 @@ namespace Sciserver_webService.ToolsSearch
         public static string getSpec = "select specobjid,survey from specobjall where specobjid= @specId";
 
 
-        public static string getApogee = @" select apstar_id, ra, dec, apogee_id, glon, glat,location_id
+        public static string getApogee = @" select apstar_id, ra, dec, apogee_id, glon, glat," + commissColumn + @" location_id 
                                             from apogeeStar
                                             where apstar_id=@apogeeId";// note that @apogeeId is a string, and has to be checked against sql injection before sending the query.
 
-        public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat,location_id
+        public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat," + commissColumn + @" location_id
                                             from apogeeStar
                                             where apogee_id=@apogeeId";// note that @apogeeId is a string, and has to be checked against sql injection before sending the query.
 
@@ -598,7 +600,7 @@ namespace Sciserver_webService.ToolsSearch
         //public class QuickLookQueries: Explore.ExplorerQueries
     public class QuickLookQueries
     {
-
+        static string commissColumn = KeyWords.ReleaseNumber < 17 ? "a.commiss," : "";
 
         public static string QueryHeader = @"select p.objId as objId,s.specObjId as specObjId " +
                         ",p.ra,p.dec," +
@@ -634,11 +636,11 @@ namespace Sciserver_webService.ToolsSearch
 
 
 
-        public static string getApogee = @" select apstar_id, ra, dec, apogee_id, glon, glat,location_id
+        public static string getApogee = @" select apstar_id, ra, dec, apogee_id, glon, glat," + commissColumn + @" location_id
                                             from apogeeStar
                                             where apstar_id='@apogeeId'";
 
-        public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat,location_id
+        public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat," + commissColumn + @" location_id
                                             from apogeeStar
                                             where apogee_id='@apogeeId'";
 
