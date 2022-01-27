@@ -177,7 +177,14 @@ namespace Sciserver_webService.Common
 
                             writer.Write("<tr align=center BGCOLOR=#eeeeff>");
                             for (int c = 0; c < NumColumns; c++)
-                                writer.Write("<td nowrap><font size=-1>{0}</font></td>", ds.Tables[t].Rows[r][c].ToString());
+                            {
+                                object value = ds.Tables[t].Rows[r][c];
+                                if (ds.Tables[t].Rows[r][c] is byte[])
+                                {
+                                    value = BytesToHex((byte[])value);
+                                }
+                                writer.Write("<td nowrap><font size=-1>{0}</font></td>", value.ToString());
+                            }
                             writer.Write("</tr>");
                         }
                         writer.Write("</TABLE>");

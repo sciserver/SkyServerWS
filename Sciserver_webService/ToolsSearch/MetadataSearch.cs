@@ -329,6 +329,14 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@name", SqlDbType.NVarChar);
                     break;
+                case "descriptionFromDBObjects":
+                    cmd = MetadataQueries.descriptionFromDBObjects;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    break;
+                case "textFromDBObjects":
+                    cmd = MetadataQueries.textFromDBObjects;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", name.ToString());
+                    break;
                 case "access":
                     cmd = MetadataQueries.schema_access;
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@name", "%" + name.ToString() + "%");

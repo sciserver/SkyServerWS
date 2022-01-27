@@ -65,7 +65,14 @@ namespace Sciserver_webService.ToolsSearch
         {
             name = name.ToLower();
             if(name == "dataconstants" || name == "profiledefs" || name == "sdssconstants" || name == "siteconstants" || name == "stripedefs"){
-                string cmd = "select * from " + name;
+                string cmd = "";
+                if (name == "dataconstants2")
+                {
+                    cmd = "select field, name, cast(value as varchar(max)), description from " + name;  
+                }else
+                {
+                    cmd = "select * from " + name;
+                }
                 if (name == "dataconstants") cmd += " order by field, value";
                 return cmd;
             }else{
@@ -117,7 +124,8 @@ namespace Sciserver_webService.ToolsSearch
         public static string schema_description = "select description from DataConstants where field=@name and [name]=''";
         public static string schema_access = "select name, type, description from DBObjects where type in ('F','P') and access='U' and UPPER(name) like @name";
         public static string schema_enum = "exec spDocEnum @name";
-
+        public static string descriptionFromDBObjects = "select description from DBObjects where name=@name";
+        public static string textFromDBObjects = "select text from DBObjects where name=@name";
 
 
 
@@ -182,10 +190,13 @@ namespace Sciserver_webService.ToolsSearch
         public static string proceduresParameters = "select o.name,o.description, o.text,o.rank,f.* from DBObjects as o cross apply fDocFunctionParams(o.name) as f where o.access='U' and o.type='P' and o.name=@name order by o.name, f.pnum";
 
 
-        public static string allIndexes = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap order by[tableName],[indexMapId]";
-        public static string indexesForTable = "select[indexMapID],[code],[type],[tableName],[fieldList],[foreignKey] from IndexMap where tableName = @name order by[tableName],[indexMapId]";
+        public static string allIndexes = "select[tableName] as 'Table Name', case when code = 'I' then 'covering index' else type end as 'Index Type', " +
+                                            "case when code = 'F' then[foreignKey] else REPLACE(fieldList, ',', ', ') end as 'Key or Field List' from IndexMap order by[tableName],[indexMapId]";
 
-        public static string constants_list = "select name, type, description from DBObjects where name like '%Constants%' or name like '%Defs%'";
+        public static string indexesForTable = "select case when code = 'I' then 'covering index' else type end as 'Index Type', " +
+                                                "case when code = 'F' then[foreignKey] else REPLACE(fieldList, ',', ', ') end as 'Key or Field List' from IndexMap where tableName = @name order by[tableName],[indexMapId]";
+
+        public static string constants_list = "select name, description from DBObjects where name like '%Constants%' or name like '%Defs%'";
 
         
 

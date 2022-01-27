@@ -1323,7 +1323,6 @@ namespace Sciserver_webService.ToolsSearch
         {
             Double? qra = null, qdec = null;
             string cmd = "";
-            apid = apid.ToLower();
             string taskname = "";
             /*
             if (apid.Contains("apogee"))
@@ -1335,11 +1334,11 @@ namespace Sciserver_webService.ToolsSearch
                 cmd = ExploreQueries.getApogee2; taskname = "Skyserver.Explore.Summary.getApogee2";
             }
             */ 
-            if (apid.StartsWith("apogee"))
+            if (apid.ToLower().StartsWith("apogee"))
             {
                 cmd = ExploreQueries.getApogee; taskname = "Skyserver.Explore.Summary.getApogee";
             }
-            else if ((apid.StartsWith("2m")))
+            else if ((apid.ToLower().StartsWith("2m")))
             {
                 cmd = ExploreQueries.getApogee2; taskname = "Skyserver.Explore.Summary.getApogee2";
             }
@@ -1358,7 +1357,9 @@ namespace Sciserver_webService.ToolsSearch
                     {
                         qra = (double)reader["ra"];
                         qdec = (double)reader["dec"];
-
+                        objectInfo.ra = qra;
+                        objectInfo.dec = qdec;
+                        objectInfo.apid = apid;
                     }
                 }
             }
@@ -1384,7 +1385,7 @@ namespace Sciserver_webService.ToolsSearch
                         objectInfo.camcol = (byte)reader["camcol"];
                         objectInfo.field = (short)reader["field"];
                         objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
-                        objectInfo.apid = apid;
+                        //objectInfo.apid = apid;
                     }
                 }
             }
