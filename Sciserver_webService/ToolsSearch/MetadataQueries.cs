@@ -24,6 +24,7 @@ namespace Sciserver_webService.ToolsSearch
         public static string sdssPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='sdss' order by plateID";
         public static string seguePlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='segue1' or survey='segue2' order by plateID";
         public static string bossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='boss' order by plateID";
+        public static string ebossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='eboss' order by plateID";
         public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by plate,mjd";
 
         // getting objects in plate:

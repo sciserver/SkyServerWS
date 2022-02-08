@@ -440,6 +440,9 @@ namespace Sciserver_webService.ToolsSearch
                 case "bossplatemjd":
                     cmd = MetadataQueries.bossPlateMJDList;
                     break;
+                case "ebossplatemjd":
+                    cmd = MetadataQueries.ebossPlateMJDList;
+                    break;
                 case "apogeeplatemjd":
                     cmd = MetadataQueries.apogeePlateMJDList;
                     break;
