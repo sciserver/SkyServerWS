@@ -1595,6 +1595,8 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = PlateQueries.FiberList.Replace("@plateid", objectInfo.plateId.ToString());break;
                 case "PlateAPOGEE":
                     cmd = PlateQueries.PlateAPOGEE; ParameterValuePairs.Clear();ParameterValuePairs.Add("@apogeeplateid", objectInfo.plateIdApogee.ToString()); break;//cmd = PlateQueries.PlateAPOGEE.Replace("@apogeeplateid", objectInfo.plateIdApogee.ToString()); break;
+                case "PlateMANGA":
+                    cmd = PlateQueries.PlateMANGA; ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaplate", objectInfo.plate.ToString()); break;
                 default:
                     cmd = "";break;
             }

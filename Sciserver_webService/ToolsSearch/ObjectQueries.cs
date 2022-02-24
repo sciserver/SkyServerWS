@@ -17,6 +17,7 @@ namespace Sciserver_webService.ToolsSearch
                                          "join apogeePlate p on (p.plate=v.plate and p.mjd=v.mjd ) "+
                                          "where p.plate_visit_id = @apogeeplateid "+
                                          "order by v.fiberid";// note that @apogeeplateid is a string, and has to be checked against sql injection before sending the query.
+        public static string PlateMANGA = "select mangaid from mangadrpall where plate = @mangaplate order by mangaid";
     }
 
     public class SpecQueries

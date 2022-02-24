@@ -72,6 +72,7 @@ namespace Sciserver_webService.ToolsSearch
         public string tablename = null;
         public decimal? plateID = null;
         public string apogeeplateid = null;
+        public string mangaplateid = null;
         public char? type = null;
         public decimal? objid = null;
         public double? ra = null;
@@ -119,6 +120,9 @@ namespace Sciserver_webService.ToolsSearch
                         catch { }
                     else if (keyL == "apogeeplateid")
                         try { apogeeplateid = Request.QueryString[key]; }// 
+                        catch { }
+                    else if (keyL == "mangaplateid")
+                        try { mangaplateid = Request.QueryString[key]; }// 
                         catch { }
                     else if (keyL == "type")
                         try { type = char.Parse(Request.QueryString[key]); }// 
@@ -295,6 +299,11 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@apogeeplateid", apogeeplateid.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@apogeeplateid", SqlDbType.NVarChar);
                     break;
+                case "mangaPlate":
+                    cmd = MetadataQueries.mangaPlate;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@mangaplateid", mangaplateid.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@mangaplateid", SqlDbType.Int);
+                    break;
                 case "runs2":
                     cmd = MetadataQueries.runs2; break;
                 case "parent":
@@ -445,6 +454,9 @@ namespace Sciserver_webService.ToolsSearch
                     break;
                 case "apogeeplatemjd":
                     cmd = MetadataQueries.apogeePlateMJDList;
+                    break;
+                case "mangaplatemjd":
+                    cmd = MetadataQueries.mangaPlateMJDList;
                     break;
                 default:
                     cmd = ""; break;

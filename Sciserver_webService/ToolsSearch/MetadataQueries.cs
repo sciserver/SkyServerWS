@@ -18,14 +18,16 @@ namespace Sciserver_webService.ToolsSearch
         public static string legacyPlates = "SELECT plateID, plate, mjd from PlateX order by plateID";
         public static string legacyPlate= "select plate,mjd,ra,dec from plateX where plateid = @plateID";
         public static string apogeePlate = "select plate,mjd,racen,deccen from apogeePlate where plate_visit_id = @apogeeplateid";
+        public static string mangaPlate = "select top 1 plate,mjdmax as mjd,cenra as racen, cendec as deccen from mangaDRPall where plate = @mangaplateid group by plate,mjdmax,cenra,cendec";
         public static string runs2 = "select distinct stripe, run from Run order by stripe, run";
 
         //listing plates for survey
-        public static string sdssPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='sdss' order by plateID";
-        public static string seguePlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='segue1' or survey='segue2' order by plateID";
-        public static string bossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='boss' order by plateID";
-        public static string ebossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='eboss' order by plateID";
-        public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by plate,mjd";
+        public static string sdssPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='sdss' order by plate";
+        public static string seguePlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='segue1' or survey='segue2' order by plate";
+        public static string bossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='boss' order by plate";
+        public static string ebossPlateMJDList = "SELECT CAST(plateID as VARCHAR(20)) as plateID, plate, mjd from PlateX where survey='eboss' order by plate";
+        public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by cast(plate as bigint),mjd";
+        public static string mangaPlateMJDList = "SELECT plate as plateID, plate, mjdmax as mjd from mangaDRPall group by plate,mjdmax order by plate,mjdmax";
 
         // getting objects in plate:
         
