@@ -150,7 +150,7 @@ namespace Sciserver_webService.ToolsSearch
                             str(s.ra,10,5) as specRa, str(s.dec,10,5) as specDec,  s.sciencePrimary, 
                             str(dbo.fDistanceArcMinEq(t.ra,t.dec,s.ra,s.dec),10,8) as distanceArcMin, s.class as class  
                             from SpecObjAll s, photoobjall t 
-                            where t.objid=@objId  and s.fluxobjid=t.objid order by  plate, MJD, fiber, 
+                            where t.objid=@objId  and s.fluxobjid=t.objid order by  MJD, plate, fiber, 
                             scienceprimary desc, distanceArcMin asc";
 
         #endregion
