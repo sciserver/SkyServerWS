@@ -29,13 +29,30 @@ namespace Sciserver_webService.ToolsSearch
         public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by cast(plate as bigint),mjd";
         public static string mangaPlateMJDList = "SELECT plate as plateID, plate, mjdmax as mjd from mangaDRPall group by plate,mjdmax order by plate,mjdmax";
 
-        // getting objects in plate:
-        
+        // notebook query
+        public static string getNotebookQuery(bool hasObjIDs, bool hasApogeeIDs)
+        {
+
+            string objQuery = hasObjIDs ? "@ids" : "null";
+            string apQuery = hasApogeeIDs ? "@apids" : "null";
+
+            string notebookQuery = "SELECT objid, specobjid, type, ra, dec, u, g, r, i, z, redshift " +
+                                   "FROM (SELECT *,ROW_NUMBER() OVER(PARTITION BY objid ORDER BY objid) AS rn FROM " +
+                                           "(" +
+                                           "select cast(objId as varchar(32)) as objId, s.specobjid, dbo.fPhotoTypeN(type) as type, p.ra, p.dec, p.u, p.g, p.r, p.i, p.z, s.z as redshift " +
+                                           "from PhotoObj p " +
+                                           "left outer join SpecObjAll s ON s.bestobjid=p.objid " +
+                                           "where objId in (" + objQuery + ")" +
+                                           ") res1 " +
+                                        ") res2 WHERE rn = 1 " +
+                                        " UNION select top 1 apstar_id as apstar_id, '' as specid, 'apogee' as type, ra as ra,dec as dec,  '' as u,'' as g,'' as r, '' as i,'' as z,'' as redshift  " +
+                                        " from apogeeStar where apstar_id in (" + apQuery + ") ";
+            return notebookQuery;
+    }
 
 
 
-
-        public static string schema_showDropList(string type)
+    public static string schema_showDropList(string type)
         {
             string cmd;
             if (type == "C")

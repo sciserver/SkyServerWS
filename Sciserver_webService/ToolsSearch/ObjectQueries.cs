@@ -402,15 +402,15 @@ namespace Sciserver_webService.ToolsSearch
                     when 'none' then NULL      when 'WISE' then c.wise_4_5_err      when 'IRAC' then c.irac_4_5_err      end      as mag_4_5_err,   c.src_4_5,  
                     dbo.fApogeeTarget1N(a.apogee_target1) as apogeeTarget1N,   dbo.fApogeeTarget2N(a.apogee_target2) as apogeeTarget2N, 
                     dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN  
-                    from apogeeStar a join aspcapStar b on a.apstar_id = b.apstar_id join apogeeObject c on a.apogee_id = c.apogee_id ";
+                    from apogeeStar a left join aspcapStar b on a.apstar_id = b.apstar_id left join apogeeObject c on a.apogee_id = c.apogee_id ";
 
         public static string APOGEE_BASE_QUERY_DR13 = @" select   a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,    a.location_id, " + commissColumn + @"  a.vhelio_avg,    a.vscatter,     b.teff,
                     b.teff_err,   b.logg,    b.logg_err,  b.m_h as 'param_m_h',   b.m_h_err as 'param_m_h_err',     b.alpha_m as 'param_alpha_m', b.alpha_m_err as 'param_alpha_m_err', c.j,   c.h,   c.k,   c.j_err,   c.h_err,   c.k_err, 
                     case c.src_4_5      when 'none' then NULL      when 'WISE' then c.wise_4_5      when 'IRAC' then c.irac_4_5      end      as mag_4_5,   case c.src_4_5     
                     when 'none' then NULL      when 'WISE' then c.wise_4_5_err      when 'IRAC' then c.irac_4_5_err      end      as mag_4_5_err,   c.src_4_5,  
                     dbo.fApogeeTarget1N(a.apogee_target1) as apogeeTarget1N,   dbo.fApogeeTarget2N(a.apogee_target2) as apogeeTarget2N, 
-                    dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN, f.field_name  
-                    from apogeeStar a join aspcapStar b on a.apstar_id = b.apstar_id join apogeeObject c on a.apogee_id = c.apogee_id left join apogeeField f on f.location_id = a.location_id ";
+                    dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN, a.field as 'field_name' 
+                    from apogeeStar a left join aspcapStar b on a.apstar_id = b.apstar_id left join apogeeObject c on a.apogee_id = c.apogee_id left join apogeeField f on f.location_id = a.location_id ";
 
         public static string APOGEEVISITS_BASE_QUERY = "select visit_id, plate,  mjd, fiberid, dateobs, vrel, apred_version from apogeeVisit where apogee_id = @id order by dateobs";
 

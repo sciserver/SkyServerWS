@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -75,10 +76,11 @@ namespace Sciserver_webService.ToolsSearch
         public string mangaplateid = null;
         public char? type = null;
         public decimal? objid = null;
+        public ArrayList objids = new ArrayList();
+        public ArrayList apogeeobjids = new ArrayList();
         public double? ra = null;
         public double? dec = null;
         public double? radius = null;
-
 
         public MetadataSearch(Dictionary<string, string> requestDir, Dictionary<string, string> ExtraInfo, HttpRequest Request)
         {
@@ -138,6 +140,20 @@ namespace Sciserver_webService.ToolsSearch
                         catch { }
                     else if (keyL == "objid")
                         try { objid = decimal.Parse(Request.QueryString[key]); }// 
+                        catch { }
+                    else if (keyL == "objids")
+                        try
+                        {
+                            foreach(String id in Request.QueryString[key].Split(','))
+                            {
+                                try {
+                                    objids.Add(decimal.Parse(id));
+                                }
+                                catch {
+                                    apogeeobjids.Add(id);
+                                }
+                            }
+                        }
                         catch { }
                     else if (keyL == "run")
                         try { run = Int32.Parse(Request.QueryString[key]); }// 
@@ -232,6 +248,25 @@ namespace Sciserver_webService.ToolsSearch
             return DataSet;
         }
 
+        public String getQueryWithList(string query, string paramInQuery, object[] list, int startParamIndex, Dictionary<string, string> ParameterValuePairs)
+        {
+            String cmd = "";
+            if (list.Length >= 0)
+            {
+                string cmdParamString = "";
+                string pname = "";
+                for (int i = 0; i < list.Length; i++)
+                {
+                    pname = String.Format("@p{0}", i + startParamIndex);
+                    cmdParamString += pname + ",";
+                    ParameterValuePairs.Add(pname, list[i].ToString());
+                    ParameterSqlTypePairs.Add(pname, SqlDbType.NVarChar);
+                }
+                cmdParamString = cmdParamString.TrimEnd(',');
+                cmd = query.Replace(paramInQuery, cmdParamString);
+            }
+            return cmd;
+        }
 
 
         public DataSet getDBComponents()
@@ -458,8 +493,14 @@ namespace Sciserver_webService.ToolsSearch
                 case "mangaplatemjd":
                     cmd = MetadataQueries.mangaPlateMJDList;
                     break;
-                default:
-                    cmd = ""; break;
+                case "notebook":
+                    bool hasObjIDs = objids.Count > 0;
+                    bool hasApogeeIDs = apogeeobjids.Count > 0;
+                    ParameterValuePairs.Clear();
+                    ParameterSqlTypePairs.Clear();
+                    cmd = getQueryWithList(MetadataQueries.getNotebookQuery(hasObjIDs, hasApogeeIDs), "@ids", objids.ToArray(), 0, ParameterValuePairs);
+                    cmd = getQueryWithList(cmd, "@apids", apogeeobjids.ToArray(), objids.Count, ParameterValuePairs);
+                    break;
             }
             ds.Merge(GetDataSetFromQuery(oConn, cmd, ParameterValuePairs));
             return ds;
