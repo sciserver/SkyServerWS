@@ -674,7 +674,8 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("id", typeof(long));
             dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
-            dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name});
+            dt.Columns.Add("release", typeof(int));
+            dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name, KeyWords.ReleaseNumber});
             dt.TableName = "objectInfo";
             ds.Merge(dt);
 
