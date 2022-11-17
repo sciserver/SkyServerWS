@@ -36,7 +36,7 @@ namespace Sciserver_webService.ToolsSearch
             string objQuery = hasObjIDs ? "@ids" : "null";
             string apQuery = hasApogeeIDs ? "@apids" : "null";
 
-            string notebookQuery = "SELECT objid, specobjid, type, ra, dec, u, g, r, i, z, redshift " +
+            string notebookQuery = "SELECT cast(objid as nvarchar) as objid, cast(specobjid as nvarchar) as specobjid, type, ra, dec, cast(u as nvarchar) as u, cast(g as nvarchar) as g, cast(r as nvarchar) as r, cast(i as nvarchar) as i, cast(z as nvarchar) as z, cast(redshift as nvarchar) as redshift " +
                                    "FROM (SELECT *,ROW_NUMBER() OVER(PARTITION BY objid ORDER BY objid) AS rn FROM " +
                                            "(" +
                                            "select cast(objId as varchar(32)) as objId, s.specobjid, dbo.fPhotoTypeN(type) as type, p.ra, p.dec, p.u, p.g, p.r, p.i, p.z, s.z as redshift " +
@@ -45,7 +45,7 @@ namespace Sciserver_webService.ToolsSearch
                                            "where objId in (" + objQuery + ")" +
                                            ") res1 " +
                                         ") res2 WHERE rn = 1 " +
-                                        " UNION select top 1 apstar_id as apstar_id, '' as specid, 'apogee' as type, ra as ra,dec as dec,  '' as u,'' as g,'' as r, '' as i,'' as z,'' as redshift  " +
+                                        " UNION select top 1 apstar_id as objid, apogee_id as specobjid, 'apogee' as type, ra as ra,dec as dec,  '' as u,'' as g,'' as r, '' as i,'' as z,'' as redshift  " +
                                         " from apogeeStar where apstar_id in (" + apQuery + ") ";
             return notebookQuery;
     }
