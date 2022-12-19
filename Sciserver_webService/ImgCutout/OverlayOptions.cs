@@ -21,11 +21,12 @@ namespace Sciserver_webService.ImgCutout
         float size;
         double radius;
         double fradius;
+        double mradius;
         int zoom;
         string datarelease;
         string token;
 
-        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string datarelease, string token, string clientIP)
+        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, double mradius, string datarelease, string token, string clientIP)
         {
             this.SqlConn = sqlcon;
             this.canvas = canvas;
@@ -35,12 +36,13 @@ namespace Sciserver_webService.ImgCutout
             this.radius = radius;
             this.zoom = zoom;
             this.fradius = fradius;
+            this.mradius = mradius;
             this.datarelease = datarelease;
             this.token = token;
             this.imgCutout.clientIP = clientIP;
         }
 
-        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, string clientIP)
+        public OverlayOptions(SqlConnection sqlcon, SDSSGraphicsEnv canvas, float size, double ra, double dec, double radius, int zoom, double fradius, double mradius, double sradius, string clientIP)
         {
             this.SqlConn = sqlcon;
             this.canvas = canvas;
@@ -50,6 +52,7 @@ namespace Sciserver_webService.ImgCutout
             this.radius = radius;
             this.zoom = zoom;
             this.fradius = fradius;
+            this.mradius = mradius;
             this.imgCutout.clientIP = clientIP;
         }
 
@@ -74,17 +77,16 @@ namespace Sciserver_webService.ImgCutout
 
 
         /// <summary>
-        /// getObjects(). Mark Photo|Spec|Target objects according to the drawing option string.
+        /// getObjects(). Mark Spec|Target objects according to the drawing option string.
         /// </summary>
-        internal void getObjects(bool drawPhotoObjs ,bool drawSpecObjs , bool drawTargetObjs)
+        internal void getObjects(bool drawSpecObjs , bool drawTargetObjs)
         {
             byte flag = 0;
-            if (drawPhotoObjs) flag |= SdssConstants.pflag;
             if (drawSpecObjs)  flag |= SdssConstants.sflag;
             if (drawTargetObjs)flag |= SdssConstants.tflag;
             StringBuilder sQ = new StringBuilder(" select * ");
             sQ.AppendFormat(" from dbo.fGetObjectsEq({0},{1},{2},{3},{4}) ",
-                flag, ra, dec, radius, zoom);
+                flag, ra, dec, 2 * radius, zoom);
             SqlDataReader reader = null;
 
             try
@@ -101,8 +103,6 @@ namespace Sciserver_webService.ImgCutout
                     oFlag = Convert.ToByte(reader[2]);		// get flag												
                     if (drawSpecObjs && (oFlag & SdssConstants.sflag) > 0)
                         canvas.drawSpecObj(oRa, oDec, size);
-                    if (drawPhotoObjs && (oFlag & SdssConstants.pflag) > 0)
-                        canvas.drawPhotoObj(oRa, oDec, size);
                     //canvas.drawApogeeObj(oRa,oDec,size);
                     if (drawTargetObjs && (oFlag & SdssConstants.tflag) > 0)
                         canvas.drawTargetObj(oRa, oDec, size);
@@ -110,13 +110,48 @@ namespace Sciserver_webService.ImgCutout
             }
             catch (Exception e)
             {
-                showException("getObjects() [Photo|Spec|Target]", sQ.ToString(), e);
+                showException("getObjects() [Spec|Target]", sQ.ToString(), e);
             }
             finally { 
                 try { if (reader != null) reader.Close(); } catch (Exception e) { } 
             }
         }
 
+
+        internal void getPhotoObjects()
+        {
+            byte flag = 0;
+            flag |= SdssConstants.pflag;
+            StringBuilder sQ = new StringBuilder(" select * ");
+            sQ.AppendFormat(" from dbo.fGetObjectsEq({0},{1},{2},{3},{4}) ",
+                flag, ra, dec, 2*radius, zoom); // looks for objects in adjacent tiles as well
+            SqlDataReader reader = null;
+
+            try
+            {
+                //SqlCommand cmd = new SqlCommand(sQ.ToString(), this.SqlConn);
+                double oRa, oDec;
+                byte oFlag;
+                //reader = cmd.ExecuteReader();					// invoke fGetObjectsEq()
+                reader = imgCutout.execSQL(sQ.ToString(), this.SqlConn);
+                while (reader.Read())
+                {
+                    oRa = Convert.ToDouble(reader[0]);		// get ra
+                    oDec = Convert.ToDouble(reader[1]);		// get dec
+                    oFlag = Convert.ToByte(reader[2]);		// get flag												
+                    if ((oFlag & SdssConstants.pflag) > 0)
+                        canvas.drawPhotoObj(oRa, oDec, size);
+                }
+            }
+            catch (Exception e)
+            {
+                showException("getPhotoObjects() [Photo]", sQ.ToString(), e);
+            }
+            finally
+            {
+                try { if (reader != null) reader.Close(); } catch (Exception e) { }
+            }
+        }
 
         /// <summary>
         /// APOGEE objects for 2mass , this needs to be updated once we get final twomass data        
@@ -127,7 +162,7 @@ namespace Sciserver_webService.ImgCutout
             try
             {
                 //canvas.drawLabel("Here Are Apgee:"+radius);
-                sq1.AppendFormat("select ra,dec from dbo.fGetNearbyApogeeStarEq ({0},{1},{2})", ra,dec,radius);      
+                sq1.AppendFormat("select ra,dec from dbo.fGetNearbyApogeeStarEq ({0},{1},{2})", ra,dec,2*radius);      
                
                 //SqlCommand cmd = new SqlCommand(sq1.ToString(), SqlConn);
                 double oRa, oDec;
@@ -173,7 +208,7 @@ namespace Sciserver_webService.ImgCutout
             sQ.Append(SdssConstants.OutlineTable);
             sQ.Append(" m \n JOIN (select min(f.objid) as objid \n");
             sQ.AppendFormat(" from dbo.fGetObjectsEq({0}, {1}, {2}, {3}, {4}) f JOIN \n		",
-                SdssConstants.pflag, ra, dec, radius, zoom);
+                SdssConstants.pflag, ra, dec, mradius, zoom);
             sQ.Append(SdssConstants.OutlineTable);
             sQ.Append(" o \nwith (nolock)\n");
             sQ.Append(" ON f.objid=o.objid  group by rmin,rmax,cmin,cmax ) q\n");

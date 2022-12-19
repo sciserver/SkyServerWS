@@ -103,7 +103,16 @@ namespace Sciserver_webService.ImgCutout
             PixelFormat pf  = PixelFormat.Format32bppRgb;		// use colors
 			img			    = new Bitmap(width, height, pf);	// Make our new image to user's adjusted specs
 			gc		        = Graphics.FromImage( img);		// Make an graphic obj we can draw on				
-			gc.SmoothingMode = SmoothingMode.AntiAlias;	// set as default SmoothingMode
+			gc.SmoothingMode = SmoothingMode.AntiAlias; // set as default SmoothingMode
+
+            /* for debugging purposes, show change the base color from black to green
+            for (int i = 0; i < width; i++)
+            {
+                for (int j=0; j < height; j++){
+                    img.SetPixel(i, j, Color.Green);
+                }
+            }
+            */
 		}
 
 
@@ -137,9 +146,37 @@ namespace Sciserver_webService.ImgCutout
                 proj = (IProjection)sproj;
             }        
         }
-		//=============================================================
-		// Image related functions
-		//=============================================================
+
+        public void InitializeProjection(double ra_, double dec_, string ptype_, double offset_x, double offset_y)
+        {
+            // call the SDSSProjection constructor
+            //SDSSproj	= new SDSSProjection( ra_, dec_, imageScale, width, height, fc_);
+
+            //create the cast onto the abstract Interface
+            //proj	= (IProjection)SDSSproj;
+
+            //-------------------------------------
+            // call the Projection constructor, then
+            // cast onto the abstract Interface
+            //-------------------------------------
+            if (ptype_ == "TAN")
+            {
+                tproj = new TANProjection(ra_, dec_, ppd, width, height, offset_x, offset_y);
+                proj = (IProjection)tproj;
+            }
+            if (ptype_ == "STR")
+            {
+                sproj = new STRProjection(ra_, dec_, ppd, width, height, offset_x, offset_y);
+                proj = (IProjection)sproj;
+            }
+        }
+
+
+
+
+        //=============================================================
+        // Image related functions
+        //=============================================================
         //@Deoyani Nandrekar
         ///// <summary>
         ///// get image property

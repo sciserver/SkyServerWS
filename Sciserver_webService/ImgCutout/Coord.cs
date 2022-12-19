@@ -18,14 +18,88 @@ namespace Sciserver_webService.ImgCutout
 		}
 	}
 
+    public class PointScreen
+    {
+        public double x, y;
+        public PointScreen(double x, double y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
 
-	/// <summary>
-	/// Summary description for Coord.
-	/// </summary>
-	/// <summary>
-	/// Coord private class carries the transformation of ra/dec to nu/mu and xy. 
-	/// </summary>
-	public class Coord 
+    public class ThetaPhi
+    {
+        public double theta, phi;
+        public ThetaPhi(double theta, double phi)
+        {
+            this.theta = theta;
+            this.phi = phi;
+        }
+    }
+
+
+
+    public class ScreenCoord
+    {
+        public ScreenCoord()
+        {
+
+        }
+
+        public static PointEq XyToRaDec(PointScreen xy, PointEq refRADec, double scale)
+        {
+            double deg2Rad = Math.PI / 180;
+            double referenceRA = refRADec.ra * deg2Rad;
+            double referenceDec = refRADec.dec * deg2Rad;
+
+            ThetaPhi thetaPhi = XyToThetaPhi(xy, scale);
+            double prevPhi = 180 * deg2Rad;
+
+            double st = Math.Sin(thetaPhi.theta);
+            double ct = Math.Cos(thetaPhi.theta);
+            double cdp = Math.Cos(referenceDec);
+            double sdp = Math.Sin(referenceDec);
+
+            double ra = referenceRA + Math.Atan2(-ct * Math.Sin(thetaPhi.phi - prevPhi), st * cdp - ct * sdp * Math.Cos(thetaPhi.phi - prevPhi));
+            double dec = Math.Asin(st * sdp + ct * cdp * Math.Cos(thetaPhi.phi - prevPhi));
+
+            return new PointEq(ra*180/Math.PI , dec * 180 / Math.PI);
+
+        }
+
+
+        public static ThetaPhi XyToThetaPhi(PointScreen xy, double scale)
+        {
+            // scale in rad/pix
+            double x = -scale * xy.x;
+            double y = -scale * xy.y;
+            double r = Math.Sqrt(x * x + y * y);
+            double theta = 0;
+            if (r != 0)
+            {
+                theta = Math.Atan(180 / (Math.PI * r));
+            }
+            else
+            {
+                theta = Math.PI / 2;
+            }
+
+            double phi = Math.Atan2(x, -y);
+            return new ThetaPhi(theta, phi);
+        }
+    }
+
+
+
+
+    /// <summary>
+    /// Summary description for Coord.
+    /// </summary>
+    /// <summary>
+    /// Coord private class carries the transformation of ra/dec to nu/mu and xy. 
+    /// </summary>
+    public class Coord 
 	{
 		public static string Revision
 		{

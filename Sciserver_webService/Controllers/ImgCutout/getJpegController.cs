@@ -23,7 +23,8 @@ namespace Sciserver_webService.Controllers
         //// Get The cone search results
         [ExceptionHandleAttribute]
         public HttpResponseMessage Get([FromUri] string ra = null, [FromUri] string dec = null, [FromUri] string scale = "0.396127",
-            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "", [FromUri]String token = "", [FromUri]String TaskName = "")
+            [FromUri] int width = 128, [FromUri] int height = 128, [FromUri] String opt = "", [FromUri]String query = "", [FromUri]String clientIP = "", [FromUri]String token = "", [FromUri]String TaskName = "",
+            [FromUri] double offset_x = 0, [FromUri] double offset_y = 0, [FromUri] double radius = 0)
         {
             RequestMisc rm = new RequestMisc(this.Request, "SkyserverWS.ImgCutout.getJpeg");
             this.Request.RequestUri = rm.AddTaskNameToURI(this.Request.RequestUri);
@@ -44,7 +45,7 @@ namespace Sciserver_webService.Controllers
                 /// This part can be changed later if we change internal ImgCutout code.
                 if (opt != null) opt = "C" + opt; else opt = "C";
 
-                resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, ClientIP));
+                resp.Content = new ByteArrayContent(img.GetJpeg(valid.getRa(), valid.getDec(), valid.getScale(), width, height, opt, query, "", "", token, ClientIP, offset_x, offset_y, radius));
                 resp.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                 if (String.IsNullOrEmpty(img.errorMessage_Generic) && String.IsNullOrEmpty(img.errorMessage_OutOfFootprint))
                     resp.StatusCode = HttpStatusCode.OK;

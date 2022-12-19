@@ -253,6 +253,19 @@ namespace Sciserver_webService.ImgCutout
             cOffset = new PointF((float)(width / 2.0), (float)(height / 2.0));
         }
 
+        public TANProjection(double ra_, double dec_, double ppd_, int width_, int height_, double offset_x, double offset_y)
+        {
+            n = V3.Normal(ra_, dec_);
+            w = V3.West(ra_, dec_);
+            u = V3.North(ra_, dec_);
+
+            scale = ppd_ / V3.D2R;
+            width = width_;
+            height = height_;
+            cOffset = new PointF((float)(width / 2.0 - offset_x), (float)(height / 2.0 - offset_y));
+        }
+
+
         //------------------------------
         // Coordinate transformations
         //------------------------------
@@ -347,6 +360,18 @@ namespace Sciserver_webService.ImgCutout
             width = width_;
             height = height_;
             cOffset = new PointF((float)(width / 2.0), (float)(height / 2.0));
+        }
+
+        public STRProjection(double ra_, double dec_, double ppd_, int width_, int height_, double offset_x, double offset_y)
+        {
+            n = V3.Normal(ra_, dec_);
+            w = V3.West(ra_, dec_);
+            u = V3.North(ra_, dec_);
+
+            scale = ppd_ / V3.D2R;
+            width = width_;
+            height = height_;
+            cOffset = new PointF((float)(width / 2.0 - offset_x), (float)(height / 2.0 - offset_y));
         }
 
         //-----------------------------
