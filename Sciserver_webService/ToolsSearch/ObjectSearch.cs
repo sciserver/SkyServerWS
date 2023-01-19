@@ -423,8 +423,10 @@ namespace Sciserver_webService.ToolsSearch
 
             if (objectInfo.plateId != null && !objectInfo.plateId.Equals(""))
             {
+                String query = +KeyWords.ReleaseNumber < 18 ? ExploreQueries.PlateShow : ExploreQueries.PlateShow2;
+                query = query.Replace("@plateId", objectInfo.plateId.ToString());
                 cmd = ExploreQueries.Plate.Replace("@plateId", objectInfo.plateId.ToString());
-                cmd += "; " + ExploreQueries.PlateShow.Replace("@plateId", objectInfo.plateId.ToString());
+                cmd += "; " + query;
                 ds.Merge(GetDataSetFromQuery(oConn, cmd));
             }
             else
@@ -710,7 +712,11 @@ namespace Sciserver_webService.ToolsSearch
 
             if (objectInfo.specId != null && !objectInfo.specId.Equals(""))
             {
-                cmd = ExploreQueries.getSpectroQuery.Replace("@objId", objectInfo.objId).Replace("@specId", objectInfo.specId.ToString());
+                if(!String.IsNullOrEmpty(objectInfo.objId))
+                    cmd = ExploreQueries.getSpectroQuery.Replace("@objId", objectInfo.objId).Replace("@specId", objectInfo.specId.ToString());
+                else
+                    cmd = ExploreQueries.getSpectroQuery2.Replace("@specId", objectInfo.specId.ToString());
+
                 dt = GetDataTableFromQuery(oConn, cmd);
                 dt.TableName = "SpectralData";
                 ds.Merge(dt);
@@ -1011,8 +1017,12 @@ namespace Sciserver_webService.ToolsSearch
 
         private void ObjIDFromPlfib(short? plate, int? mjd, short? fiber)
         {
+            string cmd = "";
+            if (KeyWords.ReleaseNumber < 18)
+                cmd = ExploreQueries.getObjIDFromPlatefiberMjd;
+            else
+                cmd = ExploreQueries.getObjIDFromPlatefiberMjd2;
 
-            string cmd = ExploreQueries.getObjIDFromPlatefiberMjd;
             cmd = cmd.Replace("@mjd", mjd.ToString());
             cmd = cmd.Replace("@plate", plate.ToString());
             cmd = cmd.Replace("@fiberId", fiber.ToString());
@@ -1171,7 +1181,9 @@ namespace Sciserver_webService.ToolsSearch
 
         private void pmtsFromSpecWithSpecobjID(decimal? sid)
         {
-            string cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
+
+            string cmd = KeyWords.ReleaseNumber >= 18 ? ExploreQueries.getpmtsFromSpecWithSpecobjID_DR18 : ExploreQueries.getpmtsFromSpecWithSpecobjID;
+            //string cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
             cmd = cmd.Replace("@sid", sid.ToString());
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
             using (DataTableReader reader = ds.Tables[0].CreateDataReader())
@@ -1184,9 +1196,9 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                     objectInfo.plateId = reader["plateId"] is DBNull ? null : (decimal?)reader["plateId"];
-                    objectInfo.mjd = (int)reader["mjd"];
-                    objectInfo.fiberId = (short)reader["fiberId"];
-                    objectInfo.plate = (short)reader["plate"];
+                    objectInfo.mjd = (long?)reader["mjd"];
+                    objectInfo.fiberId = (long?)reader["fiberId"];
+                    objectInfo.plate = (decimal?)reader["plate"];
                 }
             } // using DataReader
 
@@ -1510,7 +1522,11 @@ namespace Sciserver_webService.ToolsSearch
                 case "Plate":
                     cmd = ExploreQueries.Plate.Replace("@plateId", objectInfo.plateId.ToString());break;
                 case "PlateShow":
-                    cmd = ExploreQueries.PlateShow.Replace("@plateId", objectInfo.plateId.ToString());break;
+                    if(KeyWords.ReleaseNumber < 18) 
+                        cmd = ExploreQueries.PlateShow.Replace("@plateId", objectInfo.plateId.ToString());
+                    else
+                        cmd = ExploreQueries.PlateShow2.Replace("@plateId", objectInfo.plateId.ToString());
+                    break;
                 case "PlatePlusShow":
                     cmd = ExploreQueries.Plate.Replace("@plateId", objectInfo.plateId.ToString()) + ";" + ExploreQueries.PlateShow.Replace("@plateId", objectInfo.plateId.ToString());break;
                 //parameters
@@ -1548,6 +1564,8 @@ namespace Sciserver_webService.ToolsSearch
                     //
                 case "SpecObjQuery":
                     cmd = ExploreQueries.SpecObjQuery.Replace("@specId", objectInfo.specId.ToString());break;
+                case "Spall":
+                    cmd = ExploreQueries.SpallQuery.Replace("@specId", objectInfo.specId.ToString()); break;
                 case "sppLinesQuery":
                     cmd = ExploreQueries.sppLinesQuery.Replace("@specId", objectInfo.specId.ToString());break;
                 case "sppParamsQuery":

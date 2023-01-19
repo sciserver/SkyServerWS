@@ -55,6 +55,7 @@ namespace Sciserver_webService.ToolsSearch
         //specObjall
         public static string SpecObjQuery = "select * from SpecObjAll where specObjId=@specId";
 
+        public static string SpallQuery = "select * from spall where specObjId=@specId";
 
         //sppLines
         public static string sppLinesQuery = "select * from sppLines where specObjId=@specId";
@@ -135,6 +136,11 @@ namespace Sciserver_webService.ToolsSearch
         public static string PlateShow = @" select specObjID as specObjId, fiberId, class as name, str(z,5,3) as z 
                                 from SpecObjAll where plateID=@plateId order by fiberId";
 
+        public static string PlateShow2 = @" select specObjID as specObjId, fiberId, class as name, str(z,5,3) as z 
+                                from SpecObjAll where plateID=@plateId
+                                UNION ALL
+                                select s.specObjID as specObjId, s.fiberId, s.class as name, str(s.z,5,3) as z 
+                                from spall s join platex p on p.plate=s.plate and p.mjd=s.mjd where p.plateID=@plateId order by fiberId";
         #endregion
 
         #region AllSpectra
@@ -366,6 +372,16 @@ namespace Sciserver_webService.ToolsSearch
              from  PlateX p ,SpecObjAll s 
              join (select bestobjid, count(*) as nspec from specobjall where bestobjid=@objId
              group by bestobjid) x on s.bestobjid=x.bestobjid  where p.plateId=s.plateId and  s.specObjId=@specId";
+
+        public static string getSpectroQuery2 =
+                @" select p.plateID, s.plate, s.mjd, fiberid, null as instrument, class as 'objclass', z as 'redshift_z', z_err as 'redshift_err' 
+            , dbo.fSpecZWarningN(zWarning) as 'redshift_flags', s.survey, s.programname, null as 'primary', 
+            null as 'otherspec', null as sourcetype, vdisp as 'veldisp', vdisp_err as 'veldisp_err' 
+            , case when sdssv_boss_target0 = 0 then '' else 'sdssv_boss_target0: ' + dbo.fSdssVBossTarget0N(sdssv_boss_target0) end  as 'targeting_flags',
+             s.run2d, s.catalogid as catalogid, s.healpix_dir 
+             from  spall s join PLatex as p on p.plate=s.plate and s.mjd=p.mjd and s.specObjId=@specId";
+
+
         //iQuery += " --WHEN 'apogee' THEN (select apogee_target1,apogee_target2 ) ";
 
         #region cross_id
@@ -425,6 +441,14 @@ namespace Sciserver_webService.ToolsSearch
                             from SpecObjAll s JOIN PhotoTag p ON s.bestobjid=p.objid JOIN PlateX q ON s.plateId=q.plateId
                             where s.mjd = @mjd and s.fiberId = @fiberId  and q.plate = @plate";
 
+        public static string getObjIDFromPlatefiberMjd2 = @"select p.objId as objId, s.specObjId as specObjId
+                            ,p.ra,p.dec
+                            from SpecObjAll s JOIN PhotoTag p ON s.bestobjid=p.objid JOIN PlateX q ON s.plateId=q.plateId
+                            where s.mjd = @mjd and s.fiberId = @fiberId  and q.plate = @plate
+                            UNION ALL
+                            select null as objId, specObjId as specObjId, plug_ra as ra, plug_dec as dec 
+                            from spall
+                            where mjd = @mjd and fiberId = @fiberId and plate = @plate";
 
         public static string getAPOGEEId_PlateFiberMjd = @" select s.apstar_id
                          from apogeeVisit v JOIN apogeeStar s ON s.apogee_id=v.apogee_id
@@ -508,6 +532,24 @@ namespace Sciserver_webService.ToolsSearch
                     s.plateId as plateId, s.mjd, s.fiberId, q.plate
                     from SpecObjAll s JOIN PhotoTag p ON s.bestobjId=p.objid JOIN PlateX q ON s.plateId=q.plateId
                     where s.specObjId= @sid";
+
+        public static string getpmtsFromSpecWithSpecobjID_DR18 = @" select p.ra, p.dec,
+                    cast(p.fieldId as binary(8)) as fieldId,
+                    s.specObjId as specObjId,
+                    p.objId as objId,
+                    s.plateId as plateId, s.mjd, s.fiberId, q.plate
+                    from SpecObjAll s JOIN PhotoTag p ON s.bestobjId=p.objid JOIN PlateX q ON s.plateId=q.plateId
+                    where s.specObjId= @sid 
+                    UNION ALL
+                    select s.plug_ra, s.plug_dec,
+                    null as fieldId,
+                    s.specObjId as specObjId,
+                    null as objId,
+                    q.plateid as plateId, s.mjd as mjd, s.fiberId as fiberId, s.plate as plate
+                    from spAll s JOIN PlateX q ON s.plate=q.plate and s.mjd=q.mjd
+                    where s.specObjId= @sid                    
+                    ";
+
 
 
         public static string getpmtsFromPhoto = @" select p.ra, p.dec, p.run, p.rerun, p.camcol, p.field,
