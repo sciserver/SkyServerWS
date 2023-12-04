@@ -87,6 +87,14 @@ namespace Sciserver_webService
                 defaults: new { controller = "SqlSearch" }
             );
 
+            /// Database state
+            config.Routes.MapHttpRoute(
+                name: "State",
+                routeTemplate: "SearchTools/{controller}",
+                defaults: new { controller = "DBState" }
+            );
+
+
             /// TESTing new casjobs REST client 
             config.Routes.MapHttpRoute(
                 name: "NewRectangular",
