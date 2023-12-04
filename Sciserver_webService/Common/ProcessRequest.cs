@@ -168,6 +168,13 @@ namespace Sciserver_webService.Common
             switch (queryType)
             {
 
+                case "UsageHistory":
+                    UsageHistory usage = new UsageHistory(dictionary, ExtraInfo, HttpContext.Current.Request);
+                    ResultsDataSet = usage.ResultDataSet;
+                    ExtraInfo["QueryForUserDisplay"] = usage.query;
+                    ExtraInfo["query"] = usage.query;
+                    break;
+
                 case "UserHistory":
                     UserHistory history = new UserHistory(dictionary, ExtraInfo, HttpContext.Current.Request);
                     ResultsDataSet = history.ResultDataSet;
@@ -346,6 +353,7 @@ namespace Sciserver_webService.Common
                 case "ObjectSearch":
                 case "MetadataSearch":
                 case "UserHistory":
+                case "UsageHistory":
                     return new SendTables(ResultsDataSet, format, ActivityInfo, ExtraInfo);
                 default:
                     return new RunDBquery(query, format, TaskName, ExtraInfo, ActivityInfo, queryType, positionType);

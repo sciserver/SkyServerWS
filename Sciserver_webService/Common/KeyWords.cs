@@ -130,6 +130,7 @@ namespace Sciserver_webService.Common
         public static string CrossIdQuery = "CrossIdSearch";
         public static string ObjectQuery = "ObjectSearch";
         public static string UserHistoryQuery = "UserHistory";
+        public static string UsageQuery = "UsageHistory";
 
 
         public static float EqSearchRadius = float.Parse(ConfigurationManager.AppSettings["eqSearchRadius"] ?? "0.75");

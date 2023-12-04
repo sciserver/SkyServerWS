@@ -158,6 +158,7 @@
   <ItemGroup>
     <Compile Include="Common\RequestMisc.cs" />
     <Compile Include="Common\SciserverLogging.cs" />
+    <Compile Include="Controllers\SciserverLog\UsageHistoryController.cs" />
     <Compile Include="Controllers\SciserverLog\UserHistoryController.cs" />
     <Compile Include="Controllers\SearchTools\MetadataSearchController.cs" />
     <Compile Include="Controllers\SearchTools\DBStateController.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="ToolsSearch\MetadataQueries.cs" />
     <Compile Include="ToolsSearch\MetadataSearch.cs" />
     <Compile Include="ToolsSearch\DatabaseState.cs" />
+    <Compile Include="ToolsSearch\UsageHistory.cs" />
     <Compile Include="ToolsSearch\UserHistory.cs" />
     <Compile Include="DataWrapper\DataSetWrapper.cs" />
     <Compile Include="DataWrapper\DataWrapper.cs" />
