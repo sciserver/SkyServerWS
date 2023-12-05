@@ -14,7 +14,7 @@ namespace Sciserver_webService
         //private static string urlbase = string.Format("{0}://{1}{2}{3}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath,"<DR>" );
 
         //private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", KeyWords.DataRelease.ToUpper());
-        private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", "").TrimEnd(new char [] { '/'});
+        public static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", "").Replace("http://", "https://").TrimEnd(new char [] { '/'});
 
         //cone search 1
 
@@ -142,11 +142,11 @@ namespace Sciserver_webService
                         case 0: lit.Text = serviceNames[i]; break;
                         case 1: lit.Text = serviceDesc[i]; break;
                         //case 2: lit.Text = serviceURLs[i]; break;
-                        case 2: if (i == 0) lit.Text = "Service Urls";
+                        case 2: if (i == 0) lit.Text = "<b>Example Urls</br>";
                                 else
                                 lit.Text = tableNew(serviceUrls[i-1], serviceUrls[i-1].Length, true); 
                                 break;
-                        case 3: if (i == 0) lit.Text = "Service Parameters";
+                        case 3: if (i == 0) lit.Text = "<b>Service Parameters</b>";
                                 else
                                     lit.Text = tableNew(serviceParams[i-1], serviceParams[i-1].Length, false); 
                                 break;
@@ -194,9 +194,9 @@ namespace Sciserver_webService
             return text;
         }
 
-        private string[] serviceNames = new string[10] { "Service Name", "ConeSearch", "ImgCutout", "SIAP", "SDSSFields", "SearchTools", 
+        private string[] serviceNames = new string[10] { "<b>Service Name</b>", "ConeSearch", "ImgCutout", "SIAP", "SDSSFields", "SearchTools", 
                                                          "ImagingQuery", "SpectroQuery", "IRSpectra", "ObjectCrossid" };
-        private string[] serviceDesc = new string[10] { "Service Description", ConeSearchDesc, ImgCutoutDesc, SIAPDesc, SDSSFieldDesc, 
+        private string[] serviceDesc = new string[10] { "<b>Service Description</b>", ConeSearchDesc, ImgCutoutDesc, SIAPDesc, SDSSFieldDesc, 
                                                         SearchToolsDesc, ImagingQueryDesc, spectraQueryDesc, IRSpectraQueryDesc, crossidDesc };
 
         private string[][] serviceUrls = {new string[]{ConeSearch1}, new string[]{ImgCutout1,ImgCutout2}, new string[]{SIAP1,SIAP2,SIAP3},
