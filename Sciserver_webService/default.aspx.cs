@@ -14,7 +14,8 @@ namespace Sciserver_webService
         //private static string urlbase = string.Format("{0}://{1}{2}{3}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath,"<DR>" );
 
         //private static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", KeyWords.DataRelease.ToUpper());
-        public static string urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", "").Replace("http://", "https://").TrimEnd(new char [] { '/'});
+        static string _urlbase = HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Replace("default.aspx", "").TrimEnd(new char [] { '/'});
+        public static string urlbase = _urlbase.StartsWith("https") ? _urlbase.Replace("http", "https") : _urlbase.Replace("https", "http");
 
         //cone search 1
 
