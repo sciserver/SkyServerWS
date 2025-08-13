@@ -141,6 +141,10 @@ namespace Sciserver_webService.ToolsSearch
                                 UNION ALL
                                 select s.specObjID as specObjId, s.fiberId, s.class as name, str(s.z,5,3) as z 
                                 from spall s join platex p on p.plate=s.plate and p.mjd=s.mjd where p.plateID=@plateId order by fiberId";
+
+        public static string PlateShowDR19 = @" select specObjID as specObjId, fiberId, class as name, str(z,5,3) as z 
+                                from SpecObjAll where plateID=@plateId";
+
         #endregion
 
         #region AllSpectra
@@ -158,6 +162,18 @@ namespace Sciserver_webService.ToolsSearch
                             from SpecObjAll s, photoobjall t 
                             where t.objid=@objId  and s.fluxobjid=t.objid order by  MJD, plate, fiber, 
                             scienceprimary desc, distanceArcMin asc";
+
+        public static string AllSpec3 = @"select top 1000 * from (
+                                        select distinct
+                                        a.specObjId, a.plate_or_fps_field as plate, a.mjd, a.fiberid, 
+                                        s.racat as ra, s.deccat as dec, a.ra as specRa, a.dec as specDec, '' as sciencePrimary
+                                        ,str(dbo.fDistanceArcMinEq(s.racat,s.deccat,a.ra,a.dec),10,8) as distanceArcMin, '' as class   
+                                        FROM 
+                                        spall s, allspec a
+                                        where s.specobjid = @specobjid and s.sdss_id=a.sdss_id
+                                        ) as d
+                                        order by  MJD, plate, fiberid, scienceprimary desc, distanceArcMin asc
+                                        ";
 
         #endregion
 
@@ -368,7 +384,7 @@ namespace Sciserver_webService.ToolsSearch
 							                  (case when segue2_target2 = 0   then '' else ' segue2_target2: ' + dbo.fSEGUE2target2N(segue2_target2) end )))
              ELSE ' No Data ' 
              END 
-             as 'targeting_flags', s.run2d 
+             as 'targeting_flags', s.run2d, null as catalogid, '' as healpix_dir, null as fps_field, '' as spec_file, null as spec_field, s.ra as spec_ra, s.dec as spec_dec 
              from  PlateX p ,SpecObjAll s 
              join (select bestobjid, count(*) as nspec from specobjall where bestobjid=@objId
              group by bestobjid) x on s.bestobjid=x.bestobjid  where p.plateId=s.plateId and  s.specObjId=@specId";
@@ -381,9 +397,54 @@ namespace Sciserver_webService.ToolsSearch
              s.run2d, s.catalogid as catalogid, s.healpix_dir 
              from  spall s join PLatex as p on p.plate=s.plate and s.mjd=p.mjd and s.specObjId=@specId";
 
+        public static string getSpectroQuery3 =
+            @" SELECT TOP 1 * FROM (
+                select top 1 null as plateID, a.plate, s.mjd, fiberid, null as instrument, class as 'objclass', z as 'redshift_z', z_err as 'redshift_err' 
+                , dbo.fSpecZWarningN(zWarning) as 'redshift_flags', s.survey, s.programname, null as 'primary' 
+                , null as 'otherspec', null as sourcetype, vdisp as 'veldisp', vdisp_err as 'veldisp_err' 
+                , '' as 'targeting_flags', 
+                s.run2d, s.catalogid as catalogid, '' as healpix_dir, a.fps_field, s.spec_file, s.field as spec_field, s.racat as spec_ra, s.deccat as spec_dec
+                FROM spall as s, allspec as a where a.specObjId = s.specObjId AND s.specObjId=@specId order by s.sdss_id, s.specobjid, apogee_id, apstar_id, visit_id, mangaid 
+                UNION
+                select top 1  null as plateID, a.plate, s.mjd, fiberid, null as instrument, class as 'objclass', z as 'redshift_z', z_err as 'redshift_err' 
+                , dbo.fSpecZWarningN(zWarning) as 'redshift_flags', s.survey, s.programname, null as 'primary' 
+                , null as 'otherspec', null as sourcetype, vdisp as 'veldisp', vdisp_err as 'veldisp_err' 
+                , '' as 'targeting_flags', 
+                s.run2d, s.catalogid as catalogid, '' as healpix_dir, a.fps_field, s.spec_file, s.field as spec_field, s.racat as spec_ra, s.deccat as spec_dec
+                FROM spall_epoch as s, allspec as a where a.specObjId = s.specObjId AND s.specObjId=@specId order by s.sdss_id, s.specobjid, apogee_id, apstar_id, visit_id, mangaid 
+                UNION
+                select top 1 null as plateID, a.plate, s.mjd, fiberid, null as instrument, class as 'objclass', z as 'redshift_z', z_err as 'redshift_err' 
+                , dbo.fSpecZWarningN(zWarning) as 'redshift_flags', s.survey, s.programname, null as 'primary' 
+                , null as 'otherspec', null as sourcetype, vdisp as 'veldisp', vdisp_err as 'veldisp_err' 
+                , '' as 'targeting_flags', 
+                s.run2d, s.catalogid as catalogid, '' as healpix_dir, a.fps_field, s.spec_file, s.field as spec_field, s.racat as spec_ra, s.deccat as spec_dec
+                FROM spall_allepoch as s, allspec as a where a.specObjId = s.specObjId AND s.specObjId=@specId order by s.sdss_id, s.specobjid, apogee_id, apstar_id, visit_id, mangaid 
+            ) as d ";
 
-        //iQuery += " --WHEN 'apogee' THEN (select apogee_target1,apogee_target2 ) ";
 
+        public static string getAllSpecQuery =
+            @"select distinct
+            sdss_id as allspec_sdss_id, specobjid as allspec_specobjid, apogee_id as allspec_apogee_id, apstar_id as allspec_apstar_id, mangaid as allspec_mangaid, 
+            ra as allspec_ra, dec as allspec_dec, sas_url as allspec_sas_url, replace(cas_url, 'public', '@DataRelease') as allspec_cas_url, 
+            CASE WHEN catalogid > 0 THEN catalogid ELSE NULL END AS allspec_catalogid,
+            sdss_phase as allspec_sdss_phase, survey as allspec_survey, programname as allspec_programname, observatory as allspec_observatory, instrument as allspec_instrument, 
+            CASE WHEN ifudsgn > 0 THEN ifudsgn ELSE NULL END AS allspec_ifudsgn,
+            CASE WHEN fiberid > 0 THEN fiberid ELSE NULL END AS allspec_fiberid,
+            CASE WHEN plate > 0 THEN plate ELSE NULL END AS allspec_plate,
+            CASE WHEN fps_field > 0 THEN fps_field ELSE NULL END AS allspec_fps_field, p.mjd as allspec_mjd, version as allspec_version, visit_id as allspec_visit_id, null as distance, has_mwmStar 
+            FROM allspec as p where sdss_id = @id and sdss_id > 0 order by p.sdss_phase, p.sdss_id, p.apogee_id, p.apstar_id, p.visit_id, p.specobjid, p.mangaid "; // sddss_id = 0 has moslty apogee objects, whichdo not fall in the same RA,Dec  
+
+        public static string getAllSpecQueryByRADEC = @" select distinct
+                                                        p.sdss_id as allspec_sdss_id, p.specobjid as allspec_specobjid, p.apogee_id as allspec_apogee_id, apstar_id as allspec_apstar_id, p.mangaid as allspec_mangaid,
+                                                        p.ra as allspec_ra, p.dec as allspec_dec, sas_url as allspec_sas_url, replace(cas_url, 'public', '@DataRelease') as allspec_cas_url,
+                                                        CASE WHEN catalogid > 0 THEN catalogid ELSE NULL END AS allspec_catalogid,
+                                                        sdss_phase as allspec_sdss_phase, survey as allspec_survey, programname as allspec_programname, observatory as allspec_observatory, instrument as allspec_instrument,
+                                                        CASE WHEN ifudsgn > 0 THEN ifudsgn ELSE NULL END AS allspec_ifudsgn,
+                                                        CASE WHEN fiberid > 0 THEN fiberid ELSE NULL END AS allspec_fiberid,
+                                                        CASE WHEN plate > 0 THEN plate ELSE NULL END AS allspec_plate,
+                                                        CASE WHEN fps_field > 0 THEN fps_field ELSE NULL END AS allspec_fps_field, p.mjd as allspec_mjd, version as allspec_version, p.visit_id as allspec_visit_id, distance, has_mwmStar 
+                                                        from allspec p join dbo.fGetNearbyAllspecEq(@ra, @dec, @searchradius) n on (p.allspec_id= n.allspec_id) order by p.sdss_phase, p.sdss_id, p.apogee_id, p.apstar_id, p.visit_id, p.specobjid, p.mangaid ";
+                                                        //where sas_url not like '%epoch%' ";  // -- sddss_id < 0 has apogee visits spectra, for example.
         #region cross_id
 
         public static string USNO = @" select 'USNO' as Catalog, str(10*propermotion,6,2)+' &plusmn; '+str(sqrt(power(muraerr,2)+power(mudecerr,2)),8,3) as 'Proper motion (mas/yr)',
@@ -428,8 +489,46 @@ namespace Sciserver_webService.ToolsSearch
                     dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN, a.field as 'field_name', a.[file] 
                     from apogeeStar a left join aspcapStar b on a.apstar_id = b.apstar_id left join apogeeObject c on a.apogee_id = c.apogee_id left join apogeeField f on f.location_id = a.location_id ";
 
-        public static string APOGEEVISITS_BASE_QUERY = "select visit_id, plate,  mjd, fiberid, dateobs, vrel, apred_version, [file]  from apogeeVisit where apogee_id = @id order by dateobs";
+        public static string APOGEE_BASE_QUERY_DR19 = @"SELECT TOP 1 * FROM (
+	                                                select distinct  a.ra,    a.dec,   a.apstar_id,    a.apogee_id,    a.glon,    a.glat,    a.location_id, a.vhelio_avg,    a.vscatter,     b.teff,
+	                                                b.teff_err,   b.logg,    b.logg_err,  b.m_h as 'param_m_h',   b.m_h_err as 'param_m_h_err',     b.alpha_m as 'param_alpha_m', b.alpha_m_err as 'param_alpha_m_err', c.j,   c.h,   c.k,   c.j_err,   c.h_err,   c.k_err, 
+	                                                case c.src_4_5      when 'none' then NULL      when 'WISE' then c.wise_4_5      when 'IRAC' then c.irac_4_5      end      as mag_4_5,   case c.src_4_5     
+	                                                when 'none' then NULL      when 'WISE' then c.wise_4_5_err      when 'IRAC' then c.irac_4_5_err      end      as mag_4_5_err,   c.src_4_5,  
+	                                                dbo.fApogeeTarget1N(a.apogee_target1) as apogeeTarget1N,   dbo.fApogeeTarget2N(a.apogee_target2) as apogeeTarget2N, 
+	                                                dbo.fApogeeStarFlagN(a.starflag) as apogeeStarFlagN,   dbo.fApogeeAspcapFlagN(aspcapflag) as apogeeAspcapFlagN, a.field as 'field_name', a.[file] as apogee_file, 
+                                                    al.sas_url as apogee_sas_url, 'dr17' as apred_vers, '' as apogee_telescope, null as apogee_healpixgrp, null as apogee_healpix 
+	                                                from apogeeStar a 
+	                                                JOIN allspec as al on al.APOGEE_ID=a.apogee_id
+	                                                left join aspcapStar b on a.apstar_id = b.apstar_id left join apogeeObject c on a.apogee_id = c.apogee_id left join apogeeField f on f.location_id = a.location_id 
+	                                                @WHERE_STATEMENT
+	                                                and sas_url like '%star%'
+	                                                UNION 
+	                                                SELECT distinct 
+	                                                ap.ra, ap.dec, a.apstar_id as apstar_id, a.apogee_id, ap.glon, ap.glat, null as location_id, null as vhelio_avg, ap.vscatter,
+	                                                ap.RV_TEFF as teff, ap.RV_TEFFERR	as teff_err, ap.RV_LOGG as logg, ap.RV_LOGGERR as logg_err, null as 'param_m_h',  null as 'param_m_h_err', null as 'param_alpha_m', null as 'param_alpha_m_err', 
+	                                                ap.jmag as j,   ap.hmag as h,   ap.kmag as k,   ap.jerr as j_err,   ap.herr as h_err,   ap.kerr as _kerr, 
+	                                                NULL as mag_4_5, null as mag_4_5_err, NULL as src_4_5,  
+	                                                dbo.fApogeeTarget1N(ap.apogee_target1) as apogeeTarget1N,   dbo.fApogeeTarget2N(ap.apogee_target2) as apogeeTarget2N, 
+	                                                dbo.fApogeeStarFlagN(ap.starflag) as apogeeStarFlagN,   null as apogeeAspcapFlagN, null as 'field_name', ap.[file] as apogee_file, 
+                                                    a.sas_url as apogee_sas_url, ap.apred_vers, ap.telescope as apogee_telescope, a.healpixgrp as apogee_healpixgrp, a.healpix as apogee_healpix
+	                                                FROM apogee_drp_allstar ap 
+	                                                JOIN allspec as a on ap.APOGEE_ID=a.apogee_id  
+	                                                @WHERE_STATEMENT
+                                                    and sas_url like '%star%'
+                                                    ) as d ";
 
+
+        public static string APOGEEVISITS_BASE_QUERY = "select visit_id, plate,  mjd, fiberid, dateobs, vrel, apred_version, [file]  from apogeeVisit where apogee_id = @id order by dateobs";
+        public static string APOGEEVISITS_BASE_QUERY_DR19 = @" select * from (
+                                                                select visit_id, plate,  mjd, fiberid, dateobs, cast(vrel as real) as vrel, apred_version, [file]  
+                                                                from apogeeVisit where apogee_id = @id 
+                                                                UNION
+                                                                select distinct a.visit_id as visit_id, av.plate,  av.mjd, av.fiberid, av.dateobs, cast(av.vrel as real) as vrel, av.APRED_VERS as apred_version, av.[file] 
+                                                                from apogee_drp_allvisit av, allspec a 
+                                                                where av.apogee_id = @id 
+                                                                and a.apogee_id=av.APOGEE_ID and a.sdss_id=av.SDSS_ID 
+                                                                and visit_id != ''
+                                                            ) d order by d.dateobs";
 
         #endregion
 
@@ -450,15 +549,38 @@ namespace Sciserver_webService.ToolsSearch
                             from spall
                             where mjd = @mjd and fiberId = @fiberId and plate = @plate";
 
+
+        public static string getObjIDFromPlatefiberMjd3 = @" select top 1 * from (
+                            select p.objId as objId, s.specObjId as specObjId
+                            ,p.ra,p.dec, null as sdss_id
+                            from SpecObjAll s JOIN PhotoTag p ON s.bestobjid=p.objid JOIN PlateX q ON s.plateId=q.plateId
+                            where s.mjd = @mjd and s.fiberId = @fiberId  and q.plate = @plate
+                            UNION ALL
+                            select null as objId, specObjId as specObjId, a.ra as ra, a.dec as dec, a.sdss_id 
+                            from allspec as a
+                            where a.mjd = @mjd and a.fiberId = @fiberId and a.plate_or_fps_field = @plate and specobjid > 0) as j";
+
+
         public static string getAPOGEEId_PlateFiberMjd = @" select s.apstar_id
                          from apogeeVisit v JOIN apogeeStar s ON s.apogee_id=v.apogee_id
                          where v.plate = @plate  and v.mjd = @mjd  and v.fiberID = @fiberId";
 
 
+        public static string getSdssIDFromEq = @" select top 1 p.sdss_id from allspec p join dbo.fGetNearestAllspecEq(@qra , @qdec , @searchRadius) n on (p.allspec_id=n.allspec_id) where p.sdss_id > 0";
 
         public static string getApogeeFromEq = @" select top 1 p.apstar_id
                                                from apogeeStar p, dbo.fGetNearestApogeeStarEq(@qra , @qdec , @searchRadius) n 
                                                where p.apstar_id=n.apstar_id";
+
+        public static string getApogeeFromEq2 = @"select top 1 * FROM (
+                                                SELECT p.apstar_id, null as sdss_id, p.ra, p.dec, n.distance
+                                                FROM apogeeStar p, dbo.fGetNearestApogeeStarEq(@qra , @qdec , @searchRadius) n 
+                                                WHERE p.apstar_id=n.apstar_id
+                                                UNION
+                                                SELECT al.apstar_id, p.sdss_id, p.ra, p.dec, n.distance
+                                                FROM apogee_drp_allstar p,  dbo.fGetNearestApogeeDrpAllstarEq(@qra , @qdec , @searchRadius) n , allspec as al
+	                                            WHERE p.pk = n.PK AND al.sdss_id = n.sdss_id and al.apogee_id = n.apogee_id
+                                                ) as d order by distance ";
 
         public static string getMangaFromMangaId = @"select plateIFU,mangaid,objra,objdec,ifura,ifudec,drp3qual,bluesn2,redsn2,mjdmax,mngtarg1,mngtarg2,mngtarg3,
                                                             htmID,plate,ifudsgn,versdrp3,srvymode from mangaDrpAll where mangaid=@mangaId";
@@ -518,6 +640,24 @@ namespace Sciserver_webService.ToolsSearch
                             from PhotoTag p, dbo.fGetNearbyObjAllEq(@qra , @qdec , @searchRadius) n
                             where p.objId=n.objId order by n.mode asc, n.distance asc";
 
+        public static string getSpallFromEq = @"SELECT p.specobjid, p.racat as ra, p.deccat as dec, p.sdss_id
+                                               FROM spall p, dbo.fGetNearestSpallEq(@qra , @qdec , @searchRadius) n 
+                                               WHERE p.specobjid=n.specobjid and p.specobjid is not null";
+
+        public static string getSpecFromEq = @"select top 1 * from (
+                                                SELECT p.specobjid, p.racat as ra, p.deccat as dec, n.distance
+                                                FROM spall p, dbo.fGetNearestSpallEq(@qra , @qdec , @searchRadius) n 
+                                                WHERE p.specobjid=n.specobjid and p.specobjid is not null
+                                                UNION ALL
+                                                SELECT p.specobjid, p.ra, p.dec, n.distance
+                                                FROM specobj p, dbo.fGetNearestSpecObjEq(@qra , @qdec , @searchRadius) n 
+                                                WHERE p.specobjid=n.specobjid 
+                                               ) as o order by distance";
+            
+
+
+
+
         public static string getSkyversion = "select top 1 skyversion from run";
 
         public static string getpmtsFromSpecWithApogeeId = @" select st.apstar_id, st.ra, st.dec
@@ -550,6 +690,40 @@ namespace Sciserver_webService.ToolsSearch
                     where s.specObjId= @sid                    
                     ";
 
+        public static string getpmtsFromSpecWithSpecobjID_DR19 = @" select top 1 * from (
+                    select p.ra, p.dec, cast(p.fieldId as binary(8)) as fieldId, s.specObjId as specObjId, p.objId as objId, 
+                    s.plateId as plateId, s.mjd, cast(s.fiberId as bigint) as fiberId, cast(q.plate as numeric) as plate 
+                    from SpecObjAll s JOIN PhotoTag p ON s.bestobjId=p.objid JOIN PlateX q ON s.plateId=q.plateId
+                    where s.specObjId= @sid 
+                    UNION 
+                    select a.ra as ra, a.dec as dec,
+                    null as fieldId,
+                    s.specObjId as specObjId,
+                    null as objId,
+                    null as plateId, s.mjd as mjd, cast(a.fiberId as bigint) as fiberId, cast(a.plate_or_fps_field as numeric) as plate
+                    from spall as s, allspec as a
+                    where s.specObjId=@sid
+                    and a.specObjId=@sid
+                    UNION 
+                    select a.ra as ra, a.dec as dec,
+                    null as fieldId,
+                    s.specObjId as specObjId,
+                    null as objId,
+                    null as plateId, s.mjd as mjd, cast(a.fiberId as bigint) as fiberId, cast(a.plate_or_fps_field as numeric) as plate
+                    from spall_allepoch as s, allspec as a
+                    where s.specObjId=@sid
+                    and a.specObjId=@sid
+                    UNION 
+                    select a.ra as ra, a.dec as dec,
+                    null as fieldId,
+                    s.specObjId as specObjId,
+                    null as objId,
+                    null as plateId, s.mjd as mjd, cast(a.fiberId as bigint) as fiberId, cast(a.plate_or_fps_field as numeric) as plate
+                    from spall_epoch as s, allspec as a
+                    where s.specObjId=@sid
+                    and a.specObjId=@sid
+                  ) as x ";
+
 
 
         public static string getpmtsFromPhoto = @" select p.ra, p.dec, p.run, p.rerun, p.camcol, p.field,
@@ -559,6 +733,8 @@ namespace Sciserver_webService.ToolsSearch
                      from PhotoTag p 
                      left outer join SpecObjAll s ON s.bestobjid=p.objid AND s.scienceprimary=1
                      where p.objId=dbo.fObjId(@objid)";
+
+        public static string getpmtsFromSdssId = @"select specobjid, apogee_id, apstar_id, mangaid, ra, dec FROM allspec where sdss_id = @sdssid and sdss_id > 0";
 
 
         public static string getpmtsFrom5PartSDSS = @"select p.ra, p.dec, p.run, p.rerun, p.camcol, p.field,
@@ -590,6 +766,29 @@ namespace Sciserver_webService.ToolsSearch
         public static string getApogee2 = @" select apstar_id, ra, dec, apogee_id, glon, glat," + commissColumn + @" location_id
                                             from apogeeStar
                                             where apogee_id=@apogeeId";// note that @apogeeId is a string, and has to be checked against sql injection before sending the query.
+
+        public static string getApogee3 = @"select top 1 * from (
+                                            select apstar_id, ra, dec, apogee_id, glon, glat, location_id
+                                            from apogeeStar a
+                                            where a.apogee_id=@apogeeId
+                                            UNION
+                                            select distinct a.apstar_id, ap.ra, ap.dec, ap.apogee_id, ap.glon, ap.glat, null as location_id
+                                            from apogee_drp_allstar ap
+                                            join allspec a on ap.SDSS_ID = a.sdss_id and ap.APOGEE_ID=a.apogee_id
+                                            where a.apogee_id=@apogeeId
+                                            ) as p ";
+
+        public static string getApogee4 = @"select top 1 * from (
+                                            select apstar_id, ra, dec, apogee_id, glon, glat, location_id
+                                            from apogeeStar a
+                                            where a.apstar_id=@apogeeId
+                                            UNION
+                                            select distinct a.apstar_id, ap.ra, ap.dec, ap.apogee_id, ap.glon, ap.glat, null as location_id
+                                            from apogee_drp_allstar ap
+                                            join allspec a on ap.SDSS_ID = a.sdss_id and ap.APOGEE_ID=a.apogee_id
+                                            where a.apstar_id=@apogeeId
+                                            ) as p ";
+
 
         public static string getManga = @"select top 1 objra as ra, objdec as dec from mangadrpall where mangaid=@mangaId order by redsn2 desc";
         public static string getMastar = @"select top 1 objra as ra, objdec as dec from mastar_goodstars where mangaid=@mangaId";

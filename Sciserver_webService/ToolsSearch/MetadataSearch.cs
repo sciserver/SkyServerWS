@@ -17,6 +17,7 @@ using System.Data.SqlTypes;
 
 using System.Reflection;
 using System.Reflection.Emit;
+using Sciserver_webService.ImgCutout;
 
 namespace Sciserver_webService.ToolsSearch
 {
@@ -31,6 +32,7 @@ namespace Sciserver_webService.ToolsSearch
         string format = "";
 
         //protected HRefs hrefs = new HRefs();
+        long top = -1; // negative value means get all rows
 
         long? id = null;
         string apid;
@@ -158,7 +160,9 @@ namespace Sciserver_webService.ToolsSearch
                     else if (keyL == "run")
                         try { run = Int32.Parse(Request.QueryString[key]); }// 
                         catch { }
-
+                    else if (keyL == "top")
+                        try { long.TryParse(Request.QueryString[key], out top); }// 
+                        catch { }
                 }
             }
 
@@ -399,10 +403,17 @@ namespace Sciserver_webService.ToolsSearch
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
                     ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
                     break;
+                case "nearestspecobj":
+                    if (ra == null || dec == null || radius == null)
+                        throw new ArgumentException("Unspecified value of either ra, dec or radius.");
+                    cmd = MetadataQueries.navigateNearestSpecObj;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
                 case "nearestspecobjid":
                     cmd = MetadataQueries.nearestspecobjid;
-                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@objid", objid.ToString());
-                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@objid", SqlDbType.NVarChar);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
                     break;
                 case "nearestapogee":
                     if (ra == null || dec == null || radius == null)
@@ -501,6 +512,94 @@ namespace Sciserver_webService.ToolsSearch
                     cmd = getQueryWithList(MetadataQueries.getNotebookQuery(hasObjIDs, hasApogeeIDs), "@ids", objids.ToArray(), 0, ParameterValuePairs);
                     cmd = getQueryWithList(cmd, "@apids", apogeeobjids.ToArray(), objids.Count, ParameterValuePairs);
                     break;
+                case "navigatephotoobj":
+                    cmd = MetadataQueries.navigatePhotoObj;
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatespecobj":
+                    cmd = MetadataQueries.navigateSpecObj;
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigateapogeestar":
+                    cmd = MetadataQueries.navigateApogeeStar;
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatenearestapogeestar":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    cmd = MetadataQueries.navigateNearestApogeeStar;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatenearestapogeestarid":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    cmd = MetadataQueries.nearestsapogeestarid;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatemanga":
+                    cmd = MetadataQueries.navigateManga;
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatemastar":
+                    cmd = MetadataQueries.navigateMastar;
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatenearestmanga":
+                    cmd = MetadataQueries.navigateNearestManga;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatenearestmastar":
+                    cmd = MetadataQueries.navigateNearestMastar;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigateplates":
+                    cmd = MetadataQueries.navigatePlates;
+                    break;
+                case "navigateapogeeplates":
+                    cmd = MetadataQueries.navigateApogeePlates;
+                    break;
+                case "navigatephotomasks":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    cmd = MetadataQueries.navigatePhotoMasks;
+                    ParameterValuePairs.Clear(); ParameterValuePairs.Add("@ra", ra.ToString()); ParameterValuePairs.Add("@dec", dec.ToString()); ParameterValuePairs.Add("@radius", radius.ToString());
+                    ParameterSqlTypePairs.Clear(); ParameterSqlTypePairs.Add("@ra", SqlDbType.Float); ParameterSqlTypePairs.Add("@dec", SqlDbType.Float); ParameterSqlTypePairs.Add("@radius", SqlDbType.Float);
+                    break;
+                case "navigatephotofields":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ds = (new ImgCutout.ImgCutout()).getFieldPolygons((double)ra, (double)dec, (double)radius);
+                    return ds;
+                case "navigatephotoboundingbox":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ds = (new ImgCutout.ImgCutout()).getOutlinePolygons((double)ra, (double)dec, (double)radius, true);
+                    return ds;
+                case "navigatephotooutlines":
+                    radius = Math.Min(4.0 * 60, (double)radius);
+                    ds = (new ImgCutout.ImgCutout()).getOutlinePolygons((double)ra, (double)dec, (double)radius, false);
+                    return ds;
+                case "navigatephotoboundingboxFast":
+                    radius = Math.Min(10.0 * 60, (double)radius);
+                    ds = (new ImgCutout.ImgCutout()).getOutlinePolygonsFast((double)ra, (double)dec, (double)radius, true, top);
+                    return ds;
+                case "navigatephotooutlinesFast":
+                    radius = Math.Min(10.0 * 60, (double)radius);
+                    ds = (new ImgCutout.ImgCutout()).getOutlinePolygonsFast((double)ra, (double)dec, (double)radius, false, top);
+                    return ds;
+
+
+
+
             }
             ds.Merge(GetDataSetFromQuery(oConn, cmd, ParameterValuePairs));
             return ds;

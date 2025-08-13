@@ -8,10 +8,12 @@ namespace Sciserver_webService.ToolsSearch
     public class ObjectInfo
     {
         public long? id = null;
+        public long? sdssid = null;
         public string apid;
         public decimal? specId = null;
 
         public string objId = null;
+        public string sdssId = null;
         public string specObjId = null;
 
         public double? ra = null;

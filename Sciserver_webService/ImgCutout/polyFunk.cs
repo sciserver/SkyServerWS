@@ -6,6 +6,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 namespace Sciserver_webService.ImgCutout
 {
@@ -57,6 +58,141 @@ namespace Sciserver_webService.ImgCutout
       
         const  int X   = 11;		//random references
         const  int Y   = 22;
+
+
+        public static Line getNextLine(Line line, ArrayList lines, ref HashSet<Line> alreadyAdded)
+        {
+            Line newLine;
+            for (int i =0; i < lines.Count; i++)
+            {
+                newLine = (Line)lines[i];
+                bool p1xp1xp1yp1y = false;//((int)line.p1.X).Equals((int)newLine.p1.X) && ((int)line.p1.Y).Equals((int)newLine.p1.Y);
+                bool p1xp2xp1yp2y = false;//((int)line.p1.X).Equals((int)newLine.p2.X) && ((int)line.p1.Y).Equals((int)newLine.p2.Y);
+                bool p2xp1xp2yp1y = arePointsEqual(line.p2, newLine.p1); //((int)line.p2.X).Equals((int)newLine.p1.X) && ((int)line.p2.Y).Equals((int)newLine.p1.Y);
+                bool p2xp2xp2yp2y = arePointsEqual(line.p2, newLine.p2); //((int)line.p2.X).Equals((int)newLine.p2.X) && ((int)line.p2.Y).Equals((int)newLine.p2.Y);
+                if (!alreadyAdded.Contains(newLine)) {
+                //if (true) {
+                    if ( p1xp1xp1yp1y || p1xp2xp1yp2y || p2xp1xp2yp1y || p2xp2xp2yp2y)
+                    {
+                        return newLine;
+                    }
+                }
+            }
+            throw new Exception("NO POINT FOUND");
+        }
+
+
+        public static ArrayList getLineWithoutDuplicates(ArrayList lines)
+        {
+            ArrayList lines2 = new ArrayList();
+            lines2.Add(lines[0]);
+            for (int i = 1; i < lines.Count; i++)
+            {
+                Line l1 = (Line)lines2[lines2.Count - 1];
+                Line l2 = (Line)lines[i];
+                if (!polyFunk.areLinesEqual(l1, l2))
+                {
+                    lines2.Add(lines[i]);
+                }
+            }
+            return lines2;
+        }
+
+        public static ArrayList getOrderedPolygon(ArrayList lines)
+        {
+
+            ArrayList lines2 = new ArrayList();
+            lines2.Add(lines[0]);
+            for (int i = 1; i < lines.Count; i++)
+            {
+                Line l1 = (Line)lines2[lines2.Count - 1];
+                Line l2 = (Line)lines[i];
+                if (!polyFunk.areLinesEqual(l1, l2))
+                {
+                    lines2.Add(lines[i]);
+                }
+            }
+
+
+
+
+
+            ArrayList pol = new ArrayList();
+            HashSet<Line> alreadyAdded = new HashSet<Line>();
+            Line lineOld = (Line)lines[0];
+            Line lineNew;
+            pol.Add(lineOld);
+            alreadyAdded.Add(lineOld);
+            for (int i = 0; i< lines.Count; i++) {
+                try
+                {
+                    lineNew = getNextLine(lineOld, lines, ref alreadyAdded);
+                }catch(Exception ex){
+                    break;
+                }
+                alreadyAdded.Add(lineNew);
+                lineNew = getCheckedLineDirection(lineOld, lineNew);
+                pol.Add(lineNew);
+                lineOld = lineNew;
+                
+            }
+            return pol;
+        }
+        
+        public static ArrayList getReducedOrderedPolygon(ArrayList lines)
+        {
+            ArrayList newPol = new ArrayList();
+            Line lineOld = (Line)lines[0];
+            Line lineNew = lineOld;
+            Point p1 = lineOld.p1;
+            Point p2;
+            //newPol.Add(lines[0]);
+            Line segment;
+            for (int i = 1; i < lines.Count; i++)
+            {
+                lineNew = (Line)lines[i];
+                if( lineOld.p1.X != lineNew.p2.X && lineOld.p1.Y != lineNew.p2.Y)
+                {
+                    p2 = lineNew.p1;
+                    segment = new Line(p1, p2);
+                    newPol.Add(segment);
+                    p1 = lineNew.p1;
+                }
+                lineOld = lineNew;
+            }
+            // add connecting line with first line
+            if(newPol.Count > 0)
+            {
+                p1 = ((Line)newPol[newPol.Count - 1]).p2;
+                p2 = ((Line)lines[0]).p1;
+                newPol.Add(new Line(p1, p2));
+            }
+            return newPol;
+        }
+        
+        public static Line getCheckedLineDirection(Line lineOld, Line newLine)
+        {
+            bool direction = ((int)lineOld.p2.X).Equals((int)newLine.p1.X) && ((int)lineOld.p2.Y).Equals((int)newLine.p1.Y);
+            if (direction)
+            {
+                return newLine;
+            }else
+            {
+                // reverse direction
+                return new Line(newLine.p2, newLine.p1);
+            }
+        }
+
+
+        public static bool arePointsEqual(Point p1, Point p2)
+        {
+            return ((int)p1.X).Equals((int)p2.X) && ((int)p1.Y).Equals((int)p2.Y);
+        }
+
+        public static bool areLinesEqual(Line l1, Line l2)
+        {
+            return (arePointsEqual(l1.p1, l2.p1) && arePointsEqual(l1.p2, l2.p2));
+        }
 
         /// <summary>
         /// given a span, will return an arraylist of line segments 
@@ -311,6 +447,7 @@ namespace Sciserver_webService.ImgCutout
             }
         */
     }
+
 }
 /* Revision History
         $Log: polyFunk.cs,v $

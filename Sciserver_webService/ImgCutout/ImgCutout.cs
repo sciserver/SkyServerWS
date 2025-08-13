@@ -649,6 +649,266 @@ namespace Sciserver_webService.ImgCutout
         }
 
 
+        public Hashtable getCTable(double ra, double dec, double radius)
+        {
+            int zoom10x = SdssConstants.zoom10(0);
+            //int zoom10x = SdssConstants.zoom10(zoom);
+            //int zoom10x = 50;
+            StringBuilder sQ = new StringBuilder();
+            try
+            {
+                connectToDataBaseImage();
+                sQ.Append("SELECT null as img, f.a, f.b, f.c, f.d, f.e, f.f, f.node, f.incl, f.ra, f.dec, f.fieldID, \n");
+                sQ.AppendFormat(" dbo.fSDSS(f.fieldID) , f.run, f.camcol, f.rerun,f.field, dbo.fDistanceEq({0}, {1}, f.ra, f.dec) \n", ra, dec);
+                sQ.AppendFormat("FROM dbo.fGetNearbyFrameEq({0}, {1}, {2}, {3}) as n JOIN Frame f \n", ra, dec, radius, zoom10x);
+                sQ.AppendFormat("ON f.fieldID = n.fieldID  and f.zoom =  {0} \n", zoom10x);
+                sQ.Append(" and f.iflag = 1  and f.ifieldflag=1 order by f.iorder");
+                cTable = new Hashtable();
+                reader = execSQL(sQ.ToString(), SqlConnImage);
+                while (reader.Read())
+                {
+                    //----------------------------------------------
+                    // get the astrometry coordinates of this tile
+                    //----------------------------------------------
+                    coord = new Coord(
+                        Convert.ToDouble(reader[1]),        // a
+                        Convert.ToDouble(reader[2]),        // b 
+                        Convert.ToDouble(reader[3]),        // c
+                        Convert.ToDouble(reader[4]),        // d
+                        Convert.ToDouble(reader[5]),        // e
+                        Convert.ToDouble(reader[6]),        // f
+                        Convert.ToDouble(reader[7]),        // node
+                        Convert.ToDouble(reader[8]),        // inclination
+                        zoomScale,                          // zoomScale
+                        Convert.ToString(reader[12])        // info
+                    );
+                    string fieldId = Convert.ToString(reader[11]);
+                    cTable.Add(fieldId, coord);
+                }
+                return cTable;
+            }
+            catch (Exception exp){
+                return new Hashtable();
+            }
+            finally{
+                try { reader.Close();} catch (Exception ex) { }
+                disconnectFromDataBaseImage();
+            }
+        }
+
+
+
+        /// <summary>
+        /// getFramePolygons. Fetch the frames as poligons in ra,dec format.
+        /// </summary>
+        public DataSet getFieldPolygons(double ra, double dec, double radius)
+        {
+            radius = radius + SdssConstants.FrameHalfDiag;
+            int zoom10x = SdssConstants.zoom10(0);
+            StringBuilder sQ = new StringBuilder();
+            DataSet ds = new DataSet();
+            DataTable dt = new DataTable("fields");
+            dt.Columns.Add("area", typeof(string));
+            Hashtable table = getCTable(ra, dec, radius);
+            foreach (DictionaryEntry t in table)
+            {
+                string area = "POLY J2000";
+                PointF[] corners = SdssConstants.FieldGeometry(false);
+                for (int i = 0; i < corners.Length; i++)
+                {
+                    PointEq c = ((Coord)t.Value).FrameToEq(corners[i].X, corners[i].Y);
+                    area += " " + c.ra + " " + c.dec;
+                }
+                dt.Rows.Add(new object[] { area });
+            }
+            ds.Merge(dt);
+            return ds;
+        }
+
+        /// <summary>
+        /// getFramePolygons. Fetch the frames as poligons in ra,dec format.
+        /// </summary>
+        public DataSet getOutlinePolygons(double ra, double dec, double radius, Boolean isBoundingBox)
+        {
+            String fieldid;
+            StringBuilder span;
+            float xmin, xmax, ymin, ymax;
+            PointF pf; PointEq c;
+
+            double frameRadius = Math.Max(radius, 1.01*SdssConstants.FrameHalfDiag);
+
+            int zoom10x = SdssConstants.zoom10(0);
+            DataSet ds = new DataSet();
+            DataTable dt = new DataTable("outlines");
+            dt.Columns.Add("area", typeof(string));
+            try
+            {
+                Hashtable table = getCTable(ra, dec, frameRadius);
+                connectToDataBase();
+                /*
+                StringBuilder sQ = new StringBuilder("SELECT \n");
+                sQ.Append("	( cast(q.objid as bigint) & 0xFFFFFFFFFFFF0000) as fieldid,\n");
+                sQ.Append("	m.rmin, m.rmax, m.cmin, m.cmax, m.span\n from AtlasOutline ");
+                sQ.Append(" m \n JOIN (select min(f.objid) as objid \n");
+                sQ.AppendFormat(" from dbo.fGetObjectsEq({0}, {1}, {2}, {3}, {4}) f JOIN \n		",
+                    SdssConstants.pflag, ra, dec, radius, zoom);
+                sQ.Append("AtlasOutline");
+                sQ.Append(" o \nwith (nolock)\n");
+                sQ.Append(" ON f.objid=o.objid  group by rmin,rmax,cmin,cmax ) q\n");
+                sQ.Append(" ON m.objid=q.objid");
+                */
+                StringBuilder sQ = new StringBuilder("SELECT \n");
+                sQ.Append("	( cast(q.objid as bigint) & 0xFFFFFFFFFFFF0000) as fieldid,\n");
+                sQ.Append("	m.rmin, m.rmax, m.cmin, m.cmax, m.span\n from AtlasOutline ");
+                sQ.AppendFormat(" m \n JOIN (select objid from dbo.fGetNearbyObjAllEq({0}, {1}, {2}) where mode = 1) as q ", ra, dec, radius);
+                sQ.Append("ON m.objid=q.objid");
+                string s = sQ.ToString();
+                reader = execSQL(s, SqlConn);
+                while (reader.Read())
+                {
+                    fieldid = Convert.ToString(reader[0]);
+                    ymin = Convert.ToSingle(reader[1]) * SdssConstants.OutlinePix;
+                    ymax = Convert.ToSingle(reader[2]) * SdssConstants.OutlinePix;
+                    xmin = Convert.ToSingle(reader[3]) * SdssConstants.OutlinePix;
+                    xmax = Convert.ToSingle(reader[4]) * SdssConstants.OutlinePix;
+                    span = new StringBuilder("\"" + Convert.ToString(reader[5]) + "\"");
+                    string area = "";
+
+                    Coord coo = (Coord)table[fieldid];
+                    if(coo != null)
+                    {
+                        if (isBoundingBox)
+                        {
+                            area = "POLY J2000";
+                            pf = new PointF(xmin, ymin);
+                            c = coo.FrameToEq(pf.X, pf.Y);
+                            area += " " + c.ra + " " + c.dec;
+
+                            pf = new PointF(xmax, ymin);
+                            c = coo.FrameToEq(pf.X, pf.Y);
+                            area += " " + c.ra + " " + c.dec;
+
+                            pf = new PointF(xmax, ymax + SdssConstants.OutlinePix);
+                            c = coo.FrameToEq(pf.X, pf.Y);
+                            area += " " + c.ra + " " + c.dec;
+
+                            pf = new PointF(xmin, ymax + SdssConstants.OutlinePix);
+                            c = coo.FrameToEq(pf.X, pf.Y);
+                            area += " " + c.ra + " " + c.dec;
+                        }else
+                        {
+                            span.Replace('"', 'k');
+                            span.Replace("k", "");
+                            ArrayList lines = polyFunk.getPoly(span.ToString());
+                            // needed since getPoly returns duplicates
+                            lines = polyFunk.getLineWithoutDuplicates(lines);
+                            lines = polyFunk.getOrderedPolygon(lines);
+                            lines = polyFunk.getReducedOrderedPolygon(lines);
+
+                            if(lines.Count > 0)
+                            {
+                                area = "POLY J2000";
+                                //area = "";
+
+                                for (int i = 0; i < lines.Count; i++)
+                                {
+
+                                    pf = (PointF)((Line)lines[i]).p1;
+                                    c = coo.FrameToEq(pf.X, pf.Y);
+                                    area += " " + c.ra + " " + c.dec;
+                                    /*
+                                    pf = (PointF)((Line)lines[i]).p1;
+                                    c = coo.FrameToEq(pf.X, pf.Y);
+                                    area += c.ra + " " + c.dec + " ";
+
+                                    pf = (PointF)((Line)lines[i]).p2;
+                                    c = coo.FrameToEq(pf.X, pf.Y);
+                                    area += c.ra + " " + c.dec + " ";
+                                    */
+                                }
+                                //area = area.Remove(area.Length - 1);// removes last space
+
+
+
+                            }
+                        }
+                        if (!area.Equals(""))
+                        {
+                            dt.Rows.Add(new object[] { area });
+                        }
+                    }
+
+                }
+                ds.Merge(dt);
+                return ds;
+            }
+
+            catch (Exception exp)
+            {
+                return ds;
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                disconnectAllDatabases();
+            }
+        }
+
+
+
+        public DataSet getOutlinePolygonsFast(double ra, double dec, double radius, Boolean isBoundingBox, long top)
+        {
+            String fieldid;
+            StringBuilder span;
+            float xmin, xmax, ymin, ymax;
+            PointF pf; PointEq c;
+
+            double frameRadius = Math.Max(radius, 1.01 * SdssConstants.FrameHalfDiag);
+
+            string area = "";
+            string column = isBoundingBox ? "box" : "outline";
+            string function = isBoundingBox ? "fGetObjectBoxesEq" : "fGetObjectOutlinesEq";
+
+            int zoom10x = SdssConstants.zoom10(0);
+            DataSet ds = new DataSet();
+            DataTable dt = new DataTable("polygons");
+            dt.Columns.Add("area", typeof(string));
+            try
+            {
+                connectToDataBaseImage();
+                StringBuilder sQ = new StringBuilder("SELECT ");
+                sQ.AppendFormat(" {0} as 'area' ", column);
+                sQ.AppendFormat(" FROM dbo.{0}({1}, {2}, {3}, {4}) ", function, ra, dec, radius, top);
+                sQ.AppendFormat(" WHERE {0} != '' ", column);
+                string s = sQ.ToString();
+                reader = execSQL(s, SqlConnImage);
+                while (reader.Read())
+                {
+                    area = Convert.ToString(reader[0]);
+                    dt.Rows.Add(new object[] { area });
+                }
+                ds.Merge(dt);
+                return ds;
+            }
+
+            catch (Exception exp)
+            {
+                return ds;
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                disconnectFromDataBaseImage();
+            }
+        }
+
+
+
+
+
+
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         //%%%%%%%%%%%%%  utilities %%%%%%%%%%%%%%%
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

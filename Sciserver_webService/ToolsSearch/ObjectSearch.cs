@@ -31,6 +31,7 @@ namespace Sciserver_webService.ToolsSearch
         //protected HRefs hrefs = new HRefs();
 
         long? id = null;
+        long? sdssid = null;
         string apid;
         decimal? specId = null;
         string sidstring = null;
@@ -111,13 +112,23 @@ namespace Sciserver_webService.ToolsSearch
                         string s = Request.QueryString[key];
                         id = Utilities.ParseId(s);
                     }
+                    if (keyL == "sdssid")
+                    {
+                        string s = Request.QueryString[key];
+                        sdssid = Utilities.ParseId(s);
+                    }
                     if (keyL == "sid")
                     {
                         string s = Request.QueryString[key].Trim().ToUpper();
-                        if (s != null & !"".Equals(s) & (s.StartsWith("APOGEE") || s.StartsWith("2M")))
-                            apid = HttpUtility.UrlEncode(Request.QueryString[key]); //sidstring = s;
+                        decimal value;
+                        if (Decimal.TryParse(s, out value))
+                        {
+                            sidstring = Utilities.ParseSpecObjId(Request.QueryString[key]).ToString();
+                        }
                         else
-                            sidstring = (string.Equals(s, "")) ? s : Utilities.ParseSpecObjId(Request.QueryString[key]).ToString();
+                        {
+                            apid = (string.Equals(s, "")) ? s : HttpUtility.UrlEncode(Request.QueryString[key]); //sidstring = s;
+                        }
                     }
                     if (keyL == "spec" || keyL == "specobjid")
                     {
@@ -127,7 +138,7 @@ namespace Sciserver_webService.ToolsSearch
                     if (keyL == "apid")
                     {
                         string s = HttpUtility.UrlEncode(Request.QueryString[key]);
-                        if (s != null & !"".Equals(s) & (s.ToLower().StartsWith("apogee") || s.ToLower().StartsWith("2m")))
+                        if (s != null & !"".Equals(s) )
                         {
                             apid = s;
                         }
@@ -231,9 +242,12 @@ namespace Sciserver_webService.ToolsSearch
         private void parseIdsForTableResult()
         {
             if(id != null)
+            {
                 objectInfo.id = id;
-            if (id != null)
                 objectInfo.objId = id.ToString();
+            }
+            if (sdssid != null)
+                objectInfo.sdssid = sdssid;
             if (sidstring != null && sidstring != "")
             {
                 objectInfo.specId = decimal.Parse(sidstring);
@@ -423,7 +437,7 @@ namespace Sciserver_webService.ToolsSearch
 
             if (objectInfo.plateId != null && !objectInfo.plateId.Equals(""))
             {
-                String query = +KeyWords.ReleaseNumber < 18 ? ExploreQueries.PlateShow : ExploreQueries.PlateShow2;
+                String query = ExploreQueries.PlateShowDR19;
                 query = query.Replace("@plateId", objectInfo.plateId.ToString());
                 cmd = ExploreQueries.Plate.Replace("@plateId", objectInfo.plateId.ToString());
                 cmd += "; " + query;
@@ -459,12 +473,13 @@ namespace Sciserver_webService.ToolsSearch
             ds.Merge(dt);
 
 
-            string[] TableNames1 = { "AllSpec1", "AllSpec2" };
+            string[] TableNames1 = { "AllSpec1", "AllSpec2", "AllSpec3" };
 
-            if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
+            if (objectInfo.specId != null)
             {
-                cmd = ExploreQueries.AllSpec1.Replace("@objId", objectInfo.objId.ToString());
-                cmd += "; " + ExploreQueries.AllSpec2.Replace("@objId", objectInfo.objId.ToString());
+                cmd = ExploreQueries.AllSpec1.Replace("@objId", objectInfo.objId == null ? "''" : objectInfo.objId.ToString());
+                cmd += "; " + ExploreQueries.AllSpec2.Replace("@objId", objectInfo.objId == null ? "''" : objectInfo.objId.ToString());
+                cmd += "; " + ExploreQueries.AllSpec3.Replace("@specobjid", objectInfo.specId.ToString());
                 ds.Merge(GetDataSetFromQuery(oConn, cmd));
             }
             else
@@ -677,12 +692,14 @@ namespace Sciserver_webService.ToolsSearch
             dt.Columns.Add("specId", typeof(decimal));
             dt.Columns.Add("name", typeof(string));
             dt.Columns.Add("release", typeof(int));
-            dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name, KeyWords.ReleaseNumber});
+            dt.Columns.Add("ra", typeof(string));
+            dt.Columns.Add("dec", typeof(string));
+            dt.Rows.Add(new object[] { objectInfo.objId, objectInfo.specObjId, objectInfo.apid, objectInfo.id, objectInfo.specId, objectInfo.name, KeyWords.ReleaseNumber, objectInfo.ra.ToString(), objectInfo.dec.ToString()});
             dt.TableName = "objectInfo";
             ds.Merge(dt);
 
 
-            string[] TableNames = { "MetaData", "ImagingData", "ImagingDataUnits", "CrossId_USNO", "CrossId_FIRST", "CrossId_ROSAT", "CrossId_RC3", "CrossId_WISE", "CrossId_TWOMASS", "QuickLookMetaData" };
+            string[] TableNames = { "MetaData", "ImagingData", "ImagingDataUnits", "CrossId_USNO", "CrossId_FIRST", "CrossId_ROSAT", "CrossId_RC3", "CrossId_WISE", "CrossId_TWOMASS", "QuickLookMetaData"};
             
             if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
             {
@@ -712,10 +729,16 @@ namespace Sciserver_webService.ToolsSearch
 
             if (objectInfo.specId != null && !objectInfo.specId.Equals(""))
             {
-                if(!String.IsNullOrEmpty(objectInfo.objId))
+                if (!String.IsNullOrEmpty(objectInfo.objId)) {
                     cmd = ExploreQueries.getSpectroQuery.Replace("@objId", objectInfo.objId).Replace("@specId", objectInfo.specId.ToString());
+                }
                 else
-                    cmd = ExploreQueries.getSpectroQuery2.Replace("@specId", objectInfo.specId.ToString());
+                {
+                    if (KeyWords.ReleaseNumber < 19)
+                        cmd = ExploreQueries.getSpectroQuery2.Replace("@specId", objectInfo.specId.ToString());
+                    else
+                        cmd = ExploreQueries.getSpectroQuery3.Replace("@specId", objectInfo.specId.ToString());
+                }
 
                 dt = GetDataTableFromQuery(oConn, cmd);
                 dt.TableName = "SpectralData";
@@ -753,11 +776,25 @@ namespace Sciserver_webService.ToolsSearch
                         if (id.StartsWith("apogee")) { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APSTAR_ID; }
                         else { cmd2 = ExploreQueries.APOGEE_BASE_QUERY + FIND_APOGEE_ID; }
                     }
-                    else
+                    else if(KeyWords.ReleaseNumber < 19)
                     {
                         if (id.StartsWith("apogee")) { cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR13 + FIND_APSTAR_ID; }
                         else { cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR13 + FIND_APOGEE_ID; }
                     }
+                    else
+                    {
+                        if (id.StartsWith("apogee"))
+                        {
+                            cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR19;
+                            cmd2 = cmd2.Replace("@WHERE_STATEMENT", "where a.apstar_id = @id");
+                        }
+                        else
+                        {
+                            cmd2 = ExploreQueries.APOGEE_BASE_QUERY_DR19;
+                            cmd2 = cmd2.Replace("@WHERE_STATEMENT", "where a.apogee_id = @id");
+                        }
+                    }
+
                     ParameterValuePairs.Clear(); ParameterValuePairs.Add("@id", id);
                     //cmd2 = cmd2.Replace("@id", "'" + id + "'");
 
@@ -767,7 +804,11 @@ namespace Sciserver_webService.ToolsSearch
 
                     if(dt.Rows.Count > 0) {
                         string apogee_id = (string)dt.Rows[0]["apogee_id"];
-                        cmd2 = ExploreQueries.APOGEEVISITS_BASE_QUERY;
+                        if (KeyWords.ReleaseNumber < 19)
+                            cmd2 = ExploreQueries.APOGEEVISITS_BASE_QUERY;
+                        else
+                            cmd2 = ExploreQueries.APOGEEVISITS_BASE_QUERY_DR19;
+
                         ParameterValuePairs.Clear(); ParameterValuePairs.Add("@id", apogee_id);
                         //cmd2 = cmd2.Replace("@id", "'" + apogee_id + "'");
                         dt = GetDataTableFromQuery(oConn, cmd2, ParameterValuePairs);
@@ -833,6 +874,12 @@ namespace Sciserver_webService.ToolsSearch
                     ds.Merge(dt);
                 }
             }
+            else
+            {
+                dt.Reset();
+                dt.TableName = "MangaData";
+                ds.Merge(dt);
+            }
 
             // now add any MaStar objects matching.------------------------------------------
 
@@ -874,10 +921,47 @@ namespace Sciserver_webService.ToolsSearch
                     ds.Merge(dt);
                 }
             }
+            else
+            {
+                dt.Reset();
+                dt.TableName = "MastarData";
+                ds.Merge(dt);
+            }
 
+            // now add Allspec matches.------------------------------------------
 
+            if (KeyWords.ReleaseNumber > 18)
+            {
+                if (objectInfo.ra != null && objectInfo.dec != null){
+                    cmd = ExploreQueries.getAllSpecQueryByRADEC;
+                    cmd = cmd.Replace("@ra", objectInfo.ra.ToString());
+                    cmd = cmd.Replace("@dec", objectInfo.dec.ToString());
+                    cmd = cmd.Replace("@searchradius", KeyWords.EqSearchRadius.ToString());
+                    cmd = cmd.Replace("@DataRelease", KeyWords.DataRelease);
+                    
+                    dt = GetDataTableFromQuery(oConn, cmd);
 
+                    if (dt.Rows.Count == 0)
+                        dt.Reset();
+                }
+                else if (!String.IsNullOrEmpty(objectInfo.sdssId))
+                {
+                    cmd = ExploreQueries.getAllSpecQuery;
+                    cmd = cmd.Replace("@id", objectInfo.sdssId);
+                    cmd = cmd.Replace("@DataRelease", KeyWords.DataRelease);
+                    dt = GetDataTableFromQuery(oConn, cmd);
 
+                    if (dt.Rows.Count == 0)
+                        dt.Reset();
+                }
+                else
+                {
+                    dt.Reset();
+                }
+                dt.TableName = "AllSpecData";
+                ds.Merge(dt);
+
+            }
 
             return ds;
         }
@@ -986,7 +1070,7 @@ namespace Sciserver_webService.ToolsSearch
         }
 
 
-// the next pieces of code (till the end of the page) load the necessary info to resolve the object
+        // the next pieces of code (till the end of the page) load the necessary info to resolve the object
         private void parseIds()
         {
             if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
@@ -995,6 +1079,8 @@ namespace Sciserver_webService.ToolsSearch
             if (objectInfo.specObjId != null && !objectInfo.specObjId.Equals(""))
                 objectInfo.specId = Utilities.ParseSpecObjId(objectInfo.specObjId);
 
+            if (!String.IsNullOrEmpty(objectInfo.sdssId))
+                objectInfo.sdssid = long.Parse(objectInfo.sdssId);
         }
 
         private void getObjPmts()
@@ -1013,6 +1099,8 @@ namespace Sciserver_webService.ToolsSearch
                 parseApogeeID(apid);
             else if (!String.IsNullOrEmpty(mangaId))
                 parseMangaID(mangaId);
+            else if (sdssid.HasValue)
+                pmtsFromSdssId(sdssid);
         }
 
         private void ObjIDFromPlfib(short? plate, int? mjd, short? fiber)
@@ -1020,8 +1108,10 @@ namespace Sciserver_webService.ToolsSearch
             string cmd = "";
             if (KeyWords.ReleaseNumber < 18)
                 cmd = ExploreQueries.getObjIDFromPlatefiberMjd;
-            else
+            else if(KeyWords.ReleaseNumber == 18)
                 cmd = ExploreQueries.getObjIDFromPlatefiberMjd2;
+            else
+                cmd = ExploreQueries.getObjIDFromPlatefiberMjd3;
 
             cmd = cmd.Replace("@mjd", mjd.ToString());
             cmd = cmd.Replace("@plate", plate.ToString());
@@ -1037,93 +1127,202 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                     objectInfo.ra = (double)reader["ra"];
                     objectInfo.dec = (double)reader["dec"];
+                    if (KeyWords.ReleaseNumber > 18)
+                        objectInfo.sdssId = reader["sdss_id"] is DBNull ? null : (reader["sdss_id"]).ToString();
                 }
             } // using DataTableReader
 
-            cmd = ExploreQueries.getApogeeFromEq;
-            cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
-            cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
-            //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
-            // if we couldn't find that plate/mjd/fiber, maybe it's an APOGEE object
-            if (!String.IsNullOrEmpty(objectInfo.objId))
+            // if >=dr19, check for the existence of objid:
+            if (KeyWords.ReleaseNumber > 18 && objectInfo.ra != null && objectInfo.dec != null)
             {
+                cmd = ExploreQueries.getpmtsFromEq;
+                cmd = cmd.Replace("@qra", objectInfo.ra.ToString());
+                cmd = cmd.Replace("@qdec", objectInfo.dec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
                 ds = GetDataSetFromQuery(oConn, cmd);
+                if (ds.Tables.Count > 0)
+                {
+                    using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                    {
+                        if (reader.Read())
+                        {
+                            objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                        }
+                    }
+                    if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
+                    {
+                        // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
+                        pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
+                    }
+                }
+            }
+
+            apogeeFromEq(objectInfo.ra, objectInfo.dec);
+            if(String.IsNullOrEmpty(objectInfo.sdssId))
+                sdssidFromEq(objectInfo.ra, objectInfo.dec);
+        }
+
+        private void apogeeFromEq(double? qra, double? qdec)
+        {
+            if(String.IsNullOrEmpty(objectInfo.apid) && qra != null && qdec != null)
+            {
+                string cmd;
+                if (KeyWords.ReleaseNumber <= 18)
+                    cmd = ExploreQueries.getApogeeFromEq;
+                else
+                    cmd = ExploreQueries.getApogeeFromEq2;
+
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
                     if (reader.Read())
                     {
                         objectInfo.apid = (string)reader["apstar_id"];
+                        if (KeyWords.ReleaseNumber > 18)
+                        {
+                            objectInfo.sdssId = reader["sdss_id"] is DBNull ? null : (reader["sdss_id"]).ToString();
+                            if (objectInfo.ra == null || objectInfo.dec == null)
+                            {
+                                objectInfo.ra = (double)reader["ra"];
+                                objectInfo.dec = (double)reader["dec"];
+                            }
+                        }
                     }
-                } // using DataTableReader                
-            }
-
-        }
-
-        private void apogeeFromEq(double? qra, double? qdec)
-        {
-            string cmd = ExploreQueries.getApogeeFromEq;
-            cmd = cmd.Replace("@qra", qra.ToString());
-            cmd = cmd.Replace("@qdec", qdec.ToString());
-            cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
-            //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            DataSet ds = GetDataSetFromQuery(oConn, cmd);
-            using (DataTableReader reader = ds.Tables[0].CreateDataReader())
-            {
-                if (reader.Read())
-                {
-                    objectInfo.apid = (string)reader["apstar_id"];
                 }
             }
+        }
+        
 
+        private void specFromEq(double? qra, double? qdec)
+        {
+            if(String.IsNullOrEmpty(objectInfo.specObjId) && qra != null && qdec != null)
+            {
+                string cmd = ExploreQueries.getSpecFromEq;
+
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                {
+                    if (reader.Read())
+                    {
+                        objectInfo.specObjId = (string)reader["specobjid"].ToString();
+                        if (objectInfo.ra == null || objectInfo.dec == null)
+                        {
+                            objectInfo.ra = (double)reader["ra"];
+                            objectInfo.dec = (double)reader["dec"];
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private void sdssidFromEq(double? qra, double? qdec)
+        {
+            if(qra != null && qdec != null)
+            {
+                string cmd = ExploreQueries.getSdssIDFromEq;
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                {
+                    if (reader.Read())
+                    {
+                        objectInfo.sdssId = reader["sdss_id"] is DBNull ? null : (reader["sdss_id"]).ToString();
+                    }
+                }
+            }
         }
 
 
         private void photoFromEq(double? qra, double? qdec)
         {
-            string cmd = ExploreQueries.getPhotoFromEq;
-            cmd = cmd.Replace("@qra", qra.ToString());
-            cmd = cmd.Replace("@qdec", qdec.ToString());
-            cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
-            //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            DataSet ds = GetDataSetFromQuery(oConn, cmd);
-            using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+            if (qra != null && qdec != null)
             {
-                if (reader.Read())
-                {
-                    objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
-                    objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-                }
-            }
-        }
-
-        private void pmtsFromEq(double? qra, double? qdec)
-        {
-            string cmd = ExploreQueries.getpmtsFromEq;
-            cmd = cmd.Replace("@qra", qra.ToString());
-            cmd = cmd.Replace("@qdec", qdec.ToString());
-            cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
-            //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
-            DataSet ds = GetDataSetFromQuery(oConn, cmd);
-            if(ds.Tables.Count > 0)
-            {
+                string cmd = ExploreQueries.getPhotoFromEq;
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
                 using (DataTableReader reader = ds.Tables[0].CreateDataReader())
                 {
                     if (reader.Read())
                     {
                         objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                         objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-                        objectInfo.ra = (double)(reader["ra"]);
-                        objectInfo.dec = (double)(reader["dec"]);
                     }
                 }
-                if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
-                {
-                    // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
-                    pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
-                    apogeeFromEq(objectInfo.ra, objectInfo.dec);
-                }
             }
+        }
+
+        private void pmtsFromEq(double? qra, double? qdec)
+        {
+            if (qra != null && qdec != null)
+            {
+                string cmd = ExploreQueries.getpmtsFromEq;
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                //cmd = cmd.Replace("@searchRadius", (0.5 / 60).ToString());
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
+                if (ds.Tables.Count > 0)
+                {
+                    using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                    {
+                        if (reader.Read())
+                        {
+                            objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
+                            objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                            objectInfo.ra = (double)(reader["ra"]);
+                            objectInfo.dec = (double)(reader["dec"]);
+                        }
+                    }
+                    if (objectInfo.objId != null && !objectInfo.objId.Equals(""))
+                    {
+                        // This is required to get the primary specObjId (with sciprimary=1). PhotoTag.specObjId is not necessarily primary...
+                        pmtsFromPhoto(Utilities.ParseId(objectInfo.objId));
+                    }
+                }
+
+                // check in spall table
+                if (KeyWords.ReleaseNumber > 18 && String.IsNullOrEmpty(objectInfo.specObjId))
+                {
+                    cmd = ExploreQueries.getSpallFromEq;
+                    cmd = cmd.Replace("@qra", qra.ToString());
+                    cmd = cmd.Replace("@qdec", qdec.ToString());
+                    cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                    ds = GetDataSetFromQuery(oConn, cmd);
+                    if (ds.Tables.Count > 0)
+                    {
+                        using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                        {
+                            if (reader.Read())
+                            {
+                                objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                                objectInfo.ra = (double)(reader["ra"]);
+                                objectInfo.dec = (double)(reader["dec"]);
+                                //objectInfo.sdssId = reader["sdss_id"] is DBNull ? null : (reader["sdss_id"]).ToString();
+                            }
+                        }
+                    }
+                }
+
+                apogeeFromEq(qra, qdec);
+                sdssidFromEq(qra, qdec);
+
+
+            }
+
+
         }
 
 
@@ -1149,9 +1348,15 @@ namespace Sciserver_webService.ToolsSearch
                 if (objectInfo.ra != null && objectInfo.ra != null)
                 {
                     apogeeFromEq(objectInfo.ra, objectInfo.dec);
+                    if (String.IsNullOrEmpty(objectInfo.sdssId))
+                        sdssidFromEq(objectInfo.ra, objectInfo.dec);
+
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+                string ee = e.ToString();
+                int a = 1;                
+            }
         }
 
         private void pmtsFromSpecWithApogeeID(string sid)
@@ -1181,8 +1386,19 @@ namespace Sciserver_webService.ToolsSearch
 
         private void pmtsFromSpecWithSpecobjID(decimal? sid)
         {
+            string cmd;
+            if(KeyWords.ReleaseNumber < 18)
+            {
+                cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
+            }
+            else if(KeyWords.ReleaseNumber == 18){
+                cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID_DR18;
+            }
+            else{
+                cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID_DR19;
+            }
 
-            string cmd = KeyWords.ReleaseNumber >= 18 ? ExploreQueries.getpmtsFromSpecWithSpecobjID_DR18 : ExploreQueries.getpmtsFromSpecWithSpecobjID;
+            //string cmd = KeyWords.ReleaseNumber >= 18 ? ExploreQueries.getpmtsFromSpecWithSpecobjID_DR18 : ExploreQueries.getpmtsFromSpecWithSpecobjID;
             //string cmd = ExploreQueries.getpmtsFromSpecWithSpecobjID;
             cmd = cmd.Replace("@sid", sid.ToString());
             DataSet ds = GetDataSetFromQuery(oConn, cmd);
@@ -1196,12 +1412,11 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
                     objectInfo.plateId = reader["plateId"] is DBNull ? null : (decimal?)reader["plateId"];
-                    objectInfo.mjd = (long?)reader["mjd"];
-                    objectInfo.fiberId = (long?)reader["fiberId"];
-                    objectInfo.plate = (decimal?)reader["plate"];
+                    objectInfo.fiberId = reader["plateId"] is DBNull ? null : (long?)reader["fiberId"];
+                    objectInfo.plate = reader["plate"] is DBNull ? null : (decimal?)reader["plate"];
                 }
             } // using DataReader
-
+            apogeeFromEq(objectInfo.ra, objectInfo.dec);
         }
 
 
@@ -1225,7 +1440,6 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
                     objectInfo.objId = (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-
                 }
             }
 
@@ -1255,7 +1469,40 @@ namespace Sciserver_webService.ToolsSearch
                 apogeeFromEq(objectInfo.ra, objectInfo.dec);
             }
             catch { }
+            if (String.IsNullOrEmpty(objectInfo.sdssId))
+                sdssidFromEq(objectInfo.ra, objectInfo.dec);
 
+
+        }
+
+
+        private void pmtsFromSdssId(long? sdss_id)
+        {
+            if(KeyWords.ReleaseNumber >= 19)
+            {
+                string cmd = ExploreQueries.getpmtsFromSdssId;
+                cmd = cmd.Replace("@sdssid", sdss_id.ToString());
+
+                DataSet ds = GetDataSetFromQuery(oConn, cmd);
+                using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                {
+                    if (reader.Read())
+                    {   // specobjid, apogee_id, apstar_id, mangaid, ra, dec 
+                        objectInfo.sdssid = sdss_id;
+                        objectInfo.sdssId = sdss_id.ToString();
+                        objectInfo.specObjId = reader["specobjid"] is DBNull ? null : (reader["specobjid"]).ToString();
+                        objectInfo.apid = String.IsNullOrEmpty((string)reader["apogee_id"]) ? null : (string)reader["apogee_id"];
+                        objectInfo.mangaId = String.IsNullOrEmpty((string)reader["mangaid"]) ? null : (string)reader["mangaid"];
+                        objectInfo.ra = (double)reader["ra"];
+                        objectInfo.dec = (double)reader["dec"];
+                    }
+                }
+            }
+            
+            if(objectInfo.ra != null && objectInfo.dec != null)
+            {
+                pmtsFromEq(objectInfo.ra, objectInfo.dec);
+            }
         }
 
 
@@ -1298,7 +1545,6 @@ namespace Sciserver_webService.ToolsSearch
                     objectInfo.fieldId = reader["fieldId"] is DBNull ? null : Functions.BytesToHex((byte[])reader["fieldId"]);
                     objectInfo.objId = reader["objId"] is DBNull ? null : (reader["objId"]).ToString();
                     objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
-
                 }
             }
 
@@ -1327,6 +1573,9 @@ namespace Sciserver_webService.ToolsSearch
                 apogeeFromEq(objectInfo.ra, objectInfo.dec);
             }
             catch { }
+            if (String.IsNullOrEmpty(objectInfo.sdssId))
+                sdssidFromEq(objectInfo.ra, objectInfo.dec);
+
 
 
         }
@@ -1350,13 +1599,16 @@ namespace Sciserver_webService.ToolsSearch
             if (apid.ToLower().StartsWith("apogee"))
             {
                 cmd = ExploreQueries.getApogee; taskname = "Skyserver.Explore.Summary.getApogee";
+                if (KeyWords.ReleaseNumber >= 19)
+                    cmd = ExploreQueries.getApogee4; taskname = "Skyserver.Explore.Summary.getApogee4";
             }
-            else if ((apid.ToLower().StartsWith("2m")))
+            else
             {
                 cmd = ExploreQueries.getApogee2; taskname = "Skyserver.Explore.Summary.getApogee2";
-            }
-            else { cmd = ""; }
+                if (KeyWords.ReleaseNumber >= 19)
+                    cmd = ExploreQueries.getApogee3; taskname = "Skyserver.Explore.Summary.getApogee3";
 
+            }
 
             ParameterValuePairs.Clear(); ParameterValuePairs.Add("@apogeeId", apid);
             //cmd = cmd.Replace("@apogeeId", apid);
@@ -1402,6 +1654,31 @@ namespace Sciserver_webService.ToolsSearch
                     }
                 }
             }
+
+            // check in spall table
+            if (String.IsNullOrEmpty(objectInfo.specObjId))
+            {
+                cmd = ExploreQueries.getSpallFromEq;
+                cmd = cmd.Replace("@qra", qra.ToString());
+                cmd = cmd.Replace("@qdec", qdec.ToString());
+                cmd = cmd.Replace("@searchRadius", (KeyWords.EqSearchRadius).ToString());
+                ds = GetDataSetFromQuery(oConn, cmd);
+                if (ds.Tables.Count > 0)
+                {
+                    using (DataTableReader reader = ds.Tables[0].CreateDataReader())
+                    {
+                        if (reader.Read())
+                        {
+                            objectInfo.specObjId = reader["specObjId"] is DBNull ? null : (reader["specObjId"]).ToString();
+                            objectInfo.ra = (double)(reader["ra"]);
+                            objectInfo.dec = (double)(reader["dec"]);
+                        }
+                    }
+                }
+            }
+            if (String.IsNullOrEmpty(objectInfo.sdssId))
+                sdssidFromEq(objectInfo.ra, objectInfo.dec);
+
         }
 
         private void parseMangaID(string mangaId)
@@ -1446,6 +1723,8 @@ namespace Sciserver_webService.ToolsSearch
                 }
             }
             pmtsFromEq(qra, qdec);
+            if (String.IsNullOrEmpty(objectInfo.sdssId))
+                sdssidFromEq(objectInfo.ra, objectInfo.dec);
 
         }
 

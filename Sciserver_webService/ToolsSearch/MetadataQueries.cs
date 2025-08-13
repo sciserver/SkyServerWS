@@ -29,6 +29,31 @@ namespace Sciserver_webService.ToolsSearch
         public static string apogeePlateMJDList = "SELECT plate_visit_id as plateID, plate, mjd from apogeePlate order by cast(plate as bigint),mjd";
         public static string mangaPlateMJDList = "SELECT plate as plateID, plate, mjdmax as mjd from mangaDRPall group by plate,mjdmax order by plate,mjdmax";
 
+        // Navigate queries
+        //public static string navigatePhotoObj = @"select top 20000 * from (select CASE WHEN DEGREES(ATN2(cy,cx)) < 0 THEN DEGREES(ATN2(cy,cx)) + 360 ELSE DEGREES(ATN2(cy,cx)) END as ra, DEGREES(ASIN(cz)) as dec, objid as id from dbo.fGetNearbyObjEq(@ra, @dec, @radius) ) as a order by newid()";
+        public static string navigatePhotoObj = @"select top 20000  CASE WHEN DEGREES(ATN2(cy,cx)) < 0 THEN DEGREES(ATN2(cy,cx)) + 360 ELSE DEGREES(ATN2(cy,cx)) END as ra, DEGREES(ASIN(cz)) as dec from dbo.fGetNearbyObjEq(@ra, @dec, @radius) order by htmid*37 & 0x000000000000FFFF";
+        //public static string navigateSpecObj = @"select top 20000  * from (select CASE WHEN DEGREES(ATN2(cy,cx)) < 0 THEN DEGREES(ATN2(cy,cx)) + 360 ELSE DEGREES(ATN2(cy,cx)) END as ra, DEGREES(ASIN(cz)) as dec, specobjid as id from dbo.fGetNearbySpecObjEq(@ra, @dec, @radius) ) as a order by newid()";
+        public static string navigateSpecObj = @"select top 20000  CASE WHEN DEGREES(ATN2(cy,cx)) < 0 THEN DEGREES(ATN2(cy,cx)) + 360 ELSE DEGREES(ATN2(cy,cx)) END as ra, DEGREES(ASIN(cz)) as dec from dbo.fGetNearbySpecObjEq(@ra, @dec, @radius) order by htmid*37 & 0x000000000000FFFF";
+        //public static string navigateApogeeStar = @"select top 20000  * from (select ra, dec, apstar_id as id from dbo.fGetNearbyApogeeStarEq(@ra, @dec, @radius) ) as a order by newid()";
+        public static string navigateApogeeStar = @"select top 20000  ra, dec from dbo.fGetNearbyApogeeStarEq(@ra, @dec, @radius) order by htmid*37 & 0x000000000000FFFF";
+        //public static string navigateManga = @"select top 20000  * from (select objra as ra, objdec as dec, mangaid as id from dbo.fGetNearbyMangaObjEq(@ra, @dec, @radius) ) as a order by newid()";
+        public static string navigateManga = @"select top 20000 objra as ra, objdec as dec from dbo.fGetNearbyMangaObjEq(@ra, @dec, @radius) order by htmid*37 & 0x000000000000FFFF";
+        public static string navigateMastar = @"select top 20000 objra as ra, objdec as dec from dbo.fGetNearbyMastarObjEq(@ra, @dec, @radius) order by htmid*37 & 0x000000000000FFFF";
+
+        public static string navigatePlates = @"select ra, dec from platex";
+        public static string navigateApogeePlates = @"select racen, deccen, radius from apogeePlate";
+
+        public static string navigateNearestSpecObj = @"select CASE WHEN DEGREES(ATN2(cy,cx)) < 0 THEN DEGREES(ATN2(cy,cx)) + 360 ELSE DEGREES(ATN2(cy,cx)) END as ra, DEGREES(ASIN(cz)) as dec, specobjid, plate, mjd, fiberid, z, zerr from dbo.fGetNearestSpecObjAllEq(@ra, @dec, @radius) as n";
+        public static string navigateNearestApogeeStar = @"select n.ra, n.dec, n.apstar_id, n.apogee_id, n.vhelio_avg, n.vscatter, s.telescope, s.field from dbo.fGetNearestApogeeStarEq(@ra, @dec, @radius) as n join apogeeStar s on n.apstar_id=s.apstar_id";
+        public static string navigateNearestManga = @"select m.mangaid, m.objra as ra, m.objdec as dec, m.plateIFU, m.ifudsgn, m.plate, m.versdrp3 from dbo.fGetNearestMangaObjEq(@ra, @dec, @radius) as n join mangaDrpAll as m on m.mangaid = n.mangaid";
+        public static string navigateNearestMastar = @"select m.mangaid, m.ra, m.dec from dbo.fGetNearestMastarObjEq(@ra, @dec, @radius) as n join mastar_goodstars as m on m.mangaid = n.mangaid";
+        //public static string navigateNearestMastar = @"select n.ra, n.dec, n.apstar_id, n.apogee_id, n.vhelio_avg, n.vscatter, s.telescope, s.field from dbo.fGetNearestMastarObjEq(@ra, @dec, @radius) as n join apogeeStar s on n.apstar_id=s.apstar_id";
+
+        public static string navigatePhotoMasks = @"select m.area from dbo.fGetObjectsEq(8, @ra, @dec, @radius, 0) f JOIN Mask m with(nolock) ON f.objid = m.maskid WHERE ( (m.type = 2) or (m.type in (0,1,3) and m.filter = 2) or (m.type = 4 and m.filter = 2 and m.seeing > 1.7 ) )";
+        
+
+
+
         // notebook query
         public static string getNotebookQuery(bool hasObjIDs, bool hasApogeeIDs)
         {
@@ -159,7 +184,30 @@ namespace Sciserver_webService.ToolsSearch
                                             "  WHERE N.objID = P.objID AND P.i>0 ";
 
 
-        public static string nearestspecobjid = "select cast(s.specObjId as varchar) as specObjId from PhotoObjAll p LEFT OUTER JOIN SpecObj s ON s.bestobjid=p.objid where p.objId=@objid";
+        public static string nearestspecobjid = @"select top 1 * from(
+                                                    SELECT cast(p.specObjID as varchar) as specObjId, p.racat as ra, p.deccat as dec, n.distance, p.run2d, spec_file
+                                                    FROM spall p, dbo.fGetNearestSpallEq(@ra , @dec , @radius) n
+                                                    WHERE p.specobjid=n.specobjid and p.specobjid is not null
+                                                    UNION ALL
+                                                    SELECT cast(p.specObjID as varchar) as specObjId, p.ra, p.dec, n.distance, run2d, '' as spec_file
+                                                    FROM specobj p, dbo.fGetNearestSpecObjEq(@ra , @dec , @radius) n
+                                                    WHERE p.specobjid=n.specobjid 
+                                                ) as o order by distance";
+
+
+        public static string nearestsapogeestarid = @"select top 1 * FROM(
+                                                    SELECT p.apstar_id, p.apogee_id, null as sdss_id, p.ra, p.dec, n.distance, null as healpixgrp, null as healpix, p.telescope, 'dr17' as apred_vers, p.[file], field as field_name
+                                                    FROM apogeeStar p, dbo.fGetNearestApogeeStarEq(@ra , @dec , @radius) n
+                                                    WHERE p.apstar_id=n.apstar_id
+                                                    UNION
+                                                    SELECT al.apstar_id, al.apogee_id, p.sdss_id, p.ra, p.dec, n.distance, al.healpixgrp, al.healpix, p.telescope, p.apred_vers, p.[file], '' as field_name
+                                                    FROM apogee_drp_allstar p, dbo.fGetNearestApogeeDrpAllstarEq(@ra , @dec , @radius) n , allspec as al
+                                                    WHERE p.pk = n.PK AND al.sdss_id = n.sdss_id and al.apogee_id = n.apogee_id
+                                                ) as d order by distance ";
+
+
+
+
 
         public static string nearestapogee = " SELECT TOP 1 P.apstar_id AS 'apogee_Id', LTRIM(STR(P.ra,10,5))as 'ra', LTRIM(STR(P.dec,8,5)) as 'dec' ,  'apogee' as 'type'," +
                                                    " '' AS 'u', '' AS 'g',   '' AS 'r', '' AS 'i', '' AS 'z' " +
